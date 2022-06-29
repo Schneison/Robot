@@ -28,15 +28,16 @@
 //IN3 Right Backward
 
 void setup(void) {
-	USART_init(UBRR_SETTING);
-	ADC_init();
-	
+
 	// Delete everything on ports B and D
     DDRD = 0;
     DDRB = 0;
     
+    USART_init(UBRR_SETTING);
+	ADC_init();
+    
     // Set PD5 and PD6 as output (EN[A|B]!)
-    DDRD = (1 << DD5) | (1 << DD6);
+    DDRD |= (1 << DD5) | (1 << DD6);
     
     // Set PD7 as output (IN1)
     DDRD |= (1 << DD7);
@@ -45,7 +46,7 @@ void setup(void) {
     setupTimer0();
 
     // Set PB0, PB1, and PB3 as output (IN[2|3|4])
-    DDRB = (1 << DD0) | (1 << DD1) | (1 << DD3); 
+    DDRB |= (1 << DD0) | (1 << DD1) | (1 << DD3); 
 }
 
 void set_speed(uint8_t a, uint8_t b) {

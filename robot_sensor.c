@@ -17,12 +17,12 @@ void ADC_init(void) {
   // Sets AVcc as the ADC's voltage source and as the reference,
   // while that voltage stems from the AREF-pin (5V when the robots is
   //  powered by batteries, lower otherwise).
-  ADMUX = (1<<REFS0);
+  ADMUX |= (1<<REFS0);
 
   // This sets how fast (and: accurate) the ADC can run.
   // All these bits set to 1 set a sysclock-division of 128,
   // so the ADC can run with up to 125 kHz.
-  ADCSRA = (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0);
+  ADCSRA |= (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0);
 
   // This enables/really turns on the ADC. 
   ADCSRA |= (1<<ADEN);
