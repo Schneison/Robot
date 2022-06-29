@@ -1,38 +1,6 @@
 #include <avr/io.h>
 #include <stdio.h>
-#include "iesusart.h"
-
-// WTF. Why is there no header here? Always seperate declaration,
-// documentation, and implementation! Clean this up if you use this!
-
-#define DR_ADC0 DDRC
-#define DP_ADC0 DDC0
-#define IR_ADC0 PC0
-#define IP_ADC0 PC0
-
-#define DR_ADC1 DDRC
-#define DP_ADC1 DDC1
-#define IR_ADC1 PC1
-#define IP_ADC1 PC1
-
-#define DR_ADC2 DDRC
-#define DP_ADC2 DDC2
-#define IR_ADC2 PC2
-#define IP_ADC2 PC2
-
-// The following constants reflect table 23-4 of the ATMega328p-data-
-// sheet. These constants
-#define ADMUX_CHN_ADC0 0 // 0000 0000
-#define ADMUX_CHN_ADC1 1 // 0000 0001
-#define ADMUX_CHN_ADC2 2 // 0000 0010
-#define ADMUX_CHN_ADC3 3 // 0000 0011
-#define ADMUX_CHN_ALL 7  // 0000 0111
-
-// Average some measurements to reduce probable noise.
-#define ADC_AVG_WINDOW 20
-
-// Well hmmm understand this by yourself. Become inspired.
-#define ADCMSG "ADC0: %5u\tADC1: %5u\tADC2: %5u\n"
+#include "robot_sensor.h"
 
 /** Initializes the ADC-unit. There is ONE single ADC unit on the
  * microcontroller, but different "channels" (input pins) can be
@@ -108,34 +76,18 @@ uint16_t ADC_read_avg(uint8_t channel, uint8_t nsamples) {
   return (uint16_t)( sum / (float)nsamples );
 }
 
-int main(void) {
-    USART_init(UBRR_SETTING);
 
-    DR_ADC0 &= ~(1 << DP_ADC0);
-    DR_ADC1 &= ~(1 << DP_ADC1);
-    DR_ADC2 &= ~(1 << DP_ADC2);
+uint8_t left_state() {
+	uint16_t value = ADC_read_avg(ADMUX_CHN_ADC2, ADC_AVG_WINDOW);
+	return value > SIGNAL_LEFT_UPPER ? STATE_HIGH : STATE_LOW;
+}
 
-    ADC_init();
+uint8_t center_state() {
+	uint16_t value = ADC_read_avg(ADMUX_CHN_ADC1, ADC_AVG_WINDOW);
+	return value > SIGNAL_CENTER_UPPER ? STATE_HIGH : STATE_LOW;
+}
 
-    unsigned char strbuff[sizeof(ADCMSG) + 15]; // WTF, why + 15? Oo
-
-    // Just to make things clear: You have to be extremely careful with
-    // the size of the stringbuffer. Better safe than sorry! But memory
-    // as well as time are so so so precious!
-
-    uint16_t adcval0 = 0;
-    uint16_t adcval1 = 0;
-    uint16_t adcval2 = 0;
-
-    while(1) {
-        adcval0 = ADC_read_avg(ADMUX_CHN_ADC0, ADC_AVG_WINDOW);
-        adcval1 = ADC_read_avg(ADMUX_CHN_ADC1, ADC_AVG_WINDOW);
-        adcval2 = ADC_read_avg(ADMUX_CHN_ADC2, ADC_AVG_WINDOW);
-
-        sprintf(strbuff, ADCMSG, adcval0, adcval1, adcval2);
-
-        USART_print(strbuff);
-    }
-
-    return 0;
+uint8_t right_state() {
+	uint16_t value = ADC_read_avg(ADMUX_CHN_ADC0, ADC_AVG_WINDOW);
+	return value > SIGNAL_RIGHT_UPPER ? STATE_HIGH : STATE_LOW;
 }
