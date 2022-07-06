@@ -119,7 +119,7 @@ void drive_right(void) {
 	// PORTB &= ~(1 << PB3);
 }
 
-void drive_middle(void) {
+void drive_forward(void) {
 	set_speed(STATE_MIDDLE, STATE_MIDDLE);
 	//PORTD |= (1 << PD7);
 	//PORTB |= (1 << PB3);
@@ -193,7 +193,7 @@ int main(void) {
 		
 		// Center Sensor
 		if (center_sensor && !right_sensor && !left_sensor) {
-			drive_middle();
+			drive_forward();
 		}
 		
 		// Left Sensor
