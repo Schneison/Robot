@@ -61,31 +61,29 @@ uint16_t ADC_read(uint8_t channel) {
   return ADCW;
 }
 
-/** Used to read multiple measurements to reduce noise.
- */
-uint16_t ADC_read_avg(uint8_t channel, uint8_t nsamples) {
+uint16_t ADC_read_avg(uint8_t channel, uint8_t amount_samples) {
   // How large does our datatype need to be?
   uint32_t sum = 0;
 
-  for (uint8_t i = 0; i < nsamples; ++i ) {
+  for (uint8_t i = 0; i < amount_samples; ++i ) {
     sum += ADC_read(channel);
   }
 
-  return (uint16_t)( sum / (float)nsamples );
+  return (uint16_t)( sum / (float)amount_samples );
 }
 
 
 uint8_t left_state() {
-	uint16_t value = ADC_read_avg(ADMUX_CHN_ADC2, ADC_AVG_WINDOW);
+	uint16_t value = ADC_read_avg(ADMUX_CHN_ADC2, ADC_AVG_AMOUNT);
 	return value > SIGNAL_LEFT_UPPER ? STATE_HIGH : STATE_LOW;
 }
 
 uint8_t center_state() {
-	uint16_t value = ADC_read_avg(ADMUX_CHN_ADC1, ADC_AVG_WINDOW);
+	uint16_t value = ADC_read_avg(ADMUX_CHN_ADC1, ADC_AVG_AMOUNT);
 	return value > SIGNAL_CENTER_UPPER ? STATE_HIGH : STATE_LOW;
 }
 
 uint8_t right_state() {
-	uint16_t value = ADC_read_avg(ADMUX_CHN_ADC0, ADC_AVG_WINDOW);
+	uint16_t value = ADC_read_avg(ADMUX_CHN_ADC0, ADC_AVG_AMOUNT);
 	return value > SIGNAL_RIGHT_UPPER ? STATE_HIGH : STATE_LOW;
 }

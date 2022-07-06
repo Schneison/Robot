@@ -1,8 +1,5 @@
 #include "iesmotors.h"
 
-/**
-  Sets up timer 0 (8-bit-timer)
-*/
 void setupTimer0() {
   // Disable all interrupts
   cli();
@@ -17,15 +14,6 @@ void setupTimer0() {
   sei();
 }
 
-/**
-  Sets duty-cycle at pin PD5 or PD6 (OC0A or OC0B) to a value
-  (0 - 255 = 0% - 100%).
-
-  Timer0 needs to be setup before usage!
-
-  The required pins also need to be set as output first. That
-  setup is NOT done in the respective timer-setup-method!
-*/
 void setDutyCycle(uint8_t pin, uint8_t value)
 {
   // Suggestion to handle PD6 - note the code-clones wrt. PD5 below!

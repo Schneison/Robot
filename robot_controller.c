@@ -1,10 +1,5 @@
 #include "robot_controller.h"
 
-//IN1 Left Forward
-//IN2 Left Backward
-//IN4 Right Forward
-//IN3 Right Backward
-
 void motor_clear(void) {
 	// Delete everything on ports B and D
     DDRD = 0;
@@ -32,13 +27,13 @@ void motor_init(void) {
     
 }
 
-void set_speed(uint8_t left_speed, uint8_t right_speed) {
+void motor_set_speed(uint8_t left_speed, uint8_t right_speed) {
 	setDutyCycle(DP_M_LE, left_speed == STATE_HIGH ? 190 : left_speed == STATE_MIDDLE ? 155 : 110); // left
 	setDutyCycle(DP_M_RE, right_speed == STATE_HIGH ? 190 : right_speed == STATE_MIDDLE ? 155 : 110); // right
 }
 	
-void drive_right(void) {
-	set_speed(STATE_LOW, STATE_HIGH);
+void motor_drive_right(void) {
+    motor_set_speed(STATE_LOW, STATE_HIGH);
 	OR_M_LF |= (1 << OP_M_LF); // Left Forward ON
 	OR_M_RB |= (1 << OP_M_RB); // Right Backward ON
 	OR_M_LB &= ~(1 << OP_M_LB); // Left Backward OFF
@@ -49,8 +44,8 @@ void drive_right(void) {
 	// PORTB &= ~(1 << PB3);
 }
 
-void drive_forward(void) {
-	set_speed(STATE_MIDDLE, STATE_MIDDLE);
+void motor_drive_forward(void) {
+    motor_set_speed(STATE_MIDDLE, STATE_MIDDLE);
 	//PORTD |= (1 << PD7);
 	//PORTB |= (1 << PB3);
 	//PORTB &= ~(1 << PB0);
@@ -61,16 +56,16 @@ void drive_forward(void) {
 	OR_M_RB &= ~(1 << OP_M_RB); //Right Backward OFF
 }
 
-void drive_backward(void) {
-    set_speed(STATE_MIDDLE, STATE_MIDDLE);
+void motor_drive_backward(void) {
+    motor_set_speed(STATE_MIDDLE, STATE_MIDDLE);
     OR_M_LF &= ~(1 << OP_M_LF); //Left Forward ON
     OR_M_RF &= ~(1 << OP_M_RF); //Right Forward ON
     OR_M_LB |= (1 << OP_M_LB); //Left Backward OFF
     OR_M_RB |= (1 << OP_M_RB); //Right Backward OFF
 }
 
-void drive_left(void) {
-	set_speed(STATE_HIGH, STATE_LOW);
+void motor_drive_left(void) {
+    motor_set_speed(STATE_HIGH, STATE_LOW);
 	//PORTB |= (1 << PB0); //Left Backward
 	//PORTB |= (1 << PB3); //Right Forward	
 	//PORTB &= ~(1 << PB1);
@@ -81,7 +76,7 @@ void drive_left(void) {
 	OR_M_RB &= ~(1 << OP_M_RB); // Right Backward OFF	
 }
 
-void drive_clear(void) {
+void motor_clear_drive(void) {
     //Reset
     PORTB &= ~(1 << PB0);
     PORTB &= ~(1 << PB1);
