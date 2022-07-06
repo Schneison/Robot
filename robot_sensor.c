@@ -1,5 +1,3 @@
-#include <avr/io.h>
-#include <stdio.h>
 #include "robot_sensor.h"
 
 /** Initializes the ADC-unit. There is ONE single ADC unit on the

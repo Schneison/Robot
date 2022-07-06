@@ -1,23 +1,17 @@
-#include <avr/io.h>
-#include "iesmotors.h"
-#include <util/delay.h>
-#include "iesusart.h"
+#include "robot_controller.h"
 
 //IN1 Left Forward
 //IN2 Left Backward
 //IN4 Right Forward
 //IN3 Right Backward
 
-void clear_motot(void) {
+void motor_clear(void) {
 	// Delete everything on ports B and D
     DDRD = 0;
     DDRB = 0;
 }
 
-void setup_motor(void) {
-    
-	USART_init(UBRR_SETTING);
-    
+void motor_init(void) {
     // Set PD5 and PD6 as output (EN[A|B]!)
     //DDRD |= (1 << DD5) | (1 << DD6);
     DR_M_LE |= (1 << DP_M_LE);
@@ -38,20 +32,6 @@ void setup_motor(void) {
     
 }
 
-void clear(void) {
-	//Reset
-	PORTB &= ~(1 << PB0);
-	PORTB &= ~(1 << PB1);
-	PORTB &= ~(1 << PB3);
-	PORTD &= ~(1 << PD7);
-}
-
-
-/**
- * 
- * 
- * 
- */
 void set_speed(uint8_t left_speed, uint8_t right_speed) {
 	setDutyCycle(DP_M_LE, left_speed == STATE_HIGH ? 190 : left_speed == STATE_MIDDLE ? 155 : 110); // left
 	setDutyCycle(DP_M_RE, right_speed == STATE_HIGH ? 190 : right_speed == STATE_MIDDLE ? 155 : 110); // right
@@ -82,12 +62,12 @@ void drive_forward(void) {
 }
 
 void drive_backward(void) {
-	set_speed(STATE_MIDDLE, STATE_MIDDLE);
-	OR_M_LF &= ~(1 << OP_M_LF); //Left Forward ON
-	OR_M_RF &= ~(1 << OP_M_RF); //Right Forward ON
-	OR_M_LB |= (1 << OP_M_LB); //Left Backward OFF
-	OR_M_RB |= (1 << OP_M_RB); //Right Backward OFF
-
+    set_speed(STATE_MIDDLE, STATE_MIDDLE);
+    OR_M_LF &= ~(1 << OP_M_LF); //Left Forward ON
+    OR_M_RF &= ~(1 << OP_M_RF); //Right Forward ON
+    OR_M_LB |= (1 << OP_M_LB); //Left Backward OFF
+    OR_M_RB |= (1 << OP_M_RB); //Right Backward OFF
+}
 
 void drive_left(void) {
 	set_speed(STATE_HIGH, STATE_LOW);
@@ -99,4 +79,12 @@ void drive_left(void) {
 	OR_M_RF |= (1 << OP_M_RF); // Right Forward ON
 	OR_M_LF &= ~(1 << OP_M_LF); // Left Forward OFF
 	OR_M_RB &= ~(1 << OP_M_RB); // Right Backward OFF	
+}
+
+void drive_clear(void) {
+    //Reset
+    PORTB &= ~(1 << PB0);
+    PORTB &= ~(1 << PB1);
+    PORTB &= ~(1 << PB3);
+    PORTD &= ~(1 << PD7);
 }

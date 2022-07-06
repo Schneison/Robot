@@ -1,12 +1,18 @@
 /**
- * @file robot_controller.c
+ * @file robot_controller.h
  * @author Larson Schneider
  * @date 06.07.2022
- * @brief controlls movmentof the roboter
- * 
+ * @brief Controls movement of the roboter
+ * @version 0.1
  */
 #ifndef RO_DRIVE
 #define RO_DRIVE
+
+#include <avr/io.h>
+#include "iesmotors.h"
+#include <util/delay.h>
+#include "robot_sensor.h"
+#include "iesusart.h"
 
 //IN1 Left Forward
 #define DR_M_LF DDRD
@@ -44,27 +50,48 @@
 #define OR_M_RE PORTD
 #define OP_M_RE PD6
 
-void clear(void);
+/**
+ * @brief Clears all registers that the drive module uses
+ */
+void motor_clear(void);
+
+/**
+ * @brief Initialises the drive module
+ */
+void motor_init(void);
 
 /**
  * @brief Sets the speed of the two motors.
- * 
+ *
  * @param left_speed Speed state of the left motor.
  * @param right_speed Speed state of the left motor.
- * 
+ *
  */
 void set_speed(uint8_t left_speed, uint8_t right_speed);
 
 /**
- * @brief Sets the speed of the two motors.
- * 
+ * @brief Sets the values to drive the robot to the left
+ */
+void drive_left(void);
+
+/**
+ * @brief Sets the values to drive the robot to the right
  */
 void drive_right(void);
 
+/**
+ * @brief Sets the values to drive the robot to the forward
+ */
 void drive_forward(void);
 
+/**
+ * @brief Sets the values to drive the robot to the backward
+ */
 void drive_backward(void);
 
-void drive_left(void);
+/**
+ * @brief Clears all motor register pins
+ */
+void drive_clear(void);
 
 #endif
