@@ -14,6 +14,26 @@ void setupTimer0() {
   sei();
 }
 
+void setupTimer1() {
+    cli();
+    TCCR1B |= (1 << CS10); // Prescaler: 1 => 16E6 ticks/second
+    TCCR1B |= (1 << WGM12); // Use Timer 1 in CTC-mode
+    TIMSK1 |= (1 << OCIE1A); // Enable compare-match-interrupt for OCR1A
+    OCR1A = 255;           // Every 16E6/255 ticks COMPA_vect is fired.
+    // This equals an (non-existent) 512-clock-divisor.
+    // We need this information for later calculations.
+    // BTW: Keep in mind that there is one more OCR-register
+    // for timer 1, which you can use to do some more neat
+    // stuff.
+    sei();
+}
+
+void setupTimer2() {
+    // WTF is going on here?
+    TCCR2A = (1 << COM2B1) | (1 << WGM21) | (1 << WGM20);
+    TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20); // WTF^2
+}
+
 void setDutyCycle(uint8_t pin, uint8_t value)
 {
   // Suggestion to handle PD6 - note the code-clones wrt. PD5 below!
