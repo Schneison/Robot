@@ -1,6 +1,17 @@
 #include "iesmotors.h"
 
-void setupTimer0() {
+/**
+ * @brief Updates counter variables
+ * @details Called after the count timer reaches the compare value
+ */
+ISR (PCINT0_vect) {
+    if(count == 255){
+        seconds+=1;
+    }
+    count++;
+}
+
+void setupMotorTimer(void) {
   // Disable all interrupts
   cli();
   // Set prescaler to 64, cf. datasheet for TCCR0B
@@ -14,24 +25,19 @@ void setupTimer0() {
   sei();
 }
 
-void setupTimer1() {
+void setupCountTimer(void) {
     cli();
-    TCCR1B |= (1 << CS10); // Prescaler: 1 => 16E6 ticks/second
+    TCCR1B = 0; // TODO: Yes / no ?
+    TCCR1B |= (1 << CS10) | (1 << CS12); // Prescaler: 1 => 16E6 ticks/second
     TCCR1B |= (1 << WGM12); // Use Timer 1 in CTC-mode
     TIMSK1 |= (1 << OCIE1A); // Enable compare-match-interrupt for OCR1A
-    OCR1A = 255;           // Every 16E6/255 ticks COMPA_vect is fired.
+    OCR1A = 62746;           // Every 16E6/ 62746 ticks COMPA_vect is fired.
     // This equals an (non-existent) 512-clock-divisor.
     // We need this information for later calculations.
     // BTW: Keep in mind that there is one more OCR-register
     // for timer 1, which you can use to do some more neat
     // stuff.
     sei();
-}
-
-void setupTimer2() {
-    // WTF is going on here?
-    TCCR2A = (1 << COM2B1) | (1 << WGM21) | (1 << WGM20);
-    TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20); // WTF^2
 }
 
 void setDutyCycle(uint8_t pin, uint8_t value)

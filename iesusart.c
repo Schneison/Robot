@@ -6,7 +6,6 @@
  */
 
 #include "iesusart.h"
-#include <avr/io.h>
 
 /**
  * @brief 
@@ -14,22 +13,36 @@
  * A good way to use this would be calling it from an receive interrupt service routine
  * @return unsigned char (received byte)
  */
-unsigned char USART_receiveByte(void)
-{
-    // Wait for data to be received
-    while (!(UCSR0A & (1 << RXC0))) {
-        // Busy waiting! zzzZZZzzzZZZzzz
-    }    
-    // Return received data from buffer
+unsigned char USART_receiveByte(void){
+    while (!USART_canReceive()) {}
     return UDR0;
+}
+
+void USART_receiveString(char* buffer, uint8_t max_len){
+    uint8_t c_char;
+    uint8_t len = 0;
+
+    c_char = USART_receiveByte();
+
+    while(c_char != '\n' && len < max_len - 1 ) {
+        *buffer++ = c_char;
+        len++;
+        c_char = USART_receiveByte();
+    }
+
+    *buffer = '\0';
+}
+
+
+uint8_t USART_canReceive(){
+    return UCSR0A & (1 << RXC0);
 }
 
 /**
  * @brief Writes a single byte to the USART transmit buffer
  * @param data Byte that shall be transmitted
  */
-void USART_transmitByte(unsigned char data)
-{
+void USART_transmitByte(unsigned char data) {
     // Wait for empty transmit buffer
     while (!(UCSR0A & (1 << UDRE0))) {
         // Busy waiting! zzzZZZzzzZZZzzz

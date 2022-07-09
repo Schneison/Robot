@@ -8,6 +8,8 @@
 #ifndef IESUSART_h
 #define IESUSART_h
 
+#include <avr/io.h>
+
 /// CPU clock speed
 #ifndef F_CPU
 #define F_CPU 16E6
@@ -26,10 +28,27 @@
 unsigned char USART_receiveByte(void);
 
 /**
+ * @brief
+ * Reads a string of characters of the USART receive buffer.
+ *
+ * @param buffer A pointer to the location where the string should be stored
+ * @param max_len The maximal length of the read string
+ */
+void USART_receiveString(char* buffer, uint8_t max_len);
+
+/**
+ * @brief
+ * Checks if there is any data to be read
+ * @return
+ */
+uint8_t USART_canReceive();
+
+/**
  * @brief Writes a single byte to the USART transmit buffer
  * @param data Byte that shall be transmitted
  */
 void USART_transmitByte(unsigned char data);
+
 
 /**
  * @brief Transmittes a string (char by char) until '\0’ is reached

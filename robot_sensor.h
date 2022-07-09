@@ -68,6 +68,28 @@
 #define STATE_HIGH 2
 
 /**
+ * @brief Describes the binary state of the sensors
+ */
+typedef enum{
+/**
+ * @brief Left sensor is high
+ */
+    SENSOR_LEFT = 1,
+/**
+ * @brief Center sensor is high
+ */
+    SENSOR_CENTER = 2,
+/**
+ * @brief Right sensor is high
+ */
+    SENSOR_RIGHT = 4,
+/**
+ * @brief All sensors are high
+ */
+    SENSOR_ALL = 7,
+} SensorState;
+
+/**
  * @brief Threshold of the right sensor
  * @details This will determine if the signal of the sensor is read as positive.
  */
@@ -103,6 +125,12 @@ uint16_t ADC_read(uint8_t channel);
 uint16_t ADC_read_avg(uint8_t channel, uint8_t amount_samples);
 
 /**
+ * @brief Reads the state of all field sensors.
+ * @retval SensorState#SENSOR_LEFT
+ */
+SensorState sensor_get();
+
+/**
  * @brief Reads the state of the left field sensor
  * @retval #STATE_LOW No signal
  * @retval #STATE_MIDDLE Mediocre signal
@@ -126,9 +154,18 @@ uint8_t center_state();
  */
 uint8_t right_state();
 
+
+
 /**
  * @brief Initialises the sensor module
  */
 void ADC_init(void);
+
+/**
+ * @brief Clears all pins used by the sensor module.
+ *
+ * @details Required to be called before #ADC_init()
+ */
+void ADC_clear(void);
 
 #endif

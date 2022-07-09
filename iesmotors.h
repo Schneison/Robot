@@ -11,18 +11,33 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 /**
-* @brief Sets up timer 0 (8-bit-timer)
-*/
-void setupTimer0(void);
+ * @brief Counter variable, which contains a value from 0 to 255. This value represents the milliseconds since the last
+ * second. One unit is (1000/255) ms.
+ */
+uint8_t count = 0;
 /**
-  @brief Sets duty-cycle at pin PD5 or PD6 (OC0A or OC0B) to a value
-  (0 - 255 = 0% - 100%).
+ * @brief Seconds since start of the timer
+ */
+uint8_t seconds = 0;
 
-  @details Timer0 needs to be setup before usage!
-
-  @details The required pins also need to be set as output first. That
-  setup is NOT done in the respective timer-setup-method!
+/**
+* @brief Sets up timer which is responsible for the duty cycle of the two motors.
 */
+void setupMotorTimer(void);
+
+/**
+* @brief Sets up timer which is responsible for the internal counter.
+*/
+void setupCountTimer(void);
+
+/**
+ * @brief Defines speed of the wheels by defining how often a they are turned on,
+ * a higher value results in an faster wheel.
+ *
+ * @details Call #setupMotorTimer() before usage!
+ * @param pin PD5/PD6 for left/right motor cycle
+ * @param value Defines speed of the wheels. (0 - 255 = 0% - 100%)
+ */
 void setDutyCycle(uint8_t pin, uint8_t value);
 #endif
 

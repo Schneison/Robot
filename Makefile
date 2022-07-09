@@ -1,6 +1,6 @@
-C_SRC = drive_test.c iesmotors.c iesusart.c robot_sensor.c robot_controller.c
-H_SRC = iesmotors.h iesusart.h robot_sensor.h robot_controller.h
-O_SRC = drive_test.o iesmotors.o iesusart.o robot_sensor.o robot_controller.o
+C_SRC = drive_test.c iesmotors.c iesusart.c robot_sensor.c robot_controller.c brain.c led_control.c
+H_SRC = iesmotors.h iesusart.h robot_sensor.h robot_controller.h brain.h led_control.h
+O_SRC = drive_test.o iesmotors.o iesusart.o robot_sensor.o robot_controller.o brain.o led_control.o
 F_CPU = 16E6
 DEVICE = atmega328p
 PROGRAMMER_ID = arduino

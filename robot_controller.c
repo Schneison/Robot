@@ -17,7 +17,7 @@ void motor_init(void) {
     DR_M_LF |= (1 << DP_M_LF);
 
     // Make PWM work on PD[5|6]
-    setupTimer0();
+    setupMotorTimer();
 
     // Set PB0, PB1, and PB3 as output (IN[2|3|4])
     // DDRB |= (1 << DD0) | (1 << DD1) | (1 << DD3);

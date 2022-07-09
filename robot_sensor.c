@@ -1,16 +1,19 @@
 #include "robot_sensor.h"
 
+ADC_clear(void) {
+    // The following lines still let the digital input registers enabled,
+    // though that's not a good idea (energy-consumption).
+
+    // Klare Verhältnisse erstma!
+    ADMUX = 0;
+}
+
 /** Initializes the ADC-unit. There is ONE single ADC unit on the
  * microcontroller, but different "channels" (input pins) can be
  * connected to the ADC via a MUX-register. The s4etup of the ADC is
  * done in this method, the MUX is used in the read-function.
  */
 void ADC_init(void) {
-  // The following lines still let the digital input registers enabled,
-  // though that's not a good idea (energy-consumption).
-
-  // Klare Verhältnisse erstma!
-  ADMUX = 0;
 
   // Sets AVcc as the ADC's voltage source and as the reference,
   // while that voltage stems from the AREF-pin (5V when the robots is
@@ -72,6 +75,19 @@ uint16_t ADC_read_avg(uint8_t channel, uint8_t amount_samples) {
   return (uint16_t)( sum / (float)amount_samples );
 }
 
+SensorState sensor_get() {
+    SensorState value = 0;
+    if(ADC_read_avg(ADMUX_CHN_ADC2, ADC_AVG_AMOUNT) > SIGNAL_LEFT_UPPER){
+        value|=SENSOR_LEFT;
+    }
+    if(ADC_read_avg(ADMUX_CHN_ADC1, ADC_AVG_AMOUNT) > SIGNAL_CENTER_UPPER){
+        value|=SENSOR_CENTER;
+    }
+    if(ADC_read_avg(ADMUX_CHN_ADC0, ADC_AVG_AMOUNT) > SIGNAL_RIGHT_UPPER){
+        value|=SENSOR_CENTER;
+    }
+    return value;
+}
 
 uint8_t left_state() {
 	uint16_t value = ADC_read_avg(ADMUX_CHN_ADC2, ADC_AVG_AMOUNT);

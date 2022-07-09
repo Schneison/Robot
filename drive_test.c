@@ -4,13 +4,93 @@
 #include "iesusart.h"
 #include "robot_sensor.h"
 #include "robot_controller.h"
+#include "brain.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 void setup(void) {
     motor_clear();
+    ADC_clear();
 
     USART_init(UBRR_SETTING);
 	ADC_init();
     motor_init();
+}
+
+void drive(SensorState* lastState) {
+    SensorState current = sensor_get();
+
+    // Right Sensor
+    if((current & SENSOR_RIGHT)) {
+        motor_drive_right();
+    }
+
+    // Center Sensor
+    if ((current & SENSOR_CENTER)) {
+        motor_drive_forward();
+    }
+
+    // Left Sensor
+    if ((current & SENSOR_LEFT)) {
+        motor_drive_left();
+    }
+    *lastState=current;
+}
+
+void print(State state){
+
+}
+
+void print_help(void){
+    USART_print("-X Safe State\n-S 3 Rounds\n-P Pause\n-R Reset\n-C Home\n-? Help");
+}
+
+void read_input(State* state) {
+    if(!USART_canReceive()){
+        return;
+    }
+    unsigned char byte = USART_receiveByte();
+    switch (byte) {
+        case 'S':
+            *state=ROUNDS;
+            return;
+        case 'X':
+            *state=FROZEN;
+            return;
+        case 'P':
+            *state=PAUSE;
+            return;
+        case 'C':
+            *state=RETURN_HOME;
+            return;
+        case 'R':
+            *state=RESET;
+            return;
+        case '?':
+            print_help();
+            return;
+        default:
+            break;
+    }
+    char *s = malloc(155 * sizeof(char));
+    sprintf(s, "Received undefined Sign %c", byte);
+    USART_print(s);
+}
+
+void run(void) {
+    State state = ROUNDS;
+    SensorState lastState = 0;
+    while(1){
+        read_input(&state);
+        print(state);
+        switch (state) {
+            case ROUNDS: {
+                drive(&lastState);
+            }
+            default:
+                break;
+        }
+    }
 }
 
 int main(void) {
