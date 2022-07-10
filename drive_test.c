@@ -1,14 +1,17 @@
 #include <avr/io.h>
-#include "iesmotors.h"
+#include "utility.h"
 #include <util/delay.h>
 #include "iesusart.h"
 #include "robot_sensor.h"
-#include "robot_controller.h"
+#include "drive_control.h"
 #include "brain.h"
 #include "led_control.h"
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * @brief Setup board registries
+ */
 void setup(void) {
     motor_clear();
     ADC_clear();
@@ -18,9 +21,12 @@ void setup(void) {
     motor_init();
 }
 
-void drive(track_state* state) {
-    sensor_state current = sensor_get();
-
+/**
+ * @brief Perform driving of the robot
+ *
+ * @param current Current sensor state
+ */
+void driveDo(sensor_state current){
     // Right Sensor
     if((current & SENSOR_RIGHT)) {
         motor_drive_right();
@@ -35,15 +41,77 @@ void drive(track_state* state) {
     if ((current & SENSOR_LEFT)) {
         motor_drive_left();
     }
+}
+
+/**
+ * Performance the driving action
+ *
+ * @param state Current state
+ */
+void drive(track_state* state) {
+    sensor_state current = sensor_get();
+
+    switch (state->drive) {
+        case CHECK_START:
+            //When on start field begin first round
+            if(state->pos==POS_START_FIELD){
+                state->drive=FIRST_ROUND;
+                USART_print("Here I go again on my own, going down the only round I’ve ever known…");
+            }
+            break;
+        case FIRST_ROUND:
+        case SECOND_ROUND:
+        case THIRD_ROUND:
+            // Check if we were on track before and are now on the start field, WE DID A ROUND
+            if(state->last_pos==POS_TRACK && state->pos==POS_START_FIELD){
+                switch (state->drive) {
+                    case FIRST_ROUND:
+                        USART_print("YEAH, done round 1, going for round 2/3");
+                        state->drive = SECOND_ROUND;
+                        break;
+                    case SECOND_ROUND:
+                        USART_print("YEAH YEAH, done round 2, going for round 3/3");
+                        state->drive = THIRD_ROUND;
+                        break;
+                    case THIRD_ROUND:
+                        USART_print("YEAH YEAH YEAH , I really did it my way. ... And what’s my purpose\n"
+                                    "and the general sense of my further life now? Type ? for help");
+                        state->drive = POST_DRIVE;
+                        break;
+                    default:
+                        //Should never happen
+                        break;
+                }
+            }
+            driveDo(current);
+            break;
+        case POST_DRIVE:
+            reset();
+            break;
+        case PRE_DRIVE:
+            break;
+    }
+
+    driveDo(current);
     state->sensor_last = current;
 }
 
-void print_at_freq(uint8_t frequency, const char* string){
+/**
+ * @brief Prints then given message if the frequency requirement is currently meed.
+ *
+ * @param frequency Frequency on which the given text should be printed.
+ * @param text The text that should be printed
+ */
+void print_at_freq(uint8_t frequency, const char* text){
     if(check_freq(frequency)){
-        USART_print(string);
+        USART_print(text);
     }
 }
 
+/**
+ * @brief Represents the current state to the outside world. For example printing USART message or turn on led's.
+ * @param state Current state
+ */
 void show_state(track_state* state){
     switch (state->action) {
         case ROUNDS: {
@@ -98,6 +166,10 @@ void show_state(track_state* state){
     }
 }
 
+/**
+ * @brief Print help message for the given state. Print different if we are located on starting field.
+ * @param state Current state
+ */
 void print_help(track_state* state){
     if(state->pos == POS_START_FIELD) {
         USART_print("-X Safe action_state\n-S 3 Rounds\n-P Pause\n-R Reset\n-C Home\n-? Help");
@@ -106,6 +178,11 @@ void print_help(track_state* state){
     }
 }
 
+/**
+ * Print fail message if character was not defined for an action.
+ *
+ * @param byte The character which was not defined.
+ */
 void print_fail(unsigned char byte){
     char *s = malloc(155 * sizeof(char));
     sprintf(s, "Received undefined Sign %c", byte);
@@ -113,16 +190,13 @@ void print_fail(unsigned char byte){
     free(s);
 }
 
-void on_action_change(action_state newAction){
-    switch (newAction) {
-        case RESET:
-            USART_print("Will reset in 5 seconds...");
-            break;
-        default:
-            break;
-    }
-}
-
+/**
+ * @brief Tries to read an input from the USART, apply the action behind the character if any is defined, send an
+ * error message for undefined characters.
+ * @details Defined characters are: S, X; P, C, R, ?
+ *
+ * @param state Internal state
+ */
 void read_input(track_state* state) {
     if(!USART_canReceive()){
         return;
@@ -143,6 +217,7 @@ void read_input(track_state* state) {
             break;
         case 'R':
             state->action=RESET;
+            USART_print("Will reset in 5 seconds...");
             break;
         case '?':
             print_help(state);
@@ -151,7 +226,6 @@ void read_input(track_state* state) {
             print_fail(byte);
             return;
     }
-    on_action_change(state->action);
 }
 
 /**
@@ -162,6 +236,7 @@ void read_input(track_state* state) {
  */
 void update_position(track_state* trackState){
     if(check_freq(1)){
+        trackState->last_pos=trackState->pos;
         // All sensors on, could be home field
         if(trackState->sensor_last == SENSOR_ALL){
             trackState->homeCache++;
@@ -171,19 +246,24 @@ void update_position(track_state* trackState){
                 return;
             }
         }
-    }
-    if(trackState->action==ROUNDS){
-        trackState->pos=POS_TRACK;
-    }else{
-        trackState->pos=POS_UNKNOWN;
+        trackState->homeCache=0;
+        if(trackState->action==ROUNDS){
+            trackState->pos=POS_TRACK;
+        }else{
+            trackState->pos=POS_UNKNOWN;
+        }
     }
 }
 
+/**
+ * @brief Run loop of the script
+ */
 void run(void) {
     track_state* trackState = malloc(sizeof(track_state));
     trackState->drive=PRE_DRIVE;
     trackState->action=ROUNDS;
     trackState->pos=POS_UNKNOWN;
+    trackState->last_pos=POS_UNKNOWN;
     trackState->homeCache=0;
     while(1){
         read_input(trackState);
@@ -211,7 +291,7 @@ int main(void) {
     // Set the duty cycles for PD5/PD6
     //setDutyCycle(PD5, 155); // left
     //setDutyCycle(PD6, 155); // right
-    motor_set_speed(STATE_MIDDLE, STATE_MIDDLE);
+    motor_set_speed(SPEED_MIDDLE, SPEED_MIDDLE);
     
     unsigned char lastLeft = 0;
     unsigned char lastCenter = 0;

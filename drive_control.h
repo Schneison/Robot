@@ -1,15 +1,15 @@
 /**
- * @file robot_controller.h
+ * @file drive_control.h
  * @author Larson Schneider
  * @date 06.07.2022
  * @brief Controls movement of the roboter
  * @version 0.1
  */
-#ifndef RO_DRIVE
-#define RO_DRIVE
+#ifndef MOTOR_DRIVE
+#define MOTOR_DRIVE
 
 #include <avr/io.h>
-#include "iesmotors.h"
+#include "utility.h"
 #include <util/delay.h>
 #include "robot_sensor.h"
 #include "iesusart.h"
@@ -79,6 +79,24 @@
 #define OP_M_RE PD6
 
 /**
+ * @brief Possible directions of the two motors.
+ */
+typedef enum {
+/**
+* @brief Move motor forward
+*/
+   FORWARDS,
+/**
+ * @brief Move motor backward
+ */
+   BACKWARDS,
+/**
+ * @brief Stop the motor movement
+ */
+   STOP
+} direction;
+
+/**
  * @brief Clears all registers that the drive module uses
  */
 void motor_clear(void);
@@ -89,13 +107,41 @@ void motor_clear(void);
 void motor_init(void);
 
 /**
+ * @brief Defines speed of the wheels by defining how often a they are turned on,
+ * a higher value results in an faster wheel.
+ *
+ * @details Call #setupMotorTimer() before usage!
+ * @param pin PD5/PD6 for left/right motor cycle
+ * @param value Defines speed of the wheels. (0 - 255 = 0% - 100%)
+ */
+void setDutyCycle(uint8_t pin, uint8_t value);
+
+/**
+ * @brief Sets the speed of the left motor.
+ *
+ * @param dir Direction of the motor motion
+ * @param speed_state Speed of the motor.
+ *
+ */
+void motor_set_left(direction dir, speed_value speed_state);
+
+/**
+ * @brief Sets the speed of the right motor.
+ *
+ * @param dir Direction of the motor motion
+ * @param speed_state Speed of the motor.
+ *
+ */
+void motor_set_right(direction dir, speed_value speed_state);
+
+/**
  * @brief Sets the speed of the two motors.
  *
  * @param left_speed Speed state of the left motor.
- * @param right_speed Speed state of the left motor.
+ * @param right_speed Speed state of the righht motor.
  *
  */
-void motor_set_speed(uint8_t left_speed, uint8_t right_speed);
+void motor_set_speed(speed_value left_speed, speed_value right_speed);
 
 /**
  * @brief Sets the values to drive the robot to the left

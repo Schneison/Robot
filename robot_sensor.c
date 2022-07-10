@@ -84,7 +84,7 @@ sensor_state sensor_get() {
         value|=SENSOR_CENTER;
     }
     if(ADC_read_avg(ADMUX_CHN_ADC0, ADC_AVG_AMOUNT) > SIGNAL_RIGHT_UPPER){
-        value|=SENSOR_CENTER;
+        value|=SENSOR_RIGHT;
     }
     return value;
 }

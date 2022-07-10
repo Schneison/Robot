@@ -1,12 +1,12 @@
 /**
- * @file iesmotors.h
+ * @file utility.h
  * @author Larson Schneider
  * @date 06.07.2022
- * @brief Utility class for motor functions
+ * @brief Utility class
  * @version 0.1
  */
-#ifndef IESMOTORS
-#define IESMOTORS
+#ifndef UTILITY
+#define UTILITY
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -14,11 +14,11 @@
  * @brief Counter variable, which contains a value from 0 to 255. This value represents the milliseconds since the last
  * second. One unit is (1000/255) ms.
  */
-uint8_t count = 0;
+uint16_t count = 0;
 /**
  * @brief Seconds since start of the timer
  */
-uint8_t seconds = 0;
+uint16_t seconds = 0;
 
 /**
  * @brief Checks the current millisecond value if the equals the frequency
@@ -30,24 +30,16 @@ uint8_t seconds = 0;
 uint8_t check_freq(uint8_t frequency);
 
 /**
-* @brief Sets up timer which is responsible for the duty cycle of the two motors.
+ * @brief Sets up timer which is responsible for the duty cycle of the two motors.
+ * @details Timer0 on the board
 */
 void setupMotorTimer(void);
 
 /**
-* @brief Sets up timer which is responsible for the internal counter.
+ * @brief Sets up timer which is responsible for the internal counter.
+ * @details Timer1 on the board
 */
 void setupCountTimer(void);
-
-/**
- * @brief Defines speed of the wheels by defining how often a they are turned on,
- * a higher value results in an faster wheel.
- *
- * @details Call #setupMotorTimer() before usage!
- * @param pin PD5/PD6 for left/right motor cycle
- * @param value Defines speed of the wheels. (0 - 255 = 0% - 100%)
- */
-void setDutyCycle(uint8_t pin, uint8_t value);
 #endif
 
 

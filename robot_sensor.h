@@ -68,6 +68,28 @@
 #define STATE_HIGH 2
 
 /**
+ * @brief Defines the possible speed values of the motors.
+ */
+typedef enum {
+/**
+* @brief Stop the engine, no motion
+*/
+SPEED_ZERO = 0,
+/**
+* @brief Low speed
+*/
+ SPEED_LOW = 110,
+/**
+* @brief Mediocre speed
+*/
+ SPEED_MIDDLE = 155,
+/**
+* @brief Full speed
+*/
+ SPEED_HIGH = 190
+} speed_value;
+
+/**
  * @brief Describes the binary state of the sensors
  */
 typedef enum{
@@ -153,8 +175,6 @@ uint8_t center_state();
  * @retval #STATE_HIGH Full signal
  */
 uint8_t right_state();
-
-
 
 /**
  * @brief Initialises the sensor module
