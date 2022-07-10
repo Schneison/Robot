@@ -11,6 +11,10 @@ ISR (PCINT0_vect) {
     count++;
 }
 
+uint8_t check_freq(uint8_t frequency){
+    return count % frequency == 0;
+}
+
 void setupMotorTimer(void) {
   // Disable all interrupts
   cli();

@@ -21,6 +21,15 @@ uint8_t count = 0;
 uint8_t seconds = 0;
 
 /**
+ * @brief Checks the current millisecond value if the equals the frequency
+ * @param frequency
+ * @return
+ * @retval 0 If the current millisecond value is between two thresholds.
+ * @retval 1 if the current millisecond value equals the frequency
+ */
+uint8_t check_freq(uint8_t frequency);
+
+/**
 * @brief Sets up timer which is responsible for the duty cycle of the two motors.
 */
 void setupMotorTimer(void);

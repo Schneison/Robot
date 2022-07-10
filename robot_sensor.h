@@ -87,7 +87,7 @@ typedef enum{
  * @brief All sensors are high
  */
     SENSOR_ALL = 7,
-} SensorState;
+} sensor_state;
 
 /**
  * @brief Threshold of the right sensor
@@ -126,9 +126,9 @@ uint16_t ADC_read_avg(uint8_t channel, uint8_t amount_samples);
 
 /**
  * @brief Reads the state of all field sensors.
- * @retval SensorState#SENSOR_LEFT
+ * @retval sensor_state#SENSOR_LEFT
  */
-SensorState sensor_get();
+sensor_state sensor_get();
 
 /**
  * @brief Reads the state of the left field sensor

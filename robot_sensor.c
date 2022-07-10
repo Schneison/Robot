@@ -75,8 +75,8 @@ uint16_t ADC_read_avg(uint8_t channel, uint8_t amount_samples) {
   return (uint16_t)( sum / (float)amount_samples );
 }
 
-SensorState sensor_get() {
-    SensorState value = 0;
+sensor_state sensor_get() {
+    sensor_state value = 0;
     if(ADC_read_avg(ADMUX_CHN_ADC2, ADC_AVG_AMOUNT) > SIGNAL_LEFT_UPPER){
         value|=SENSOR_LEFT;
     }

@@ -33,6 +33,10 @@ typedef enum {
  */
     LED_NONE = 0,
 /**
+ * @brief Activates only the right LED
+ */
+    LED_RIGHT = 1,
+/**
  * @brief Activates only the center LED
  */
     LED_CENTER = 2,
@@ -40,10 +44,6 @@ typedef enum {
  * @brief Activates only the left LED
  */
     LED_LEFT = 4,
-/**
- * @brief Activates only the right LED
- */
-    LEF_RIGHT = 1,
 /**
  * @brief Activates only the center LED'S
  */

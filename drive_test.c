@@ -5,6 +5,7 @@
 #include "robot_sensor.h"
 #include "robot_controller.h"
 #include "brain.h"
+#include "led_control.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -17,8 +18,8 @@ void setup(void) {
     motor_init();
 }
 
-void drive(SensorState* lastState) {
-    SensorState current = sensor_get();
+void drive(track_state* state) {
+    sensor_state current = sensor_get();
 
     // Right Sensor
     if((current & SENSOR_RIGHT)) {
@@ -34,63 +35,174 @@ void drive(SensorState* lastState) {
     if ((current & SENSOR_LEFT)) {
         motor_drive_left();
     }
-    *lastState=current;
+    state->sensor_last = current;
 }
 
-void print(State state){
-
+void print_at_freq(uint8_t frequency, const char* string){
+    if(check_freq(frequency)){
+        USART_print(string);
+    }
 }
 
-void print_help(void){
-    USART_print("-X Safe State\n-S 3 Rounds\n-P Pause\n-R Reset\n-C Home\n-? Help");
+void show_state(track_state* state){
+    switch (state->action) {
+        case ROUNDS: {
+            uint8_t round = 1;
+            switch (state->drive) {
+                case SECOND_ROUND:
+                    round = 2;
+                    break;
+                case THIRD_ROUND:
+                    round = 2;
+                    break;
+                default:
+                    break;
+            }
+            // Manuel check, so we don't have to create a pointer every tick
+            if (check_freq(1)) {
+                char *s = malloc(sizeof("Round and round I go, currently round 1"));
+                sprintf(s, "Received undefined Sign %c", round);
+                USART_print(s);
+                free(s);
+            }
+        }
+        case FROZEN:
+            print_at_freq(1, "In safe state! Won’t react to any instructions! Rescue me!");
+            break;
+        case RETURN_HOME:
+            print_at_freq(1, "Returning home, will reset me there");
+            break;
+        case PAUSE:
+            print_at_freq(1, "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again");
+            break;
+        case WAIT:
+            if (state->pos == POS_START_FIELD) {
+                print_at_freq(1, "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again");
+            }else{
+                print_at_freq(1, "Not on the starting field. Place me there please... Send ? for help.");
+                LED_State ledState = LED_NONE;
+                if(state->sensor_last == SENSOR_LEFT) {
+                    ledState |= LED_LEFT;
+                }
+                if(state->sensor_last == SENSOR_CENTER) {
+                    ledState |= LED_CENTER;
+                }
+                if(state->sensor_last == SENSOR_RIGHT) {
+                    ledState |= LED_RIGHT;
+                }
+                LED_set(ledState);
+            }
+            break;
+        default:
+            break;
+    }
 }
 
-void read_input(State* state) {
+void print_help(track_state* state){
+    if(state->pos == POS_START_FIELD) {
+        USART_print("-X Safe action_state\n-S 3 Rounds\n-P Pause\n-R Reset\n-C Home\n-? Help");
+    }else{
+        USART_print("Not on start field, please position on start field!");
+    }
+}
+
+void print_fail(unsigned char byte){
+    char *s = malloc(155 * sizeof(char));
+    sprintf(s, "Received undefined Sign %c", byte);
+    USART_print(s);
+    free(s);
+}
+
+void on_action_change(action_state newAction){
+    switch (newAction) {
+        case RESET:
+            USART_print("Will reset in 5 seconds...");
+            break;
+        default:
+            break;
+    }
+}
+
+void read_input(track_state* state) {
     if(!USART_canReceive()){
         return;
     }
     unsigned char byte = USART_receiveByte();
     switch (byte) {
         case 'S':
-            *state=ROUNDS;
-            return;
+            state->action=ROUNDS;
+            break;
         case 'X':
-            *state=FROZEN;
-            return;
+            state->action=FROZEN;
+            break;
         case 'P':
-            *state=PAUSE;
-            return;
+            state->action=PAUSE;
+            break;
         case 'C':
-            *state=RETURN_HOME;
-            return;
+            state->action=RETURN_HOME;
+            break;
         case 'R':
-            *state=RESET;
-            return;
+            state->action=RESET;
+            break;
         case '?':
-            print_help();
+            print_help(state);
             return;
         default:
-            break;
+            print_fail(byte);
+            return;
     }
-    char *s = malloc(155 * sizeof(char));
-    sprintf(s, "Received undefined Sign %c", byte);
-    USART_print(s);
+    on_action_change(state->action);
+}
+
+/**
+ * @brief Updates position of the state. Checks if the robot is: "on the start",
+ * "on the track (if already started driving)" or "unknown (on the track but not started)"
+ *
+ * @param trackState The currently used state
+ */
+void update_position(track_state* trackState){
+    if(check_freq(1)){
+        // All sensors on, could be home field
+        if(trackState->sensor_last == SENSOR_ALL){
+            trackState->homeCache++;
+            if(trackState->homeCache > 2){
+                trackState->pos=POS_START_FIELD;
+                trackState->homeCache = 2;
+                return;
+            }
+        }
+    }
+    if(trackState->action==ROUNDS){
+        trackState->pos=POS_TRACK;
+    }else{
+        trackState->pos=POS_UNKNOWN;
+    }
 }
 
 void run(void) {
-    State state = ROUNDS;
-    SensorState lastState = 0;
+    track_state* trackState = malloc(sizeof(track_state));
+    trackState->drive=PRE_DRIVE;
+    trackState->action=ROUNDS;
+    trackState->pos=POS_UNKNOWN;
+    trackState->homeCache=0;
     while(1){
-        read_input(&state);
-        print(state);
-        switch (state) {
+        read_input(trackState);
+        show_state(trackState);
+        switch (trackState->action) {
             case ROUNDS: {
-                drive(&lastState);
+                drive(trackState);
             }
+            case RESET: {
+                reset();
+            }
+            case PAUSE:
+                //Do nothing, we pause until action changes
+                break;
             default:
                 break;
         }
     }
+    free(trackState);
 }
 
 int main(void) {
