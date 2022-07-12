@@ -105,10 +105,10 @@ void drive(track_state* state) {
  * @param frequency Frequency on which the given text should be printed.
  * @param text The text that should be printed
  */
-void print_at_freq(uint8_t frequency, const char* text){
-    if(check_freq(frequency)){
+void print_at_freq(track_state *state, counter_def frequency, const char *text) {
+    if(check_state_counter(state, frequency)){
         USART_print(text);
-    }
+   }
 }
 
 /**
@@ -130,11 +130,11 @@ void show_state(track_state* state){
                     break;
             }
             // Manuel check, so we don't have to create a pointer every tick
-            if (check_freq(1)) {
-                //char *s = malloc(sizeof("Round and round I go, currently round 1\n"));
-                //sprintf(s, "Round and round I go, currently round %d\n", round);
-                //USART_print(s);
-                //free(s);
+            if (check_state_counter(state, COUNTER_1_HZ)) {
+                char *s = malloc(sizeof("Round and round I go, currently round 1\n"));
+                sprintf(s, "Round and round I go, currently round %d\n", round);
+                USART_print(s);
+                free(s);
             }
             LED_State ledState = LED_NONE;
             if((state->sensor_last) & SENSOR_LEFT) {
@@ -150,19 +150,19 @@ void show_state(track_state* state){
             break;
         }
         case FROZEN:
-            print_at_freq(1, "In safe state! Won’t react to any instructions! Rescue me!\n");
+            print_at_freq(state, COUNTER_1_HZ, "In safe state! Won’t react to any instructions! Rescue me!\n");
             break;
         case RETURN_HOME:
-            print_at_freq(1, "Returning home, will reset me there\n");
+            print_at_freq(state, COUNTER_1_HZ, "Returning home, will reset me there\n");
             break;
         case PAUSE:
-            print_at_freq(1, "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again\n");
+            print_at_freq(state, COUNTER_1_HZ, "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again\n");
             break;
         case WAIT:
             if (state->pos == POS_START_FIELD) {
-                print_at_freq(1, "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again\n");
+                print_at_freq(state, COUNTER_1_HZ, "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again\n");
             }else{
-                print_at_freq(1, "Not on the starting field. Place me there please... Send ? for help.\n");
+                print_at_freq(state, COUNTER_1_HZ, "Not on the starting field. Place me there please... Send ? for help.\n");
                 LED_State ledState = LED_NONE;
                 if((state->sensor_last) & SENSOR_LEFT) {
                     ledState |= LED_LEFT;
@@ -250,7 +250,7 @@ void read_input(track_state* state) {
  * @param trackState The currently used state
  */
 void update_position(track_state* trackState){
-    if(check_freq(1)){
+    if(check_state_counter(trackState, COUNTER_1_HZ)){
         trackState->last_pos=trackState->pos;
         // All sensors on, could be home field
         if(trackState->sensor_last == SENSOR_ALL){
@@ -273,7 +273,7 @@ void update_position(track_state* trackState){
 /**
  * @brief Run loop of the script
  */
-void run(void) {
+void runLoop(void) {
     track_state* trackState = malloc(sizeof(track_state));
     trackState->drive=FIRST_ROUND;
     trackState->action=ROUNDS;
@@ -284,7 +284,7 @@ void run(void) {
         //read_input(trackState);
         show_state(trackState);
         update_position(trackState);
-        updateCounters(trackState->counters);
+        update_counters(trackState->counters);
         switch (trackState->action) {
             case ROUNDS: {
                 drive(trackState);
@@ -306,79 +306,8 @@ void run(void) {
 
 int main(void) {
 	setup();
-	
-    // Set the duty cycles for PD5/PD6
-    //setDutyCycle(PD5, 155); // left
-    //setDutyCycle(PD6, 155); // right
+
     motor_set_speed(SPEED_MIDDLE, SPEED_MIDDLE);
 
-    run();
-    
-//    unsigned char lastLeft = 0;
-//    unsigned char lastCenter = 0;
-//    unsigned char lastRight = 0;
-//	unsigned char changeLeft = 0;
-//    unsigned char changeCenter = 0;
-//    unsigned char changeRight = 0;
-//    unsigned char oneActive = 0;
-//    unsigned char left_sensor = 0;
-//    unsigned char center_sensor = 0;
-//    unsigned char right_sensor = 0;
-//
-//    while(1){
-//		changeCenter = 0;
-//		changeLeft = 0;
-//		changeRight = 0;
-//		/*oneActive = (IR_LF_R & (1 << IP_LF_R)) | (IR_LF_M & (1 << IP_LF_M)) | (IR_LF_L & (1 << IP_LF_L));
-//		if(oneActive){
-//			if(lastCenter != (IR_LF_M & (1 << IP_LF_M))) {
-//				changeCenter = 1;
-//				USART_print("Last middle\n\n");
-//			}
-//			if(lastLeft != (IR_LF_L & (1 << IP_LF_L))) {
-//				changeLeft = 1;
-//				USART_print("Last left\n\n");
-//			}
-//			if(lastRight != (IR_LF_R & (1 << IP_LF_R))) {
-//				changeRight = 1;
-//				USART_print("Last right\n\n");
-//			}
-//		}*/
-//
-//		right_sensor = right_state();
-//		left_sensor = left_state();
-//		center_sensor = center_state();
-//
-//		// Right Sensor
-//		if(right_sensor && !center_sensor && !left_sensor) {
-//            motor_drive_right();
-//		}
-//
-//		// Center Sensor
-//		if (center_sensor && !right_sensor && !left_sensor) {
-//            motor_drive_forward();
-//		}
-//
-//		// Left Sensor
-//		if (left_sensor && !center_sensor && !right_sensor) {
-//            motor_drive_left();
-//		}
-//		if(oneActive){
-//			lastLeft = left_state();
-//			lastCenter = center_state();
-//			lastRight = right_state();
-//		}
-//	}
-	
-	// Set IN1 to HIGH and don't set IN2 to HIGH (leave LOW) -> Left motors FORWARD
-    //PORTD |= (1 << PD7); // Use OR, since overwriting will disable EN[A|B]!
-    
-    // Set IN2 to HIGH and don't set anything else to HIGH -> Left motors BACKWARD
-    //PORTB |= (1 << PB0);
-	
-	// Set IN4 to HIGH and don't set anything else to HIGH -> Right motors FORWARD
-    //PORTB |= (1 << PB3);
-	
-	// Set IN3 to HIGH and don't set anything else to HIGH -> Right motors BACKWARD
-    //PORTB |= (1 << PB1);
+    runLoop();
 }

@@ -143,7 +143,7 @@ typedef struct track_state {
  * @retval 1 if the frequency is meet this cycle.
  * @retval 0 if the frequency is not meet this cycle.
  */
-uint8_t state_counter(track_state state, counter_def counterDef);
+uint8_t check_state_counter(track_state* state, counter_def counterDef);
 
 
 #endif

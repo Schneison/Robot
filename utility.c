@@ -10,7 +10,7 @@ ISR (TIMER1_COMPA_vect) {
     millis++;
 }
 
-void updateCounters(struct Counter* counters) {
+void update_counters(struct Counter* counters) {
     if(!counters){
         counters = malloc(sizeof(struct Counter) * COUNTER_AMOUNT);
         for(int i = 0;i <COUNTER_AMOUNT;i++){
@@ -31,10 +31,6 @@ void updateCounters(struct Counter* counters) {
             counter.value = 0;
         }
     }
-}
-
-uint8_t check_freq(uint8_t frequency){
-    return millis % (1000 / frequency) == 0;
 }
 
 uint8_t check_counter(struct Counter* counters, counter_def counterDef){

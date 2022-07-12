@@ -1,5 +1,4 @@
 #include "robot_sensor.h"
-#include "iesusart.h"
 
 void ADC_clear(void) {
     // The following lines still let the digital input registers enabled,
@@ -67,7 +66,7 @@ uint16_t ADC_read(uint8_t channel) {
 
 uint16_t ADC_read_avg(uint8_t channel, uint8_t amount_samples) {
   // How large does our datatype need to be?
-  uint32_t sum = 0;
+  float sum = 0;
 
   for (uint8_t i = 0; i < amount_samples; ++i ) {
     sum += ADC_read(channel);
@@ -80,31 +79,12 @@ sensor_state sensor_get() {
     sensor_state value = 0;
     if(ADC_read_avg(ADMUX_CHN_ADC2, ADC_AVG_AMOUNT) > SIGNAL_LEFT_UPPER){
         value|=SENSOR_LEFT;
-        USART_print("l");
     }
     if(ADC_read_avg(ADMUX_CHN_ADC1, ADC_AVG_AMOUNT) > SIGNAL_CENTER_UPPER){
         value|=SENSOR_CENTER;
-        USART_print("c");
     }
     if(ADC_read_avg(ADMUX_CHN_ADC0, ADC_AVG_AMOUNT) > SIGNAL_RIGHT_UPPER){
         value|=SENSOR_RIGHT;
-        USART_print("r");
     }
-    USART_print("\n");
     return value;
-}
-
-uint8_t left_state() {
-	uint16_t value = ADC_read_avg(ADMUX_CHN_ADC2, ADC_AVG_AMOUNT);
-	return value > SIGNAL_LEFT_UPPER ? STATE_HIGH : STATE_LOW;
-}
-
-uint8_t center_state() {
-	uint16_t value = ADC_read_avg(ADMUX_CHN_ADC1, ADC_AVG_AMOUNT);
-	return value > SIGNAL_CENTER_UPPER ? STATE_HIGH : STATE_LOW;
-}
-
-uint8_t right_state() {
-	uint16_t value = ADC_read_avg(ADMUX_CHN_ADC0, ADC_AVG_AMOUNT);
-	return value > SIGNAL_RIGHT_UPPER ? STATE_HIGH : STATE_LOW;
 }

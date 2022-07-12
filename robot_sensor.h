@@ -9,9 +9,6 @@
 #define RO_SIGNALS
 
 #include <avr/io.h>
-#include <stdio.h>
-
-// ADC Channels
 
 /**
  * @brief First channel, used by right sensor
@@ -47,25 +44,6 @@
  * @details Average some measurements to reduce probable noise.
  */
 #define ADC_AVG_AMOUNT 20
-
-/**
- * @brief No signal strength for any of the three sensors.
- * @sa #STATE_MIDDLE
- * @sa #STATE_HIGH
- */
-#define STATE_LOW 0
-/**
- * @brief Mediocre signal strength for any of the three sensors.
- * @sa #STATE_LOW
- * @sa #STATE_HIGH
- */
-#define STATE_MIDDLE 1
-/**
- * @brief Maximal signal strength for any of the three sensors.
- * @sa #STATE_LOW
- * @sa #STATE_MIDDLE
- */
-#define STATE_HIGH 2
 
 /**
  * @brief Defines the possible speed values of the motors.
@@ -151,30 +129,6 @@ uint16_t ADC_read_avg(uint8_t channel, uint8_t amount_samples);
  * @retval sensor_state#SENSOR_LEFT
  */
 sensor_state sensor_get();
-
-/**
- * @brief Reads the state of the left field sensor
- * @retval #STATE_LOW No signal
- * @retval #STATE_MIDDLE Mediocre signal
- * @retval #STATE_HIGH Full signal
- */
-uint8_t left_state();
-
-/**
- * @brief Reads the state of the center field sensor
- * @retval #STATE_LOW No signal
- * @retval #STATE_MIDDLE Mediocre signal
- * @retval #STATE_HIGH Full signal
- */
-uint8_t center_state();
-
-/**
- * @brief Reads the state of the right field sensor
- * @retval #STATE_LOW No signal
- * @retval #STATE_MIDDLE Mediocre signal
- * @retval #STATE_HIGH Full signal
- */
-uint8_t right_state();
 
 /**
  * @brief Initialises the sensor module

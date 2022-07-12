@@ -74,7 +74,7 @@ struct Counter {
  * @sa #setupCountTimer()
  * @param counters Array / Pointer that contains the counters for all registered frequencies.
  */
-void updateCounters(struct Counter* counters);
+void update_counters(struct Counter* counters);
 
 /**
  * @brief  Timer Control Register of the first timer
@@ -119,15 +119,6 @@ void updateCounters(struct Counter* counters);
  * @details 16E6/64=250E3; 250E3/250 => 1000ms
  */
 #define TIMER_1_COMPARE_VALUE 250
-
-/**
- * @brief Checks the current millisecond value if the equals the frequency
- * @param frequency
- * @return
- * @retval 0 If the current millisecond value is between two thresholds.
- * @retval 1 if the current millisecond value equals the frequency
- */
-uint8_t check_freq(uint8_t frequency);
 
 /**
  * @brief Checks if the counter that is defined with the given definition has a true value this cycle.
