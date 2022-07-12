@@ -129,12 +129,20 @@ typedef struct track_state {
     uint8_t homeCache;
 
     /**
-     * @brief
+     * @brief Array / Pointer that contains the counters for all registered frequencies.
      */
     struct Counter* counters;
 
 } track_state;
 
+/**
+ * @copybrief check_counter(struct Counter*, counter_def)
+ * @param state Current state of the robot that contains the counters.
+ * @param counterDef The definition of the counter that should be checked.
+ * @details The amount of counter is defined by #COUNTER_AMOUNT.
+ * @retval 1 if the frequency is meet this cycle.
+ * @retval 0 if the frequency is not meet this cycle.
+ */
 uint8_t state_counter(track_state state, counter_def counterDef);
 
 

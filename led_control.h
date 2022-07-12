@@ -50,17 +50,19 @@ typedef enum {
     LED_ALL = 7,
 } LED_State;
 
-
+/**
+ * @brief Initialises all pins that are used by the LED module.
+ */
 void LED_init(void);
 
 /**
- * @brief Creates a tact by setting the clock flag to LOW, HIGH, Low
+ * @brief Creates a tact by setting the clock flag value to LOW, HIGH, Low
  */
 void LED_clock(void);
 
 /**
  * @brief Updates the state of led by shifting the registry.
- *
+ * @details Uses #LED_clock to shift the registry
  * @param state Defines the set led's
  * @sa #LED_State
  */

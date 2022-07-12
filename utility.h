@@ -18,17 +18,41 @@
  */
 extern uint16_t millis;
 
+/**
+ * @brief Defines counters with different frequencies to allow output in the given frequencies.
+ */
 typedef enum {
+    /**
+     * @brief 1 HZ Counter
+     */
     COUNTER_1_HZ,
+    /**
+ * @brief 5 HZ Counter
+ */
     COUNTER_5_HZ,
+    /**
+ * @brief 8 HZ Counter
+ */
     COUNTER_8_HZ
 } counter_def;
 
-
+/**
+ * @brief Contains the frequencies for the corresponding counters in #counter_def
+ */
 static const uint16_t counter_frequencies[] = { 1000 / 1, 1000 / 5,1000 / 8 };
 
+/**
+ * @brief Amount of counters that are defined in #counter_def
+ */
 #define COUNTER_AMOUNT 3
 
+/**
+ * @brief Helper struct that is used to check frequency requirements every cycle. For example this is used to print a
+ * message every 1 HZ or every 5 HZ.
+ * <p>
+ * The amount of defined counters is #COUNTER_AMOUNT
+ * @details All counters for the frequencies 1HZ, 5HZ and 8HZ are located in the enum #counter_def
+ */
 struct Counter {
     /**
      * @brief Milliseconds since last true cycle.
@@ -45,8 +69,10 @@ struct Counter {
 };
 
 /**
- * @brief
- * @param counters
+ * @brief Updates all counters based on the current millisecond value that is created by the internal board timer1.
+ * <p>Allocates and initialises the counters if the pointer is NULL.
+ * @sa #setupCountTimer()
+ * @param counters Array / Pointer that contains the counters for all registered frequencies.
  */
 void updateCounters(struct Counter* counters);
 
@@ -103,6 +129,15 @@ void updateCounters(struct Counter* counters);
  */
 uint8_t check_freq(uint8_t frequency);
 
+/**
+ * @brief Checks if the counter that is defined with the given definition has a true value this cycle.
+ *
+ * @param counters Array / Pointer that contains the counters for all registered frequencies.
+ * @param counterDef The definition of the counter that should be checked.
+ * @details The amount of counter is defined by #COUNTER_AMOUNT.
+ * @retval 1 if the frequency is meet this cycle.
+ * @retval 0 if the frequency is not meet this cycle.
+ */
 uint8_t check_counter(struct Counter* counters, counter_def counterDef);
 
 /**
