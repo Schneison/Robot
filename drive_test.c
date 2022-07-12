@@ -250,7 +250,7 @@ void read_input(track_state* state) {
  * @param trackState The currently used state
  */
 void update_position(track_state* trackState){
-    if(check_state_counter(trackState, COUNTER_1_HZ)){
+    if(check_state_counter(trackState, COUNTER_5_HZ)){
         trackState->last_pos=trackState->pos;
         // All sensors on, could be home field
         if(trackState->sensor_last == SENSOR_ALL){
