@@ -284,6 +284,7 @@ void run(void) {
         //read_input(trackState);
         show_state(trackState);
         update_position(trackState);
+        updateCounters(trackState->counters);
         switch (trackState->action) {
             case ROUNDS: {
                 drive(trackState);

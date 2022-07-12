@@ -11,3 +11,7 @@ void reset(void) {
     wdt_disable();
 }
 
+uint8_t state_counter(track_state state, counter_def counterDef) {
+    return check_counter(state.counters, counterDef);
+}
+

@@ -9,8 +9,8 @@
 #define BRAIN_H
 
 #include <avr/wdt.h>
-#include <avr/sleep.h>
 #include "robot_sensor.h"
+#include "utility.h"
 
 /**
  * @brief Resets the board after 5 seconds by using the watch dog timer.
@@ -128,7 +128,14 @@ typedef struct track_state {
      */
     uint8_t homeCache;
 
+    /**
+     * @brief
+     */
+    struct Counter* counters;
+
 } track_state;
+
+uint8_t state_counter(track_state state, counter_def counterDef);
 
 
 #endif
