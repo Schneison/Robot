@@ -10,15 +10,8 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-/**
- * @brief Counter variable, which contains a value from 0 to 255. This value represents the milliseconds since the last
- * second. One unit is (1000/255) ms.
- */
-uint16_t count = 0;
-/**
- * @brief Seconds since start of the timer
- */
-uint16_t seconds = 0;
+
+uint16_t getMillis();
 
 /**
  * @brief Checks the current millisecond value if the equals the frequency

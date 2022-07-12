@@ -19,6 +19,8 @@ void setup(void) {
     USART_init(UBRR_SETTING);
 	ADC_init();
     motor_init();
+    LED_init();
+    setupCountTimer();
 }
 
 /**
@@ -26,19 +28,20 @@ void setup(void) {
  *
  * @param current Current sensor state
  */
-void driveDo(sensor_state current){
-    // Right Sensor
-    if((current & SENSOR_RIGHT)) {
-        motor_drive_right();
-    }
+void driveDo(sensor_state current, sensor_state last){
 
     // Center Sensor
-    if ((current & SENSOR_CENTER)) {
+    if ((current & SENSOR_CENTER) && ((current & SENSOR_LEFT) && (current & SENSOR_RIGHT) || !(current & SENSOR_LEFT) && !(current & SENSOR_RIGHT))) {
         motor_drive_forward();
     }
 
+    // Right Sensor
+    else if((current & SENSOR_RIGHT)) {
+        motor_drive_right();
+    }
+
     // Left Sensor
-    if ((current & SENSOR_LEFT)) {
+    else if ((current & SENSOR_LEFT)) {
         motor_drive_left();
     }
 }
@@ -56,7 +59,7 @@ void drive(track_state* state) {
             //When on start field begin first round
             if(state->pos==POS_START_FIELD){
                 state->drive=FIRST_ROUND;
-                USART_print("Here I go again on my own, going down the only round I’ve ever known…");
+                USART_print("Here I go again on my own, going down the only round I’ve ever known…\n");
             }
             break;
         case FIRST_ROUND:
@@ -66,16 +69,16 @@ void drive(track_state* state) {
             if(state->last_pos==POS_TRACK && state->pos==POS_START_FIELD){
                 switch (state->drive) {
                     case FIRST_ROUND:
-                        USART_print("YEAH, done round 1, going for round 2/3");
+                        USART_print("YEAH, done round 1, going for round 2/3\n");
                         state->drive = SECOND_ROUND;
                         break;
                     case SECOND_ROUND:
-                        USART_print("YEAH YEAH, done round 2, going for round 3/3");
+                        USART_print("YEAH YEAH, done round 2, going for round 3/3\n");
                         state->drive = THIRD_ROUND;
                         break;
                     case THIRD_ROUND:
                         USART_print("YEAH YEAH YEAH , I really did it my way. ... And what’s my purpose\n"
-                                    "and the general sense of my further life now? Type ? for help");
+                                    "and the general sense of my further life now? Type ? for help\n");
                         state->drive = POST_DRIVE;
                         break;
                     default:
@@ -83,7 +86,7 @@ void drive(track_state* state) {
                         break;
                 }
             }
-            driveDo(current);
+            driveDo(current, state->sensor_last);
             break;
         case POST_DRIVE:
             reset();
@@ -92,7 +95,7 @@ void drive(track_state* state) {
             break;
     }
 
-    driveDo(current);
+    //driveDo(current);
     state->sensor_last = current;
 }
 
@@ -128,34 +131,46 @@ void show_state(track_state* state){
             }
             // Manuel check, so we don't have to create a pointer every tick
             if (check_freq(1)) {
-                char *s = malloc(sizeof("Round and round I go, currently round 1"));
-                sprintf(s, "Received undefined Sign %c", round);
-                USART_print(s);
-                free(s);
+                //char *s = malloc(sizeof("Round and round I go, currently round 1\n"));
+                //sprintf(s, "Round and round I go, currently round %d\n", round);
+                //USART_print(s);
+                //free(s);
             }
+            LED_State ledState = LED_NONE;
+            if((state->sensor_last) & SENSOR_LEFT) {
+                ledState |= LED_LEFT;
+            }
+            if((state->sensor_last) & SENSOR_CENTER) {
+                ledState |= LED_CENTER;
+            }
+            if((state->sensor_last) & SENSOR_RIGHT) {
+                ledState |= LED_RIGHT;
+            }
+            LED_set(ledState);
+            break;
         }
         case FROZEN:
-            print_at_freq(1, "In safe state! Won’t react to any instructions! Rescue me!");
+            print_at_freq(1, "In safe state! Won’t react to any instructions! Rescue me!\n");
             break;
         case RETURN_HOME:
-            print_at_freq(1, "Returning home, will reset me there");
+            print_at_freq(1, "Returning home, will reset me there\n");
             break;
         case PAUSE:
-            print_at_freq(1, "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again");
+            print_at_freq(1, "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again\n");
             break;
         case WAIT:
             if (state->pos == POS_START_FIELD) {
-                print_at_freq(1, "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again");
+                print_at_freq(1, "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again\n");
             }else{
-                print_at_freq(1, "Not on the starting field. Place me there please... Send ? for help.");
+                print_at_freq(1, "Not on the starting field. Place me there please... Send ? for help.\n");
                 LED_State ledState = LED_NONE;
-                if(state->sensor_last == SENSOR_LEFT) {
+                if((state->sensor_last) & SENSOR_LEFT) {
                     ledState |= LED_LEFT;
                 }
-                if(state->sensor_last == SENSOR_CENTER) {
+                if((state->sensor_last) & SENSOR_CENTER) {
                     ledState |= LED_CENTER;
                 }
-                if(state->sensor_last == SENSOR_RIGHT) {
+                if((state->sensor_last) & SENSOR_RIGHT) {
                     ledState |= LED_RIGHT;
                 }
                 LED_set(ledState);
@@ -172,9 +187,9 @@ void show_state(track_state* state){
  */
 void print_help(track_state* state){
     if(state->pos == POS_START_FIELD) {
-        USART_print("-X Safe action_state\n-S 3 Rounds\n-P Pause\n-R Reset\n-C Home\n-? Help");
+        USART_print("-X Safe action_state\n-S 3 Rounds\n-P Pause\n-R Reset\n-C Home\n-? Help\n");
     }else{
-        USART_print("Not on start field, please position on start field!");
+        USART_print("Not on start field, please position on start field!\n");
     }
 }
 
@@ -184,8 +199,8 @@ void print_help(track_state* state){
  * @param byte The character which was not defined.
  */
 void print_fail(unsigned char byte){
-    char *s = malloc(155 * sizeof(char));
-    sprintf(s, "Received undefined Sign %c", byte);
+    char *s = malloc(156 * sizeof(char));
+    sprintf(s, "Received undefined Sign %c\n", byte);
     USART_print(s);
     free(s);
 }
@@ -217,7 +232,7 @@ void read_input(track_state* state) {
             break;
         case 'R':
             state->action=RESET;
-            USART_print("Will reset in 5 seconds...");
+            USART_print("Will reset in 5 seconds...\n");
             break;
         case '?':
             print_help(state);
@@ -260,20 +275,23 @@ void update_position(track_state* trackState){
  */
 void run(void) {
     track_state* trackState = malloc(sizeof(track_state));
-    trackState->drive=PRE_DRIVE;
+    trackState->drive=FIRST_ROUND;
     trackState->action=ROUNDS;
     trackState->pos=POS_UNKNOWN;
     trackState->last_pos=POS_UNKNOWN;
     trackState->homeCache=0;
     while(1){
-        read_input(trackState);
+        //read_input(trackState);
         show_state(trackState);
+        update_position(trackState);
         switch (trackState->action) {
             case ROUNDS: {
                 drive(trackState);
+                break;
             }
             case RESET: {
                 reset();
+                break;
             }
             case PAUSE:
                 //Do nothing, we pause until action changes
@@ -292,62 +310,64 @@ int main(void) {
     //setDutyCycle(PD5, 155); // left
     //setDutyCycle(PD6, 155); // right
     motor_set_speed(SPEED_MIDDLE, SPEED_MIDDLE);
+
+    run();
     
-    unsigned char lastLeft = 0;
-    unsigned char lastCenter = 0;
-    unsigned char lastRight = 0;
-	unsigned char changeLeft = 0;
-    unsigned char changeCenter = 0;
-    unsigned char changeRight = 0;
-    unsigned char oneActive = 0;
-    unsigned char left_sensor = 0;
-    unsigned char center_sensor = 0;
-    unsigned char right_sensor = 0;
-    
-    while(1){
-		changeCenter = 0;
-		changeLeft = 0;
-		changeRight = 0;
-		/*oneActive = (IR_LF_R & (1 << IP_LF_R)) | (IR_LF_M & (1 << IP_LF_M)) | (IR_LF_L & (1 << IP_LF_L));
-		if(oneActive){
-			if(lastCenter != (IR_LF_M & (1 << IP_LF_M))) {
-				changeCenter = 1;
-				USART_print("Last middle\n\n");
-			}
-			if(lastLeft != (IR_LF_L & (1 << IP_LF_L))) {
-				changeLeft = 1;
-				USART_print("Last left\n\n");
-			}
-			if(lastRight != (IR_LF_R & (1 << IP_LF_R))) {
-				changeRight = 1;
-				USART_print("Last right\n\n");
-			}
-		}*/
-		
-		right_sensor = right_state();
-		left_sensor = left_state();
-		center_sensor = center_state();
-		
-		// Right Sensor
-		if(right_sensor && !center_sensor && !left_sensor) {
-            motor_drive_right();
-		}
-		
-		// Center Sensor
-		if (center_sensor && !right_sensor && !left_sensor) {
-            motor_drive_forward();
-		}
-		
-		// Left Sensor
-		if (left_sensor && !center_sensor && !right_sensor) {
-            motor_drive_left();
-		}
-		if(oneActive){
-			lastLeft = left_state();
-			lastCenter = center_state();
-			lastRight = right_state();
-		}
-	}
+//    unsigned char lastLeft = 0;
+//    unsigned char lastCenter = 0;
+//    unsigned char lastRight = 0;
+//	unsigned char changeLeft = 0;
+//    unsigned char changeCenter = 0;
+//    unsigned char changeRight = 0;
+//    unsigned char oneActive = 0;
+//    unsigned char left_sensor = 0;
+//    unsigned char center_sensor = 0;
+//    unsigned char right_sensor = 0;
+//
+//    while(1){
+//		changeCenter = 0;
+//		changeLeft = 0;
+//		changeRight = 0;
+//		/*oneActive = (IR_LF_R & (1 << IP_LF_R)) | (IR_LF_M & (1 << IP_LF_M)) | (IR_LF_L & (1 << IP_LF_L));
+//		if(oneActive){
+//			if(lastCenter != (IR_LF_M & (1 << IP_LF_M))) {
+//				changeCenter = 1;
+//				USART_print("Last middle\n\n");
+//			}
+//			if(lastLeft != (IR_LF_L & (1 << IP_LF_L))) {
+//				changeLeft = 1;
+//				USART_print("Last left\n\n");
+//			}
+//			if(lastRight != (IR_LF_R & (1 << IP_LF_R))) {
+//				changeRight = 1;
+//				USART_print("Last right\n\n");
+//			}
+//		}*/
+//
+//		right_sensor = right_state();
+//		left_sensor = left_state();
+//		center_sensor = center_state();
+//
+//		// Right Sensor
+//		if(right_sensor && !center_sensor && !left_sensor) {
+//            motor_drive_right();
+//		}
+//
+//		// Center Sensor
+//		if (center_sensor && !right_sensor && !left_sensor) {
+//            motor_drive_forward();
+//		}
+//
+//		// Left Sensor
+//		if (left_sensor && !center_sensor && !right_sensor) {
+//            motor_drive_left();
+//		}
+//		if(oneActive){
+//			lastLeft = left_state();
+//			lastCenter = center_state();
+//			lastRight = right_state();
+//		}
+//	}
 	
 	// Set IN1 to HIGH and don't set IN2 to HIGH (leave LOW) -> Left motors FORWARD
     //PORTD |= (1 << PD7); // Use OR, since overwriting will disable EN[A|B]!

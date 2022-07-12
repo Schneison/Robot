@@ -20,7 +20,7 @@ void motor_init(void) {
     setupMotorTimer();
 
     // Set PB0, PB1, and PB3 as output (IN[2|3|4])
-    // DDRB |= (1 << DD0) | (1 << DD1) | (1 << DD3);
+    //DDRB |= (1 << DD0) | (1 << DD1) | (1 << DD3);
     DR_M_LB |= (1 << DP_M_LB);
     DR_M_RB |= (1 << DP_M_RB);
     DR_M_RF |= (1 << DP_M_RF);

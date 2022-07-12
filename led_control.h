@@ -51,6 +51,8 @@ typedef enum {
 } LED_State;
 
 
+void LED_init(void);
+
 /**
  * @brief Creates a tact by setting the clock flag to LOW, HIGH, Low
  */

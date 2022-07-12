@@ -1,18 +1,33 @@
 #include "utility.h"
+#include "iesusart.h"
+
+/**
+ * @brief Counter variable, which contains a value from 0 to 255. This value represents the milliseconds since the last
+ * second. One unit is (1000/255) ms.
+ */
+uint16_t count = 0;
+/**
+ * @brief Seconds since start of the timer
+ */
+uint16_t seconds = 0;
 
 /**
  * @brief Updates counter variables
  * @details Called after the count timer reaches the compare value
  */
-ISR (PCINT0_vect) {
-    if(count == 1000){
+ISR (TIMER1_COMPA_vect) {
+    if(count % 1000 == 0){
         seconds+=1;
     }
     count++;
 }
 
+uint16_t getMillis() {
+    return count;
+}
+
 uint8_t check_freq(uint8_t frequency){
-    return count % frequency == 0;
+    return count % (1000/ frequency) == 0;
 }
 
 // timer0

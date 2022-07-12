@@ -14,7 +14,7 @@
 // ADC Channels
 
 /**
- * @brief First channel, used by left sensor
+ * @brief First channel, used by right sensor
  * @sa #ADMUX_CHN_ADC1
  * @sa #ADMUX_CHN_ADC2
  * @sa #ADMUX_CHN_ALL
@@ -28,7 +28,7 @@
  */
 #define ADMUX_CHN_ADC1 1 // 0000 0001
 /**
- * @brief Third channel, used by right sensor
+ * @brief Third channel, used by left sensor
  * @sa #ADMUX_CHN_ADC0
  * @sa #ADMUX_CHN_ADC1
  * @sa #ADMUX_CHN_ALL
@@ -78,15 +78,15 @@ SPEED_ZERO = 0,
 /**
 * @brief Low speed
 */
- SPEED_LOW = 110,
+ SPEED_LOW = 140,
 /**
 * @brief Mediocre speed
 */
- SPEED_MIDDLE = 155,
+ SPEED_MIDDLE = 180,
 /**
 * @brief Full speed
 */
- SPEED_HIGH = 190
+ SPEED_HIGH = 220
 } speed_value;
 
 /**
@@ -115,17 +115,17 @@ typedef enum{
  * @brief Threshold of the right sensor
  * @details This will determine if the signal of the sensor is read as positive.
  */
-#define SIGNAL_RIGHT_UPPER 600
+#define SIGNAL_RIGHT_UPPER 570
 /**
  * @brief Threshold of the center sensor
  * @details This will determine if the signal of the sensor is read as positive.
  */
-#define SIGNAL_CENTER_UPPER 600
+#define SIGNAL_CENTER_UPPER 150
 /**
  * @brief Threshold of the left sensor
  * @details This will determine if the signal of the sensor is read as positive.
  */
-#define SIGNAL_LEFT_UPPER 600
+#define SIGNAL_LEFT_UPPER 270
 
 /**
  * @brief Reads the output signals on the given channel of the adc (analog-digital-converter) module

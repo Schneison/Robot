@@ -1,6 +1,7 @@
 #include "robot_sensor.h"
+#include "iesusart.h"
 
-ADC_clear(void) {
+void ADC_clear(void) {
     // The following lines still let the digital input registers enabled,
     // though that's not a good idea (energy-consumption).
 
@@ -79,13 +80,17 @@ sensor_state sensor_get() {
     sensor_state value = 0;
     if(ADC_read_avg(ADMUX_CHN_ADC2, ADC_AVG_AMOUNT) > SIGNAL_LEFT_UPPER){
         value|=SENSOR_LEFT;
+        USART_print("l");
     }
     if(ADC_read_avg(ADMUX_CHN_ADC1, ADC_AVG_AMOUNT) > SIGNAL_CENTER_UPPER){
         value|=SENSOR_CENTER;
+        USART_print("c");
     }
     if(ADC_read_avg(ADMUX_CHN_ADC0, ADC_AVG_AMOUNT) > SIGNAL_RIGHT_UPPER){
         value|=SENSOR_RIGHT;
+        USART_print("r");
     }
+    USART_print("\n");
     return value;
 }
 
