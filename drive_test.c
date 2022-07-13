@@ -17,7 +17,7 @@ void setup(void) {
     ADC_clear();
 
     USART_init(UBRR_SETTING);
-	ADC_init();
+    ADC_init();
     motor_init();
     LED_init();
     setupCountTimer();
@@ -99,8 +99,8 @@ void drive(track_state *state) {
     switch (state->drive) {
         case CHECK_START:
             //When on start field begin first round
-            if(state->pos==POS_START_FIELD){
-                state->drive=FIRST_ROUND;
+            if (state->pos == POS_START_FIELD) {
+                state->drive = FIRST_ROUND;
                 USART_print("Here I go again on my own, going down the only round I’ve ever known…\n");
             }
             break;
@@ -108,7 +108,7 @@ void drive(track_state *state) {
         case SECOND_ROUND:
         case THIRD_ROUND:
             // Check if we were on track before and are now on the start field, WE DID A ROUND
-            if(state->last_pos==POS_TRACK && state->pos==POS_START_FIELD){
+            if (state->last_pos == POS_TRACK && state->pos == POS_START_FIELD) {
                 switch (state->drive) {
                     case FIRST_ROUND:
                         USART_print("YEAH, done round 1, going for round 2/3\n");
@@ -148,16 +148,16 @@ void drive(track_state *state) {
  * @param text The text that should be printed
  */
 void print_at_freq(track_state *state, counter_def frequency, const char *text) {
-    if(check_state_counter(state, frequency)){
+    if (check_state_counter(state, frequency)) {
         USART_print(text);
-   }
+    }
 }
 
 /**
  * @brief Represents the current state to the outside world. For example printing USART message or turn on led's.
  * @param state Current state
  */
-void show_state(track_state* state){
+void show_state(track_state *state) {
     switch (state->action) {
         case ROUNDS: {
             uint8_t round = 1;
@@ -179,13 +179,13 @@ void show_state(track_state* state){
                 free(s);
             }
             LED_State ledState = LED_NONE;
-            if((state->sensor_last) & SENSOR_LEFT) {
+            if ((state->sensor_last) & SENSOR_LEFT) {
                 ledState |= LED_LEFT;
             }
-            if((state->sensor_last) & SENSOR_CENTER) {
+            if ((state->sensor_last) & SENSOR_CENTER) {
                 ledState |= LED_CENTER;
             }
-            if((state->sensor_last) & SENSOR_RIGHT) {
+            if ((state->sensor_last) & SENSOR_RIGHT) {
                 ledState |= LED_RIGHT;
             }
             LED_set(ledState);
@@ -203,16 +203,17 @@ void show_state(track_state* state){
         case WAIT:
             if (state->pos == POS_START_FIELD) {
                 print_at_freq(state, COUNTER_1_HZ, "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again\n");
-            }else{
-                print_at_freq(state, COUNTER_1_HZ, "Not on the starting field. Place me there please... Send ? for help.\n");
+            } else {
+                print_at_freq(state, COUNTER_1_HZ,
+                              "Not on the starting field. Place me there please... Send ? for help.\n");
                 LED_State ledState = LED_NONE;
-                if((state->sensor_last) & SENSOR_LEFT) {
+                if ((state->sensor_last) & SENSOR_LEFT) {
                     ledState |= LED_LEFT;
                 }
-                if((state->sensor_last) & SENSOR_CENTER) {
+                if ((state->sensor_last) & SENSOR_CENTER) {
                     ledState |= LED_CENTER;
                 }
-                if((state->sensor_last) & SENSOR_RIGHT) {
+                if ((state->sensor_last) & SENSOR_RIGHT) {
                     ledState |= LED_RIGHT;
                 }
                 LED_set(ledState);
@@ -227,10 +228,10 @@ void show_state(track_state* state){
  * @brief Print help message for the given state. Print different if we are located on starting field.
  * @param state Current state
  */
-void print_help(track_state* state){
-    if(state->pos == POS_START_FIELD) {
+void print_help(track_state *state) {
+    if (state->pos == POS_START_FIELD) {
         USART_print("-X Safe action_state\n-S 3 Rounds\n-P Pause\n-R Reset\n-C Home\n-? Help\n");
-    }else{
+    } else {
         USART_print("Not on start field, please position on start field!\n");
     }
 }
@@ -240,7 +241,7 @@ void print_help(track_state* state){
  *
  * @param byte The character which was not defined.
  */
-void print_fail(unsigned char byte){
+void print_fail(unsigned char byte) {
     char *s = malloc(156 * sizeof(char));
     sprintf(s, "Received undefined Sign %c\n", byte);
     USART_print(s);
@@ -254,26 +255,26 @@ void print_fail(unsigned char byte){
  *
  * @param state Internal state
  */
-void read_input(track_state* state) {
-    if(!USART_canReceive()){
+void read_input(track_state *state) {
+    if (!USART_canReceive()) {
         return;
     }
     unsigned char byte = USART_receiveByte();
     switch (byte) {
         case 'S':
-            state->action=ROUNDS;
+            state->action = ROUNDS;
             break;
         case 'X':
-            state->action=FROZEN;
+            state->action = FROZEN;
             break;
         case 'P':
-            state->action=PAUSE;
+            state->action = PAUSE;
             break;
         case 'C':
-            state->action=RETURN_HOME;
+            state->action = RETURN_HOME;
             break;
         case 'R':
-            state->action=RESET;
+            state->action = RESET;
             USART_print("Will reset in 5 seconds...\n");
             break;
         case '?':
@@ -291,23 +292,23 @@ void read_input(track_state* state) {
  *
  * @param trackState The currently used state
  */
-void update_position(track_state* trackState){
-    if(check_state_counter(trackState, COUNTER_5_HZ)){
-        trackState->last_pos=trackState->pos;
+void update_position(track_state *trackState) {
+    if (check_state_counter(trackState, COUNTER_5_HZ)) {
+        trackState->last_pos = trackState->pos;
         // All sensors on, could be home field
-        if(trackState->sensor_last == SENSOR_ALL){
+        if (trackState->sensor_last == SENSOR_ALL) {
             trackState->homeCache++;
-            if(trackState->homeCache > 2){
-                trackState->pos=POS_START_FIELD;
+            if (trackState->homeCache > 2) {
+                trackState->pos = POS_START_FIELD;
                 trackState->homeCache = 2;
                 return;
             }
         }
-        trackState->homeCache=0;
-        if(trackState->action==ROUNDS){
-            trackState->pos=POS_TRACK;
-        }else{
-            trackState->pos=POS_UNKNOWN;
+        trackState->homeCache = 0;
+        if (trackState->action == ROUNDS) {
+            trackState->pos = POS_TRACK;
+        } else {
+            trackState->pos = POS_UNKNOWN;
         }
     }
 }
@@ -316,13 +317,13 @@ void update_position(track_state* trackState){
  * @brief Run loop of the script
  */
 void runLoop(void) {
-    track_state* trackState = malloc(sizeof(track_state));
-    trackState->drive=FIRST_ROUND;
-    trackState->action=ROUNDS;
-    trackState->pos=POS_UNKNOWN;
-    trackState->last_pos=POS_UNKNOWN;
-    trackState->homeCache=0;
-    while(1){
+    track_state *trackState = malloc(sizeof(track_state));
+    trackState->drive = FIRST_ROUND;
+    trackState->action = ROUNDS;
+    trackState->pos = POS_UNKNOWN;
+    trackState->last_pos = POS_UNKNOWN;
+    trackState->homeCache = 0;
+    while (1) {
         //read_input(trackState);
         show_state(trackState);
         update_position(trackState);
@@ -347,7 +348,7 @@ void runLoop(void) {
 }
 
 int main(void) {
-	setup();
+    setup();
 
     motor_set_speed(SPEED_MIDDLE, SPEED_MIDDLE);
 

@@ -48,7 +48,7 @@
 /**
  * @brief Describes the binary state of the sensors
  */
-typedef enum{
+typedef enum {
 /**
  * @brief Left sensor is high
  */

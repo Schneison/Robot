@@ -50,8 +50,7 @@ void LED_set(LED_State state) {
     for (int i = LED_AMOUNT - 1; i >= 0; i--) {
         if ((state >> i) & 1) {
             PORTB |= (1 << LED);
-        }
-        else {
+        } else {
             PORTB &= ~(1 << LED);
         }
         LED_clock();

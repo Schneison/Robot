@@ -10,50 +10,50 @@ ISR (TIMER1_COMPA_vect) {
     millis++;
 }
 
-void update_counters(struct Counter* counters) {
-    if(!counters){
+void update_counters(struct Counter *counters) {
+    if (!counters) {
         counters = malloc(sizeof(struct Counter) * COUNTER_AMOUNT);
-        for(int i = 0;i <COUNTER_AMOUNT;i++){
+        for (int i = 0; i < COUNTER_AMOUNT; i++) {
             struct Counter counter = counters[i];
             counter.value = 0;
             counter.threshold = counter_frequencies[i];
             counter.lastMillis = millis;
         }
     }
-    for(int i = 0;i < COUNTER_AMOUNT;i++){
+    for (int i = 0; i < COUNTER_AMOUNT; i++) {
         struct Counter counter = counters[i];
         // Diff since last true cycle
         uint16_t delta = millis - counter.lastMillis;
-        if(delta > counter.threshold){
+        if (delta > counter.threshold) {
             counter.lastMillis = millis;
             counter.value = 1;
-        }else{
+        } else {
             counter.value = 0;
         }
     }
 }
 
-uint8_t check_counter(struct Counter* counters, counter_def counterDef){
+uint8_t check_counter(struct Counter *counters, counter_def counterDef) {
     return counters && counters[counterDef].value;
 }
 
 // timer0
 void setupMotorTimer(void) {
-  // Disable all interrupts
-  cli();
-  // Set prescaler to 64, cf. datasheet for TCCR0B
-  // (TCCR0B: Timer/Counter Control Register 0 B)
-  TIMER_0_CONTROL = 0;
-  TIMER_0_CONTROL |= TIMER_0_PRE_SCALE;
-  //TCCR0B = 0;
-  //TCCR0B |= (1 << CS00) | (1 << CS01);
-  // Set waveform generation mode to Fast PWM, frequency = F_CPU / (PRESCALER * 2^8)
-  //TCCR0A = 0;
-  //TCCR0A |= (1 << WGM00) | (1 << WGM01);
+    // Disable all interrupts
+    cli();
+    // Set prescaler to 64, cf. datasheet for TCCR0B
+    // (TCCR0B: Timer/Counter Control Register 0 B)
+    TIMER_0_CONTROL = 0;
+    TIMER_0_CONTROL |= TIMER_0_PRE_SCALE;
+    //TCCR0B = 0;
+    //TCCR0B |= (1 << CS00) | (1 << CS01);
+    // Set waveform generation mode to Fast PWM, frequency = F_CPU / (PRESCALER * 2^8)
+    //TCCR0A = 0;
+    //TCCR0A |= (1 << WGM00) | (1 << WGM01);
     TIMER_0_WAVE = 0;
     TIMER_0_WAVE |= TIMER_0_WAVE_MODE;
-  // Re-enable all interrupts
-  sei();
+    // Re-enable all interrupts
+    sei();
 }
 
 // timer1

@@ -1,7 +1,7 @@
 #include "drive_control.h"
 
 void motor_clear(void) {
-	// Delete everything on ports B and D
+    // Delete everything on ports B and D
     DDRD = 0;
     DDRB = 0;
 }
@@ -11,7 +11,7 @@ void motor_init(void) {
     //DDRD |= (1 << DD5) | (1 << DD6);
     DR_M_LE |= (1 << DP_M_LE);
     DR_M_RE |= (1 << DP_M_RE);
-    
+
     // Set PD7 as output (IN1)
     //DDRD |= (1 << DD7);
     DR_M_LF |= (1 << DP_M_LF);
@@ -24,10 +24,10 @@ void motor_init(void) {
     DR_M_LB |= (1 << DP_M_LB);
     DR_M_RB |= (1 << DP_M_RB);
     DR_M_RF |= (1 << DP_M_RF);
-    
+
 }
 
-void setDutyCycle(uint8_t pin, uint8_t value){
+void setDutyCycle(uint8_t pin, uint8_t value) {
     // Suggestion to handle PD6 - note the code-clones wrt. PD5 below!
     // Code-clones are extraordinary f cky! Correct this (tricky though
     // due to the PP-macros, which you cannot simply pass to functions)!
@@ -52,12 +52,10 @@ void setDutyCycle(uint8_t pin, uint8_t value){
         if (value == 0) {
             TCCR0A &= ~(1 << COM0B1) & ~(1 << COM0B0);
             PORTD &= ~(1 << PD5);
-        }
-        else if (value == 255) {
+        } else if (value == 255) {
             TCCR0A &= ~(1 << COM0B1) & ~(1 << COM0B0);
             PORTD |= (1 << PD5);
-        }
-        else {
+        } else {
             TCCR0A |= (1 << COM0B1);
             TCCR0A &= ~(1 << COM0B0);
             OCR0B = value;
@@ -66,8 +64,8 @@ void setDutyCycle(uint8_t pin, uint8_t value){
 }
 
 void motor_set_speed(speed_value left_speed, speed_value right_speed) {
-	setDutyCycle(DP_M_LE, left_speed); // left
-	setDutyCycle(DP_M_RE, right_speed); // right
+    setDutyCycle(DP_M_LE, left_speed); // left
+    setDutyCycle(DP_M_RE, right_speed); // right
 }
 
 void motor_set_right(orientation dir, speed_value speed_state) {
@@ -101,29 +99,29 @@ void motor_set_left(orientation dir, speed_value speed_state) {
     }
     setDutyCycle(DP_M_LE, speed_state);
 }
-	
+
 void motor_drive_right(void) {
     motor_set_speed(SPEED_LOW, SPEED_HIGH);
-	OR_M_LF |= (1 << OP_M_LF); // Left Forward ON
-	OR_M_RB |= (1 << OP_M_RB); // Right Backward ON
-	OR_M_LB &= ~(1 << OP_M_LB); // Left Backward OFF
-	OR_M_RF &= ~(1 << OP_M_RF); // Right Forward OFF
-	// PORTD |= (1 << PD7); 
-	// PORTB |= (1 << PB1); 
-	// PORTB &= ~(1 << PB0);
-	// PORTB &= ~(1 << PB3);
+    OR_M_LF |= (1 << OP_M_LF); // Left Forward ON
+    OR_M_RB |= (1 << OP_M_RB); // Right Backward ON
+    OR_M_LB &= ~(1 << OP_M_LB); // Left Backward OFF
+    OR_M_RF &= ~(1 << OP_M_RF); // Right Forward OFF
+    // PORTD |= (1 << PD7);
+    // PORTB |= (1 << PB1);
+    // PORTB &= ~(1 << PB0);
+    // PORTB &= ~(1 << PB3);
 }
 
 void motor_drive_forward(void) {
     motor_set_speed(SPEED_MIDDLE, SPEED_MIDDLE);
-	//PORTD |= (1 << PD7);
-	//PORTB |= (1 << PB3);
-	//PORTB &= ~(1 << PB0);
-	//PORTB &= ~(1 << PB1);
-	OR_M_LF |= (1 << OP_M_LF); //Left Forward ON
-	OR_M_RF |= (1 << OP_M_RF); //Right Forward ON
-	OR_M_LB &= ~(1 << OP_M_LB); //Left Backward OFF
-	OR_M_RB &= ~(1 << OP_M_RB); //Right Backward OFF
+    //PORTD |= (1 << PD7);
+    //PORTB |= (1 << PB3);
+    //PORTB &= ~(1 << PB0);
+    //PORTB &= ~(1 << PB1);
+    OR_M_LF |= (1 << OP_M_LF); //Left Forward ON
+    OR_M_RF |= (1 << OP_M_RF); //Right Forward ON
+    OR_M_LB &= ~(1 << OP_M_LB); //Left Backward OFF
+    OR_M_RB &= ~(1 << OP_M_RB); //Right Backward OFF
 }
 
 void motor_drive_backward(void) {
@@ -136,14 +134,14 @@ void motor_drive_backward(void) {
 
 void motor_drive_left(void) {
     motor_set_speed(SPEED_HIGH, SPEED_LOW);
-	//PORTB |= (1 << PB0); //Left Backward
-	//PORTB |= (1 << PB3); //Right Forward	
-	//PORTB &= ~(1 << PB1);
-	//PORTD &= ~(1 << PD7);
-	OR_M_LB |= (1 << OP_M_LB); // Left Backward ON
-	OR_M_RF |= (1 << OP_M_RF); // Right Forward ON
-	OR_M_LF &= ~(1 << OP_M_LF); // Left Forward OFF
-	OR_M_RB &= ~(1 << OP_M_RB); // Right Backward OFF	
+    //PORTB |= (1 << PB0); //Left Backward
+    //PORTB |= (1 << PB3); //Right Forward
+    //PORTB &= ~(1 << PB1);
+    //PORTD &= ~(1 << PD7);
+    OR_M_LB |= (1 << OP_M_LB); // Left Backward ON
+    OR_M_RF |= (1 << OP_M_RF); // Right Forward ON
+    OR_M_LF &= ~(1 << OP_M_LF); // Left Forward OFF
+    OR_M_RB &= ~(1 << OP_M_RB); // Right Backward OFF
 }
 
 void motor_clear_drive(void) {

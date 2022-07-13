@@ -13,18 +13,18 @@
  * A good way to use this would be calling it from an receive interrupt service routine
  * @return unsigned char (received byte)
  */
-unsigned char USART_receiveByte(void){
+unsigned char USART_receiveByte(void) {
     while (!USART_canReceive()) {}
     return UDR0;
 }
 
-void USART_receiveString(char* buffer, uint8_t max_len){
+void USART_receiveString(char *buffer, uint8_t max_len) {
     uint8_t c_char;
     uint8_t len = 0;
 
     c_char = USART_receiveByte();
 
-    while(c_char != '\n' && len < max_len - 1 ) {
+    while (c_char != '\n' && len < max_len - 1) {
         *buffer++ = c_char;
         len++;
         c_char = USART_receiveByte();
@@ -34,7 +34,7 @@ void USART_receiveString(char* buffer, uint8_t max_len){
 }
 
 
-uint8_t USART_canReceive(){
+uint8_t USART_canReceive() {
     return UCSR0A & (1 << RXC0);
 }
 
@@ -54,8 +54,7 @@ void USART_transmitByte(unsigned char data) {
 /**
  * @brief Transmittes a string (char by char) until '\0’ is reached
  */
-void USART_print(const char *c)
-{
+void USART_print(const char *c) {
     while (*c != '\0') {
         USART_transmitByte(*c);
         c++;
@@ -66,8 +65,7 @@ void USART_print(const char *c)
  * @brief Sets up the USART port (The USART baudrate register)
  * @param ubrr Content to write into the UBRR register
  */
-void USART_init(unsigned long ubrr)
-{
+void USART_init(unsigned long ubrr) {
     // Set baud rate, high byte first
     UBRR0H = (unsigned char) (ubrr >> 8);
     // Set baud rate, low byte second
@@ -79,5 +77,5 @@ void USART_init(unsigned long ubrr)
     /* Transmit something right after initialization to overcome the lagg at the
      * start of a simulation in SimulIDE.
     */
-   USART_print("<(^_^)>\n\0");
+    USART_print("<(^_^)>\n\0");
 }

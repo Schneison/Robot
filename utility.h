@@ -39,7 +39,7 @@ typedef enum {
 /**
  * @brief Contains the frequencies for the corresponding counters in #counter_def
  */
-static const uint16_t counter_frequencies[] = { 1000 / 1, 1000 / 5,1000 / 8 };
+static const uint16_t counter_frequencies[] = {1000 / 1, 1000 / 5, 1000 / 8};
 
 /**
  * @brief Amount of counters that are defined in #counter_def
@@ -74,7 +74,7 @@ struct Counter {
  * @sa #setupCountTimer()
  * @param counters Array / Pointer that contains the counters for all registered frequencies.
  */
-void update_counters(struct Counter* counters);
+void update_counters(struct Counter *counters);
 
 /**
  * @brief  Timer Control Register of the first timer
@@ -129,7 +129,7 @@ void update_counters(struct Counter* counters);
  * @retval 1 if the frequency is meet this cycle.
  * @retval 0 if the frequency is not meet this cycle.
  */
-uint8_t check_counter(struct Counter* counters, counter_def counterDef);
+uint8_t check_counter(struct Counter *counters, counter_def counterDef);
 
 /**
  * @brief Sets up timer which is responsible for the duty cycle of the two motors.
@@ -142,6 +142,7 @@ void setupMotorTimer(void);
  * @details Timer1 on the board
 */
 void setupCountTimer(void);
+
 #endif
 
 
