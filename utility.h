@@ -33,18 +33,19 @@ typedef enum {
     /**
  * @brief 8 HZ Counter
  */
-    COUNTER_8_HZ
+    COUNTER_8_HZ,
+    COUNTER_3_HZ,
 } counter_def;
 
 /**
  * @brief Contains the frequencies for the corresponding counters in #counter_def
  */
-static const uint16_t counter_frequencies[] = {1000 / 1, 1000 / 5, 1000 / 8};
+static const uint16_t counter_frequencies[] = {1000 / 1, 1000 / 5, 1000 / 8, 1000 / 3};
 
 /**
  * @brief Amount of counters that are defined in #counter_def
  */
-#define COUNTER_AMOUNT 3
+#define COUNTER_AMOUNT 4
 
 /**
  * @brief Helper struct that is used to check frequency requirements every cycle. For example this is used to print a
@@ -65,8 +66,10 @@ struct Counter {
     /**
      * @brief Frequency threshold
      */
-    uint8_t threshold;
+    uint16_t threshold;
 };
+
+void init_counters(struct Counter *counters);
 
 /**
  * @brief Updates all counters based on the current millisecond value that is created by the internal board timer1.

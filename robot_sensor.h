@@ -71,7 +71,7 @@ typedef enum {
  * @brief Threshold of the right sensor
  * @details This will determine if the signal of the sensor is read as positive.
  */
-#define SIGNAL_RIGHT_UPPER 570
+#define SIGNAL_RIGHT_UPPER 630
 /**
  * @brief Threshold of the center sensor
  * @details This will determine if the signal of the sensor is read as positive.
@@ -81,7 +81,7 @@ typedef enum {
  * @brief Threshold of the left sensor
  * @details This will determine if the signal of the sensor is read as positive.
  */
-#define SIGNAL_LEFT_UPPER 270
+#define SIGNAL_LEFT_UPPER 250
 
 /**
  * @brief Reads the output signals on the given channel of the adc (analog-digital-converter) module

@@ -1,4 +1,6 @@
 #include "utility.h"
+#include "iesusart.h"
+#include <stdio.h>
 
 uint16_t millis = 0;
 
@@ -10,25 +12,29 @@ ISR (TIMER1_COMPA_vect) {
     millis++;
 }
 
-void update_counters(struct Counter *counters) {
-    if (!counters) {
-        counters = malloc(sizeof(struct Counter) * COUNTER_AMOUNT);
-        for (int i = 0; i < COUNTER_AMOUNT; i++) {
-            struct Counter counter = counters[i];
-            counter.value = 0;
-            counter.threshold = counter_frequencies[i];
-            counter.lastMillis = millis;
-        }
-    }
+uint16_t getMillis() {
+    return millis;
+}
+
+void init_counters(struct Counter *counters){
     for (int i = 0; i < COUNTER_AMOUNT; i++) {
-        struct Counter counter = counters[i];
+        struct Counter* counter = &counters[i];
+        counter->value = 0;
+        counter->threshold = counter_frequencies[i];
+        counter->lastMillis = millis;
+    }
+}
+
+void update_counters(struct Counter *counters) {
+    for (int i = 0; i < COUNTER_AMOUNT; i++) {
+        struct Counter* counter = &counters[i];
         // Diff since last true cycle
-        uint16_t delta = millis - counter.lastMillis;
-        if (delta > counter.threshold) {
-            counter.lastMillis = millis;
-            counter.value = 1;
+        uint16_t delta = millis - counter->lastMillis;
+        if (delta > counter->threshold) {
+            counter->lastMillis = millis;
+            counter->value = 1;
         } else {
-            counter.value = 0;
+            counter->value = 0;
         }
     }
 }
@@ -61,16 +67,16 @@ void setupCountTimer(void) {
     //16E6/64=250E3
     //250E3/250 = 1ms
     cli();
-    TIMER_1_CONTROL = 0;
-    TIMER_1_CONTROL |= TIMER_1_PRE_SCALE;
-    TIMER_1_CONTROL |= (1 << TIMER_1_MODE);
-    TIMER_1_CONTROL |= (1 << TIMER_1_COMPARE_MODE);
-    TIMER_1_COMPARE_RESOLUTION = TIMER_1_COMPARE_VALUE;
-//    TCCR1B = 0; // TODO: Yes / no ?
-//    TCCR1B |= (1 << CS10) | (1 << CS11); // Prescaler: 64 => 16E6/64 ticks/second
-//    TCCR1B |= (1 << WGM12); // Use Timer 1 in CTC-mode
-//    TIMSK1 |= (1 << OCIE1A); // Enable compare-match-interrupt for OCR1A
-    //OCR1A = 250;           // Every 16E6/ 16E3 ticks COMPA_vect is fired.
+    //TIMER_1_CONTROL = 0;
+    //TIMER_1_CONTROL |= TIMER_1_PRE_SCALE;
+    //TIMER_1_CONTROL |= (1 << TIMER_1_MODE);
+    //TIMER_1_CONTROL |= (1 << TIMER_1_COMPARE_MODE);
+    //TIMER_1_COMPARE_RESOLUTION = TIMER_1_COMPARE_VALUE;
+    TCCR1B = 0; // TODO: Yes / no ?
+    TCCR1B |= (1 << CS10) | (1 << CS11); // Prescaler: 64 => 16E6/64 ticks/second
+    TCCR1B |= (1 << WGM12); // Use Timer 1 in CTC-mode
+    TIMSK1 |= (1 << OCIE1A); // Enable compare-match-interrupt for OCR1A
+    OCR1A = 250;           // Every 16E6/ 16E3 ticks COMPA_vect is fired.
     // This equals an (non-existent) 512-clock-divisor.
     // We need this information for later calculations.
     // BTW: Keep in mind that there is one more OCR-register

@@ -131,8 +131,7 @@ typedef struct track_state {
     /**
      * @brief Array / Pointer that contains the counters for all registered frequencies.
      */
-    struct Counter *counters;
-
+    struct Counter counters[COUNTER_AMOUNT];
 } track_state;
 
 /**

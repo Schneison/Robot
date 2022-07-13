@@ -115,7 +115,7 @@ typedef enum {
 /**
 * @brief Full speed
 */
-    SPEED_HIGH = 220
+    SPEED_HIGH = 200
 } speed_value;
 
 /**

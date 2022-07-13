@@ -107,30 +107,33 @@ void drive(track_state *state) {
         case FIRST_ROUND:
         case SECOND_ROUND:
         case THIRD_ROUND:
-            // Check if we were on track before and are now on the start field, WE DID A ROUND
-            if (state->last_pos == POS_TRACK && state->pos == POS_START_FIELD) {
-                switch (state->drive) {
-                    case FIRST_ROUND:
-                        USART_print("YEAH, done round 1, going for round 2/3\n");
-                        state->drive = SECOND_ROUND;
-                        break;
-                    case SECOND_ROUND:
-                        USART_print("YEAH YEAH, done round 2, going for round 3/3\n");
-                        state->drive = THIRD_ROUND;
-                        break;
-                    case THIRD_ROUND:
-                        USART_print("YEAH YEAH YEAH , I really did it my way. ... And what’s my purpose\n"
-                                    "and the general sense of my further life now? Type ? for help\n");
-                        state->drive = POST_DRIVE;
-                        break;
-                    default:
-                        //Should never happen
-                        break;
+            if(check_state_counter(state, COUNTER_3_HZ)) {
+                // Check if we were on track before and are now on the start field, WE DID A ROUND
+                if (state->last_pos == POS_TRACK && state->pos == POS_START_FIELD) {
+                    switch (state->drive) {
+                        case FIRST_ROUND:
+                            USART_print("YEAH, done round 1, going for round 2/3\n");
+                            state->drive = SECOND_ROUND;
+                            break;
+                        case SECOND_ROUND:
+                            USART_print("YEAH YEAH, done round 2, going for round 3/3\n");
+                            state->drive = THIRD_ROUND;
+                            break;
+                        case THIRD_ROUND:
+                            USART_print("YEAH YEAH YEAH , I really did it my way. ... And what's my purpose\n"
+                                        "and the general sense of my further life now? Type ? for help\n");
+                            state->drive = POST_DRIVE;
+                            break;
+                        default:
+                            //Should never happen
+                            break;
+                    }
                 }
             }
             driveDo(current, state->sensor_last);
             break;
         case POST_DRIVE:
+            motor_clear_drive();
             reset();
             break;
         case PRE_DRIVE:
@@ -293,19 +296,30 @@ void read_input(track_state *state) {
  * @param trackState The currently used state
  */
 void update_position(track_state *trackState) {
-    if (check_state_counter(trackState, COUNTER_5_HZ)) {
+    if (check_state_counter(trackState, COUNTER_3_HZ)) {
         trackState->last_pos = trackState->pos;
         // All sensors on, could be home field
         if (trackState->sensor_last == SENSOR_ALL) {
             trackState->homeCache++;
             if (trackState->homeCache > 2) {
+                if(trackState->pos != POS_START_FIELD) {
+                    USART_print("Start field found \n");
+                }
                 trackState->pos = POS_START_FIELD;
                 trackState->homeCache = 2;
-                return;
+            }else{
+                char *s = malloc(sizeof("Start field tick 1\n"));
+                sprintf(s, "Start field tick %d\n", trackState->homeCache);
+                USART_print(s);
+                free(s);
             }
+            return;
         }
         trackState->homeCache = 0;
         if (trackState->action == ROUNDS) {
+            if((trackState->pos) != POS_TRACK) {
+                USART_print("Start field lost \n");
+            }
             trackState->pos = POS_TRACK;
         } else {
             trackState->pos = POS_UNKNOWN;
@@ -323,6 +337,7 @@ void runLoop(void) {
     trackState->pos = POS_UNKNOWN;
     trackState->last_pos = POS_UNKNOWN;
     trackState->homeCache = 0;
+    init_counters(trackState->counters);
     while (1) {
         //read_input(trackState);
         show_state(trackState);
