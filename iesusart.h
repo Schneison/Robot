@@ -34,7 +34,7 @@ unsigned char USART_receiveByte(void);
  * @param buffer A pointer to the location where the string should be stored
  * @param max_len The maximal length of the read string
  */
-void USART_receiveString(char *buffer, uint8_t max_len);
+void USART_receiveString(unsigned char *buffer, uint8_t max_len);
 
 /**
  * @brief

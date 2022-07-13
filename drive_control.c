@@ -152,3 +152,87 @@ void motor_clear_drive(void) {
     PORTB &= ~(1 << PB3);
     PORTD &= ~(1 << PD7);
 }
+
+direction evaluate_sensors(sensor_state current, sensor_state last) {
+    if ((current & SENSOR_CENTER) && ((current & SENSOR_LEFT) && (current & SENSOR_RIGHT) ||
+                                      !(current & SENSOR_LEFT) && !(current & SENSOR_RIGHT))) {
+        return DIR_FORWARD;
+    }
+        // Right Sensor
+    else if ((current & SENSOR_RIGHT)) {
+        return DIR_RIGHT;
+    }
+        // Left Sensor
+    else if ((current & SENSOR_LEFT)) {
+        return DIR_LEFT;
+    }
+    return DIR_NONE;
+}
+
+void driveDo(sensor_state current, sensor_state last) {
+    direction dir = evaluate_sensors(current, last);
+    switch (dir) {
+        case DIR_FORWARD:
+            motor_drive_forward();
+            break;
+        case DIR_RIGHT:
+            motor_drive_right();
+            break;
+        case DIR_LEFT:
+            motor_drive_left();
+            break;
+        default:
+            break;
+    }
+}
+
+void drive(track_state *state) {
+    sensor_state current = sensor_get();
+
+    switch (state->drive) {
+        case CHECK_START:
+            //When on start field begin first round
+            if (state->pos == POS_START_FIELD) {
+                state->drive = FIRST_ROUND;
+                USART_print("Here I go again on my own, going down the only round I’ve ever known…\n");
+            }
+            break;
+        case FIRST_ROUND:
+        case SECOND_ROUND:
+        case THIRD_ROUND:
+            if(check_state_counter(state, COUNTER_3_HZ)) {
+                // Check if we were on track before and are now on the start field, WE DID A ROUND
+                if (state->last_pos == POS_TRACK && state->pos == POS_START_FIELD) {
+                    switch (state->drive) {
+                        case FIRST_ROUND:
+                            USART_print("YEAH, done round 1, going for round 2/3\n");
+                            state->drive = SECOND_ROUND;
+                            break;
+                        case SECOND_ROUND:
+                            USART_print("YEAH YEAH, done round 2, going for round 3/3\n");
+                            state->drive = THIRD_ROUND;
+                            break;
+                        case THIRD_ROUND:
+                            USART_print("YEAH YEAH YEAH , I really did it my way. ... And what's my purpose\n"
+                                        "and the general sense of my further life now? Type ? for help\n");
+                            state->drive = POST_DRIVE;
+                            break;
+                        default:
+                            //Should never happen
+                            break;
+                    }
+                }
+            }
+            driveDo(current, state->sensor_last);
+            break;
+        case POST_DRIVE:
+            motor_clear_drive();
+            state->action=RESET;
+            break;
+        case PRE_DRIVE:
+            break;
+    }
+
+    //driveDo(current);
+    state->sensor_last = current;
+}

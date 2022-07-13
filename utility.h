@@ -9,38 +9,6 @@
 #define UTILITY
 
 #include <avr/io.h>
-#include <avr/interrupt.h>
-#include <stdlib.h>
-
-/**
- * @brief Counter variable, which contains a value from 0 to 255. This value represents the milliseconds since the last
- * second. One unit is (1000/255) ms.
- */
-extern uint16_t millis;
-
-/**
- * @brief Defines counters with different frequencies to allow output in the given frequencies.
- */
-typedef enum {
-    /**
-     * @brief 1 HZ Counter
-     */
-    COUNTER_1_HZ,
-    /**
- * @brief 5 HZ Counter
- */
-    COUNTER_5_HZ,
-    /**
- * @brief 8 HZ Counter
- */
-    COUNTER_8_HZ,
-    COUNTER_3_HZ,
-} counter_def;
-
-/**
- * @brief Contains the frequencies for the corresponding counters in #counter_def
- */
-static const uint16_t counter_frequencies[] = {1000 / 1, 1000 / 5, 1000 / 8, 1000 / 3};
 
 /**
  * @brief Amount of counters that are defined in #counter_def
@@ -54,7 +22,7 @@ static const uint16_t counter_frequencies[] = {1000 / 1, 1000 / 5, 1000 / 8, 100
  * The amount of defined counters is #COUNTER_AMOUNT
  * @details All counters for the frequencies 1HZ, 5HZ and 8HZ are located in the enum #counter_def
  */
-struct Counter {
+typedef struct Counter {
     /**
      * @brief Milliseconds since last true cycle.
      */
@@ -67,155 +35,145 @@ struct Counter {
      * @brief Frequency threshold
      */
     uint16_t threshold;
-};
-
-void init_counters(struct Counter *counters);
+} Counter;
 
 /**
- * @brief Updates all counters based on the current millisecond value that is created by the internal board timer1.
- * <p>Allocates and initialises the counters if the pointer is NULL.
- * @sa #setupCountTimer()
- * @param counters Array / Pointer that contains the counters for all registered frequencies.
+ * @brief Describes the binary state of the sensors
  */
-void update_counters(struct Counter *counters);
-
+typedef enum {
 /**
- * @brief  Timer Control Register of the first timer
+ * @brief Left sensor is high
  */
-#define TIMER_0_CONTROL TCCR0B
+    SENSOR_LEFT = 1,
 /**
- * @brief Set prescaler to 64. For more info see datasheet p.142
+ * @brief Center sensor is high
  */
-#define TIMER_0_PRE_SCALE ((1 << CS00) | (1 << CS01))
+    SENSOR_CENTER = 2,
 /**
- * @brief Timer 0 settings (waveform generation mode and port operation)
+ * @brief Right sensor is high
  */
-#define TIMER_0_WAVE TCCR0A
-
+    SENSOR_RIGHT = 4,
 /**
- * @brief Set waveform generation mode to Fast PWM, frequency = F_CPU / (PRESCALER * 2^8)
+ * @brief All sensors are high
  */
-#define TIMER_0_WAVE_MODE ((1 << WGM00) | (1 << WGM01))
+    SENSOR_ALL = 7,
+} sensor_state;
 
 /**
- * @brief Control Register A and B of timer1
+ * @brief Defines the action state of the roboter
  */
-#define TIMER_1_CONTROL TCCR1B
+typedef enum {
 /**
- * @brief Sets the prescale value of timer1 to 64. For more info see datasheet p.173
+ * @brief The roboter drives 3 rounds from the start point and resets after this.
  */
-#define TIMER_1_PRE_SCALE ((1 << CS10) | (1 << CS11))
+    ROUNDS,
 /**
- * @brief Timer 1 in CTC-mode
+ * @brief The roboter waits 5 seconds and resets to default state
  */
-#define TIMER_1_MODE WGM12
+    RESET,
 /**
- * @brief Enables compare-match-interrupt
+ * @brief The roboter makes a pause
  */
-#define TIMER_1_COMPARE_MODE OCIE1A
+    PAUSE,
 /**
- * @brief Registry of the pin that is used  to manipulate the counter resolution
+ * @brief The roboter reacts to nothing until a hard reset is done
  */
-#define TIMER_1_COMPARE_RESOLUTION OCR1A
+    FROZEN,
 /**
- * @brief Compare value of timer1
- * @details 16E6/64=250E3; 250E3/250 => 1000ms
+ * @brief The robot drives back home and resets itself there
  */
-#define TIMER_1_COMPARE_VALUE 250
-
+    RETURN_HOME,
 /**
- * @brief Checks if the counter that is defined with the given definition has a true value this cycle.
- *
- * @param counters Array / Pointer that contains the counters for all registered frequencies.
- * @param counterDef The definition of the counter that should be checked.
- * @details The amount of counter is defined by #COUNTER_AMOUNT.
- * @retval 1 if the frequency is meet this cycle.
- * @retval 0 if the frequency is not meet this cycle.
+ * @brief The robot waits for instructions
  */
-uint8_t check_counter(struct Counter *counters, counter_def counterDef);
+    WAIT,
+} action_state;
 
 /**
- * @brief Sets up timer which is responsible for the duty cycle of the two motors.
- * @details Timer0 on the board
-*/
-void setupMotorTimer(void);
+ * @brief Current state of the driving action.
+ */
+typedef enum {
+    /**
+     * @brief Before driving action was selected
+     */
+    PRE_DRIVE,
+    /**
+     * @brief After action was selected and home field is not selected yet
+     */
+    CHECK_START,
+    /**
+     * @brief Started an currently driving the first round.
+     */
+    FIRST_ROUND,
+    /**
+     * @brief Finished first round, currently in second round.
+     */
+    SECOND_ROUND,
+    /**
+    * @brief Finished second round, currently in third and last round.
+    */
+    THIRD_ROUND,
+    /**
+     * @brief Finished driving, try to reset robot.
+     */
+    POST_DRIVE,
+
+} drive_state;
 
 /**
- * @brief Sets up timer which is responsible for the internal counter.
- * @details Timer1 on the board
-*/
-void setupCountTimer(void);
-
-#endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
- .______________ _________                       __           ._.
-|   \_   _____//   _____/ _______  ____   ____ |  | __  _____| |
-|   ||    __)_ \_____  \  \_  __ \/  _ \_/ ___\|  |/ / /  ___/ |
-|   ||        \/        \  |  | \(  <_> )  \___|    <  \___ \ \|
-|___/_______  /_______  /  |__|   \____/ \___  >__|_ \/____  >__
-            \/        \/                     \/     \/     \/ \/
-*/
-
-// blubb
+ * @brief Position on the field.
+ */
+typedef enum {
+    /**
+    * @brief On the start field.
+    */
+    POS_START_FIELD,
+    /**
+     * @brief On the track while driving.
+     */
+    POS_TRACK,
+    /**
+     * @brief On the track before driving action was performed.
+     */
+    POS_UNKNOWN
+} track_pos;
+
+/**
+ * @brief Reflects the current inputs of the robot (sensors, position on the track), currently performed action and last
+ * inputs.
+ */
+typedef struct track_state {
+    /**
+     * @brief Currently performed action
+     */
+    action_state action;
+    /**
+     * @brief Current state of the drive action, if the action is performed currently.
+     */
+    drive_state drive;
+    /**
+     * @brief State of the sensors on the last tick
+     */
+    sensor_state sensor_last;
+    /**
+     * @brief Position of the robot on the track
+     */
+    track_pos pos;
+    /**
+     * @brief Last position of the robot on the track
+     */
+    track_pos last_pos;
+    /**
+     * @brief Count of seconds of the robot on the board. A value from 0 to 2. If the robot is not on the start field
+     * this is 0.
+     */
+    uint8_t homeCache;
+
+    /**
+     * @brief Array / Pointer that contains the counters for all registered frequencies.
+     */
+    Counter counters[COUNTER_AMOUNT];
+} track_state;
+
+
+#endif //UTILITY

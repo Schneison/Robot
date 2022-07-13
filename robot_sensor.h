@@ -9,6 +9,7 @@
 #define RO_SIGNALS
 
 #include <avr/io.h>
+#include "utility.h"
 
 /**
  * @brief First channel, used by right sensor
@@ -44,28 +45,6 @@
  * @details Average some measurements to reduce probable noise.
  */
 #define ADC_AVG_AMOUNT 20
-
-/**
- * @brief Describes the binary state of the sensors
- */
-typedef enum {
-/**
- * @brief Left sensor is high
- */
-    SENSOR_LEFT = 1,
-/**
- * @brief Center sensor is high
- */
-    SENSOR_CENTER = 2,
-/**
- * @brief Right sensor is high
- */
-    SENSOR_RIGHT = 4,
-/**
- * @brief All sensors are high
- */
-    SENSOR_ALL = 7,
-} sensor_state;
 
 /**
  * @brief Threshold of the right sensor

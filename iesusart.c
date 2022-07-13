@@ -18,8 +18,8 @@ unsigned char USART_receiveByte(void) {
     return UDR0;
 }
 
-void USART_receiveString(char *buffer, uint8_t max_len) {
-    uint8_t c_char;
+void USART_receiveString(unsigned char *buffer, uint8_t max_len) {
+    unsigned char c_char;
     uint8_t len = 0;
 
     c_char = USART_receiveByte();

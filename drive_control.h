@@ -9,10 +9,11 @@
 #define MOTOR_DRIVE
 
 #include <avr/io.h>
-#include "utility.h"
+#include "timers.h"
 #include <util/delay.h>
 #include "robot_sensor.h"
 #include "iesusart.h"
+#include "utility.h"
 
 // Direction Register = DR
 // Input Register = IR
@@ -189,5 +190,48 @@ void motor_drive_backward(void);
  * @brief Clears all motor register pins
  */
 void motor_clear_drive(void);
+
+/**
+ * @brief Drive directions
+ */
+typedef enum {
+/**
+ * @brief No direction, don't drive
+ */
+    DIR_NONE,
+/**
+ * @brief Drive straight forward
+ */
+    DIR_FORWARD,
+/**
+ * @brief Turn right
+ */
+    DIR_RIGHT,
+/**
+ * @brief Turn left
+ */
+    DIR_LEFT,
+} direction;
+
+/**
+ * @brief Reads sensor input and evaluates the direction that the robot has to drive.
+ * @param current Current sensor state
+ * @param last Sensor state in the last cycle
+ */
+direction evaluate_sensors(sensor_state current, sensor_state last);
+
+/**
+ * @brief Perform driving of the robot
+ *
+ * @param current Current sensor state
+ */
+void driveDo(sensor_state current, sensor_state last);
+
+/**
+ * Performance the driving action
+ *
+ * @param state Current state
+ */
+void drive(track_state *state);
 
 #endif

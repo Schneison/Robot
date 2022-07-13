@@ -1,4 +1,4 @@
-#include "brain.h"
+#include "state_control.h"
 
 
 void reset(void) {
@@ -9,9 +9,5 @@ void reset(void) {
     while (1) {};
     // Never reached
     wdt_disable();
-}
-
-uint8_t check_state_counter(track_state *state, counter_def counterDef) {
-    return check_counter(state->counters, counterDef);
 }
 
