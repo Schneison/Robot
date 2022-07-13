@@ -70,14 +70,14 @@ void motor_set_speed(speed_value left_speed, speed_value right_speed) {
 	setDutyCycle(DP_M_RE, right_speed); // right
 }
 
-void motor_set_right(direction dir, speed_value speed_state) {
-    if(dir == FORWARDS){
+void motor_set_right(orientation dir, speed_value speed_state) {
+    if (dir == FORWARDS) {
         OR_M_LF |= (1 << OP_M_RF); // Forward ON
         OR_M_LB &= ~(1 << OP_M_RB); // Backward OFF
-    }else if(dir == BACKWARDS){
+    } else if (dir == BACKWARDS) {
         OR_M_LF &= ~(1 << OP_M_RF); // Forward OFF
         OR_M_LB |= (1 << OP_M_RB); // Backward ON
-    }else{
+    } else {
         OR_M_LF &= ~(1 << OP_M_RF); // Forward OFF
         OR_M_LB &= ~(1 << OP_M_RB); // Backward OFF
         setDutyCycle(DP_M_LE, 0);
@@ -86,14 +86,14 @@ void motor_set_right(direction dir, speed_value speed_state) {
     setDutyCycle(DP_M_RE, speed_state);
 }
 
-void motor_set_left(direction dir, speed_value speed_state) {
-    if(dir == FORWARDS){
+void motor_set_left(orientation dir, speed_value speed_state) {
+    if (dir == FORWARDS) {
         OR_M_LF |= (1 << OP_M_LF); // Forward ON
         OR_M_LB &= ~(1 << OP_M_LB); // Backward OFF
-    }else if(dir == BACKWARDS){
+    } else if (dir == BACKWARDS) {
         OR_M_LF &= ~(1 << OP_M_LF); // Forward OFF
         OR_M_LB |= (1 << OP_M_LB); // Backward ON
-    }else{
+    } else {
         OR_M_LF &= ~(1 << OP_M_LF); // Forward OFF
         OR_M_LB &= ~(1 << OP_M_LB); // Backward OFF
         setDutyCycle(DP_M_LE, 0);

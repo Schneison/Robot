@@ -46,28 +46,6 @@
 #define ADC_AVG_AMOUNT 20
 
 /**
- * @brief Defines the possible speed values of the motors.
- */
-typedef enum {
-/**
-* @brief Stop the engine, no motion
-*/
-SPEED_ZERO = 0,
-/**
-* @brief Low speed
-*/
- SPEED_LOW = 140,
-/**
-* @brief Mediocre speed
-*/
- SPEED_MIDDLE = 180,
-/**
-* @brief Full speed
-*/
- SPEED_HIGH = 220
-} speed_value;
-
-/**
  * @brief Describes the binary state of the sensors
  */
 typedef enum{

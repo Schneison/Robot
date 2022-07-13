@@ -85,16 +85,38 @@ typedef enum {
 /**
 * @brief Move motor forward
 */
-   FORWARDS,
+    FORWARDS,
 /**
  * @brief Move motor backward
  */
-   BACKWARDS,
+    BACKWARDS,
 /**
  * @brief Stop the motor movement
  */
-   STOP
-} direction;
+    STOP
+} orientation;
+
+/**
+ * @brief Defines the possible speed values of the motors.
+ */
+typedef enum {
+/**
+* @brief Stop the engine, no motion
+*/
+    SPEED_ZERO = 0,
+/**
+* @brief Low speed
+*/
+    SPEED_LOW = 140,
+/**
+* @brief Mediocre speed
+*/
+    SPEED_MIDDLE = 180,
+/**
+* @brief Full speed
+*/
+    SPEED_HIGH = 220
+} speed_value;
 
 /**
  * @brief Clears all registers that the drive module uses
@@ -123,7 +145,7 @@ void setDutyCycle(uint8_t pin, uint8_t value);
  * @param speed_state Speed of the motor.
  *
  */
-void motor_set_left(direction dir, speed_value speed_state);
+void motor_set_left(orientation dir, speed_value speed_state);
 
 /**
  * @brief Sets the speed of the right motor.
@@ -132,7 +154,7 @@ void motor_set_left(direction dir, speed_value speed_state);
  * @param speed_state Speed of the motor.
  *
  */
-void motor_set_right(direction dir, speed_value speed_state);
+void motor_set_right(orientation dir, speed_value speed_state);
 
 /**
  * @brief Sets the speed of the two motors.

@@ -24,25 +24,67 @@ void setup(void) {
 }
 
 /**
+ * @brief Drive directions
+ */
+typedef enum {
+/**
+ * @brief No direction, don't drive
+ */
+    DIR_NONE,
+/**
+ * @brief Drive straight forward
+ */
+    DIR_FORWARD,
+/**
+ * @brief Turn right
+ */
+    DIR_RIGHT,
+/**
+ * @brief Turn left
+ */
+    DIR_LEFT,
+} direction;
+
+/**
+ * @brief Reads sensor input and evaluates the direction that the robot has to drive.
+ * @param current Current sensor state
+ * @param last Sensor state in the last cycle
+ */
+direction evaluate_sensors(sensor_state current, sensor_state last) {
+    if ((current & SENSOR_CENTER) && ((current & SENSOR_LEFT) && (current & SENSOR_RIGHT) ||
+                                      !(current & SENSOR_LEFT) && !(current & SENSOR_RIGHT))) {
+        return DIR_FORWARD;
+    }
+        // Right Sensor
+    else if ((current & SENSOR_RIGHT)) {
+        return DIR_RIGHT;
+    }
+        // Left Sensor
+    else if ((current & SENSOR_LEFT)) {
+        return DIR_LEFT;
+    }
+    return DIR_NONE;
+}
+
+/**
  * @brief Perform driving of the robot
  *
  * @param current Current sensor state
  */
-void driveDo(sensor_state current, sensor_state last){
-
-    // Center Sensor
-    if ((current & SENSOR_CENTER) && ((current & SENSOR_LEFT) && (current & SENSOR_RIGHT) || !(current & SENSOR_LEFT) && !(current & SENSOR_RIGHT))) {
-        motor_drive_forward();
-    }
-
-    // Right Sensor
-    else if((current & SENSOR_RIGHT)) {
-        motor_drive_right();
-    }
-
-    // Left Sensor
-    else if ((current & SENSOR_LEFT)) {
-        motor_drive_left();
+void driveDo(sensor_state current, sensor_state last) {
+    direction dir = evaluate_sensors(current, last);
+    switch (dir) {
+        case DIR_FORWARD:
+            motor_drive_forward();
+            break;
+        case DIR_RIGHT:
+            motor_drive_right();
+            break;
+        case DIR_LEFT:
+            motor_drive_left();
+            break;
+        default:
+            break;
     }
 }
 
@@ -51,7 +93,7 @@ void driveDo(sensor_state current, sensor_state last){
  *
  * @param state Current state
  */
-void drive(track_state* state) {
+void drive(track_state *state) {
     sensor_state current = sensor_get();
 
     switch (state->drive) {
