@@ -10,6 +10,13 @@
 
 #include <avr/io.h>
 #include "led_control.h"
+#include <avr/wdt.h>
+
+/**
+ * @brief Resets the board after 5 seconds by using the watch dog timer.
+ * @details For more information on the wdt look at p.76 of the datasheet
+ */
+void util_reset(void);
 
 /**
  * @brief Amount of counters that are defined in #counter_def
@@ -45,28 +52,28 @@ typedef enum {
 /**
  * @brief The roboter drives 3 rounds from the start point and resets after this.
  */
-    ROUNDS,
+    AC_ROUNDS,
 /**
  * @brief The roboter waits 5 seconds and resets to default state
  */
-    RESET,
+    AC_RESET,
 /**
  * @brief The roboter makes a pause
  */
-    PAUSE,
+    AC_PAUSE,
 /**
- * @brief The roboter reacts to nothing until a hard reset is done
+ * @brief The roboter reacts to nothing until a hard util_reset is done
  */
-    FROZEN,
+    AC_FROZEN,
 /**
  * @brief The robot drives back home and resets itself there
  */
-    RETURN_HOME,
+    AC_RETURN_HOME,
 /**
  * @brief The robot waits for instructions
  */
-    WAIT,
-} action_state;
+    AC_WAIT,
+} action_type;
 
 /**
  * @brief Current state of the driving action.
@@ -75,27 +82,27 @@ typedef enum {
     /**
      * @brief Before driving action was selected
      */
-    PRE_DRIVE,
+    DS_PRE_DRIVE,
     /**
      * @brief After action was selected and home field is not selected yet
      */
-    CHECK_START,
+    DS_CHECK_START,
     /**
      * @brief Started an currently driving the first round.
      */
-    FIRST_ROUND,
+    DS_FIRST_ROUND,
     /**
      * @brief Finished first round, currently in second round.
      */
-    SECOND_ROUND,
+    DS_SECOND_ROUND,
     /**
     * @brief Finished second round, currently in third and last round.
     */
-    THIRD_ROUND,
+    DS_THIRD_ROUND,
     /**
-     * @brief Finished driving, try to reset robot.
+     * @brief Finished driving, try to util_reset robot.
      */
-    POST_DRIVE,
+    DS_POST_DRIVE,
 
 } drive_state;
 
@@ -125,7 +132,7 @@ typedef struct track_state {
     /**
      * @brief Currently performed action
      */
-    action_state action;
+    action_type action;
     /**
      * @brief Current state of the drive action, if the action is performed currently.
      */
@@ -152,7 +159,7 @@ typedef struct track_state {
      */
     uint8_t homeCache;
     /**
-     * @brief If the action state was activated since the last reset at least once.
+     * @brief If the action state was activated since the last util_reset at least once.
      */
     uint8_t has_driven_once;
 

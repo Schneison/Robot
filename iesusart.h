@@ -51,7 +51,7 @@ void USART_transmitByte(unsigned char data);
 
 
 /**
- * @brief Transmittes a string (char by char) until '\0’ is reached
+ * @brief Transmitters a string (char by char) until '\0’ is reached
  */
 void USART_print(const char *c);
 

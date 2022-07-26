@@ -24,6 +24,7 @@ void motor_init(void) {
     DR_M_LB |= (1 << DP_M_LB);
     DR_M_RB |= (1 << DP_M_RB);
     DR_M_RF |= (1 << DP_M_RF);
+    //motor_set_speed(SPEED_MIDDLE, SPEED_MIDDLE);
 
 }
 
@@ -190,32 +191,32 @@ void drive_run(track_state *state) {
     sensor_state current = sensor_get();
 
     switch (state->drive) {
-        case CHECK_START:
+        case DS_CHECK_START:
             //When on start field begin first round
             if (state->pos == POS_START_FIELD) {
-                state->drive = FIRST_ROUND;
+                state->drive = DS_FIRST_ROUND;
                 USART_print("Here I go again on my own, going down the only round I’ve ever known…\n");
             }
             break;
-        case FIRST_ROUND:
-        case SECOND_ROUND:
-        case THIRD_ROUND:
+        case DS_FIRST_ROUND:
+        case DS_SECOND_ROUND:
+        case DS_THIRD_ROUND:
             if (timers_check_state(state, COUNTER_3_HZ)) {
                 // Check if we were on track before and are now on the start field, WE DID A ROUND
                 if (state->last_pos == POS_TRACK && state->pos == POS_START_FIELD) {
                     switch (state->drive) {
-                        case FIRST_ROUND:
+                        case DS_FIRST_ROUND:
                             USART_print("YEAH, done round 1, going for round 2/3\n");
-                            state->drive = SECOND_ROUND;
+                            state->drive = DS_SECOND_ROUND;
                             break;
-                        case SECOND_ROUND:
+                        case DS_SECOND_ROUND:
                             USART_print("YEAH YEAH, done round 2, going for round 3/3\n");
-                            state->drive = THIRD_ROUND;
+                            state->drive = DS_THIRD_ROUND;
                             break;
-                        case THIRD_ROUND:
+                        case DS_THIRD_ROUND:
                             USART_print("YEAH YEAH YEAH , I really did it my way. ... And what's my purpose\n"
                                         "and the general sense of my further life now? Type ? for help\n");
-                            state->drive = POST_DRIVE;
+                            state->drive = DS_POST_DRIVE;
                             break;
                         default:
                             //Should never happen
@@ -225,11 +226,11 @@ void drive_run(track_state *state) {
             }
             drive_apply(current, state->sensor_last);
             break;
-        case POST_DRIVE:
+        case DS_POST_DRIVE:
             motor_drive_stop();
-            state->action=RESET;
+            state->action = AC_RESET;
             break;
-        case PRE_DRIVE:
+        case DS_PRE_DRIVE:
             break;
     }
 

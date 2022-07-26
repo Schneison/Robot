@@ -2,17 +2,11 @@
  * @file iesusart.c
  * @brief Basic serial communication via USART for ATMEGA328
  * @version 0.1
- * @date 2021-06-08
+ * @date 26.06.2022
  */
 
 #include "iesusart.h"
 
-/**
- * @brief 
- * Reads a single byte out of the USART receive buffer.
- * A good way to use this would be calling it from an receive interrupt service routine
- * @return unsigned char (received byte)
- */
 unsigned char USART_receiveByte(void) {
     while (!USART_canReceive()) {}
     return UDR0;
@@ -38,10 +32,6 @@ uint8_t USART_canReceive() {
     return UCSR0A & (1 << RXC0);
 }
 
-/**
- * @brief Writes a single byte to the USART transmit buffer
- * @param data Byte that shall be transmitted
- */
 void USART_transmitByte(unsigned char data) {
     // Wait for empty transmit buffer
     while (!(UCSR0A & (1 << UDRE0))) {
@@ -51,9 +41,6 @@ void USART_transmitByte(unsigned char data) {
     UDR0 = data;
 }
 
-/**
- * @brief Transmittes a string (char by char) until '\0’ is reached
- */
 void USART_print(const char *c) {
     while (*c != '\0') {
         USART_transmitByte(*c);
@@ -61,10 +48,6 @@ void USART_print(const char *c) {
     }
 }
 
-/**
- * @brief Sets up the USART port (The USART baudrate register)
- * @param ubrr Content to write into the UBRR register
- */
 void USART_init(unsigned long ubrr) {
     // Set baud rate, high byte first
     UBRR0H = (unsigned char) (ubrr >> 8);
