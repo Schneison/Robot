@@ -33,6 +33,7 @@ typedef enum {
  * @brief 5 HZ Counter
  */
     COUNTER_5_HZ,
+    COUNTER_6_HZ,
     /**
  * @brief 8 HZ Counter
  */
@@ -45,7 +46,7 @@ typedef enum {
 /**
  * @brief Contains the frequencies for the corresponding counters in #counter_def
  */
-static const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 5, 1000 / 8, 1000 / 3, 1000 / 12,
+static const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 5, 1000 / 6, 1000 / 8, 1000 / 3, 1000 / 12,
                                                              1000 / 4};
 
 /**

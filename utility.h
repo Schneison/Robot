@@ -21,7 +21,7 @@ void util_reset(void);
 /**
  * @brief Amount of counters that are defined in #counter_def
  */
-#define COUNTER_AMOUNT 6
+#define COUNTER_AMOUNT 7
 
 /**
  * @brief Helper struct that is used to check frequency requirements every cycle. For example this is used to print a
@@ -141,6 +141,10 @@ typedef struct track_state {
      * @brief State of the sensors on the last tick
      */
     sensor_state sensor_last;
+    /**
+ * @brief State of the sensors on the this tick
+ */
+    sensor_state sensor_current;
     /**
      * @brief Position of the robot on the track
      */

@@ -106,17 +106,17 @@ typedef enum {
 */
     SPEED_ZERO = 0,
 /**
-* @brief Low speed
+* @brief Speed of the inner wheel
 */
-    SPEED_LOW = 140,
+    SPEED_INNER = 140,
 /**
-* @brief Mediocre speed
+* @brief Speed on a strait line
 */
-    SPEED_MIDDLE = 180,
+    SPEED_STRAIT = 140,
 /**
-* @brief Full speed
+* @brief Speed of the outer wheel
 */
-    SPEED_HIGH = 200
+    SPEED_OUTER = 220
 } speed_value;
 
 /**

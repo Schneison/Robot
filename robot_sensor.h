@@ -50,7 +50,7 @@
  * @brief Threshold of the right sensor
  * @details This will determine if the signal of the sensor is read as positive.
  */
-#define SIGNAL_RIGHT_UPPER 630
+#define SIGNAL_RIGHT_UPPER 450
 /**
  * @brief Threshold of the center sensor
  * @details This will determine if the signal of the sensor is read as positive.

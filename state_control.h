@@ -40,8 +40,10 @@ void state_print_fail(unsigned char byte);
 
 /**
  * @brief Applies effects and show state to the outside that depend on the current action.
+ * @param oldAction Action that was present before the new state
+ * @param state Internal state that contains the new state
  */
-void state_on_action_change(track_state *state);
+void state_on_action_change(track_state *state, action_type oldAction);
 
 /**
  * @brief Tries to read an input from the USART, apply the action behind the character if any is defined, send an
@@ -65,6 +67,6 @@ void state_update_position(track_state *trackState);
  *
  * @param trackState The currently used state
  */
-void state_run_loop(track_state *trackState);
+_Noreturn void state_run_loop(track_state *trackState);
 
 #endif

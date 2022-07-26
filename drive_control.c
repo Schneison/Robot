@@ -24,7 +24,7 @@ void motor_init(void) {
     DR_M_LB |= (1 << DP_M_LB);
     DR_M_RB |= (1 << DP_M_RB);
     DR_M_RF |= (1 << DP_M_RF);
-    //motor_set_speed(SPEED_MIDDLE, SPEED_MIDDLE);
+    //motor_set_speed(SPEED_STRAIT, SPEED_STRAIT);
 
 }
 
@@ -102,7 +102,7 @@ void motor_set_left(orientation dir, speed_value speed_state) {
 }
 
 void motor_drive_right(void) {
-    motor_set_speed(SPEED_LOW, SPEED_HIGH);
+    motor_set_speed(SPEED_INNER, SPEED_OUTER);
     OR_M_LF |= (1 << OP_M_LF); // Left Forward ON
     OR_M_RB |= (1 << OP_M_RB); // Right Backward ON
     OR_M_LB &= ~(1 << OP_M_LB); // Left Backward OFF
@@ -114,7 +114,7 @@ void motor_drive_right(void) {
 }
 
 void motor_drive_forward(void) {
-    motor_set_speed(SPEED_MIDDLE, SPEED_MIDDLE);
+    motor_set_speed(SPEED_STRAIT, SPEED_STRAIT);
     //PORTD |= (1 << PD7);
     //PORTB |= (1 << PB3);
     //PORTB &= ~(1 << PB0);
@@ -126,7 +126,7 @@ void motor_drive_forward(void) {
 }
 
 void motor_drive_backward(void) {
-    motor_set_speed(SPEED_MIDDLE, SPEED_MIDDLE);
+    motor_set_speed(SPEED_STRAIT, SPEED_STRAIT);
     OR_M_LF &= ~(1 << OP_M_LF); //Left Forward ON
     OR_M_RF &= ~(1 << OP_M_RF); //Right Forward ON
     OR_M_LB |= (1 << OP_M_LB); //Left Backward OFF
@@ -134,7 +134,7 @@ void motor_drive_backward(void) {
 }
 
 void motor_drive_left(void) {
-    motor_set_speed(SPEED_HIGH, SPEED_LOW);
+    motor_set_speed(SPEED_OUTER, SPEED_INNER);
     //PORTB |= (1 << PB0); //Left Backward
     //PORTB |= (1 << PB3); //Right Forward
     //PORTB &= ~(1 << PB1);
@@ -155,17 +155,16 @@ void motor_drive_stop(void) {
 }
 
 direction evaluate_sensors(sensor_state current, sensor_state last) {
-    if ((current & SENSOR_CENTER) && ((current & SENSOR_LEFT) && (current & SENSOR_RIGHT) ||
-                                      !(current & SENSOR_LEFT) && !(current & SENSOR_RIGHT))) {
-        return DIR_FORWARD;
-    }
         // Right Sensor
-    else if ((current & SENSOR_RIGHT)) {
+    if ((current & SENSOR_RIGHT) && !(current & SENSOR_LEFT)) {
         return DIR_RIGHT;
     }
         // Left Sensor
-    else if ((current & SENSOR_LEFT)) {
+    else if ((current & SENSOR_LEFT) && !(current & SENSOR_RIGHT)) {
         return DIR_LEFT;
+    } else if ((current & SENSOR_CENTER) && ((current & SENSOR_LEFT) && (current & SENSOR_RIGHT) ||
+                                           !(current & SENSOR_LEFT) && !(current & SENSOR_RIGHT))) {
+        return DIR_FORWARD;
     }
     return DIR_NONE;
 }
@@ -188,8 +187,6 @@ void drive_apply(sensor_state current, sensor_state last) {
 }
 
 void drive_run(track_state *state) {
-    sensor_state current = sensor_get();
-
     switch (state->drive) {
         case DS_CHECK_START:
             //When on start field begin first round
@@ -201,7 +198,7 @@ void drive_run(track_state *state) {
         case DS_FIRST_ROUND:
         case DS_SECOND_ROUND:
         case DS_THIRD_ROUND:
-            if (timers_check_state(state, COUNTER_3_HZ)) {
+            if (timers_check_state(state, COUNTER_12_HZ)) {
                 // Check if we were on track before and are now on the start field, WE DID A ROUND
                 if (state->last_pos == POS_TRACK && state->pos == POS_START_FIELD) {
                     switch (state->drive) {
@@ -224,7 +221,7 @@ void drive_run(track_state *state) {
                     }
                 }
             }
-            drive_apply(current, state->sensor_last);
+            drive_apply(state->sensor_current, state->sensor_last);
             break;
         case DS_POST_DRIVE:
             motor_drive_stop();
@@ -235,5 +232,4 @@ void drive_run(track_state *state) {
     }
 
     //driveDo(current);
-    state->sensor_last = current;
 }
