@@ -41,12 +41,6 @@ uint8_t timers_check(Counter *counters, counter_def counterDef) {
     return counters && counters[counterDef].value;
 }
 
-/**
- * @brief Prints then given message if the frequency requirement is currently meed.
- *
- * @param frequency Frequency on which the given text should be printed.
- * @param text The text that should be printed
- */
 void timers_print(Counter *counters, counter_def frequency, const char *text) {
     if (timers_check(counters, frequency)) {
         USART_print(text);

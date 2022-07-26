@@ -226,6 +226,7 @@ direction evaluate_sensors(sensor_state current, sensor_state last);
  * @brief Perform driving of the robot
  *
  * @param current Current sensor state
+ * @param last State of the sensors in the last cycle.
  */
 void drive_apply(sensor_state current, sensor_state last);
 

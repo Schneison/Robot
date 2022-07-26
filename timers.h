@@ -45,8 +45,15 @@ typedef enum {
 /**
  * @brief Contains the frequencies for the corresponding counters in #counter_def
  */
-static const uint16_t counter_frequencies[] = {1000 / 1, 1000 / 5, 1000 / 8, 1000 / 3, 1000 / 12, 1000 / 4};
+static const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 5, 1000 / 8, 1000 / 3, 1000 / 12,
+                                                             1000 / 4};
 
+/**
+ * @brief Creates all internal timers/counters and place them in the given array.
+ *
+ * @param counters Array of counters, has to be the size of #COUNTER_AMOUNT
+ * @sa #counter_def
+ */
 void timers_create(Counter *counters);
 
 /**
@@ -127,6 +134,7 @@ uint8_t timers_check(Counter *counters, counter_def counterDef);
  *
  * @param frequency Frequency on which the given text should be printed.
  * @param text The text that should be printed
+ * @param counters Array of counters, has to be the size of #COUNTER_AMOUNT, and is typically located on the global state
  */
 void timers_print(Counter *counters, counter_def frequency, const char *text);
 
