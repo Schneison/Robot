@@ -38,22 +38,24 @@ typedef enum {
  */
     COUNTER_8_HZ,
     COUNTER_3_HZ,
+    COUNTER_12_HZ,
+    COUNTER_4_HZ,
 } counter_def;
 
 /**
  * @brief Contains the frequencies for the corresponding counters in #counter_def
  */
-static const uint16_t counter_frequencies[] = {1000 / 1, 1000 / 5, 1000 / 8, 1000 / 3};
+static const uint16_t counter_frequencies[] = {1000 / 1, 1000 / 5, 1000 / 8, 1000 / 3, 1000 / 12, 1000 / 4};
 
-void init_counters(Counter *counters);
+void timers_create(Counter *counters);
 
 /**
  * @brief Updates all counters based on the current millisecond value that is created by the internal board timer1.
  * <p>Allocates and initialises the counters if the pointer is NULL.
- * @sa #setupCountTimer()
+ * @sa #timers_setup_timer_1()
  * @param counters Array / Pointer that contains the counters for all registered frequencies.
  */
-void update_counters(Counter *counters);
+void timers_update(Counter *counters);
 
 /**
  * @brief  Timer Control Register of the first timer
@@ -100,14 +102,14 @@ void update_counters(Counter *counters);
 #define TIMER_1_COMPARE_VALUE 250
 
 /**
- * @copybrief check_counter(struct Counter*, counter_def)
+ * @copybrief timers_check(struct Counter*, counter_def)
  * @param state Current state of the robot that contains the counters.
  * @param counterDef The definition of the counter that should be checked.
  * @details The amount of counter is defined by #COUNTER_AMOUNT.
  * @retval 1 if the frequency is meet this cycle.
  * @retval 0 if the frequency is not meet this cycle.
  */
-uint8_t check_state_counter(track_state *state, counter_def counterDef);
+uint8_t timers_check_state(track_state *state, counter_def counterDef);
 
 /**
  * @brief Checks if the counter that is defined with the given definition has a true value this cycle.
@@ -118,7 +120,7 @@ uint8_t check_state_counter(track_state *state, counter_def counterDef);
  * @retval 1 if the frequency is meet this cycle.
  * @retval 0 if the frequency is not meet this cycle.
  */
-uint8_t check_counter(Counter *counters, counter_def counterDef);
+uint8_t timers_check(Counter *counters, counter_def counterDef);
 
 /**
  * @brief Prints then given message if the frequency requirement is currently meed.
@@ -126,18 +128,24 @@ uint8_t check_counter(Counter *counters, counter_def counterDef);
  * @param frequency Frequency on which the given text should be printed.
  * @param text The text that should be printed
  */
-void print_at_freq(Counter *counters, counter_def frequency, const char *text);
+void timers_print(Counter *counters, counter_def frequency, const char *text);
+
+/**
+ * @brief Setup method for timers module, setups all timers
+ */
+void timers_init(void);
+
 
 /**
  * @brief Sets up timer which is responsible for the duty cycle of the two motors.
  * @details Timer0 on the board
 */
-void setupMotorTimer(void);
+void timers_setup_timer_0(void);
 
 /**
  * @brief Sets up timer which is responsible for the internal counter.
  * @details Timer1 on the board
 */
-void setupCountTimer(void);
+void timers_setup_timer_1(void);
 
 #endif

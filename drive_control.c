@@ -17,7 +17,7 @@ void motor_init(void) {
     DR_M_LF |= (1 << DP_M_LF);
 
     // Make PWM work on PD[5|6]
-    setupMotorTimer();
+    //timers_setup_timer_0();
 
     // Set PB0, PB1, and PB3 as output (IN[2|3|4])
     //DDRB |= (1 << DD0) | (1 << DD1) | (1 << DD3);
@@ -144,7 +144,7 @@ void motor_drive_left(void) {
     OR_M_RB &= ~(1 << OP_M_RB); // Right Backward OFF
 }
 
-void motor_clear_drive(void) {
+void motor_drive_stop(void) {
     motor_set_speed(SPEED_ZERO, SPEED_ZERO);
     //Reset
     PORTB &= ~(1 << PB0);
@@ -169,7 +169,7 @@ direction evaluate_sensors(sensor_state current, sensor_state last) {
     return DIR_NONE;
 }
 
-void driveDo(sensor_state current, sensor_state last) {
+void drive_apply(sensor_state current, sensor_state last) {
     direction dir = evaluate_sensors(current, last);
     switch (dir) {
         case DIR_FORWARD:
@@ -186,7 +186,7 @@ void driveDo(sensor_state current, sensor_state last) {
     }
 }
 
-void drive(track_state *state) {
+void drive_run(track_state *state) {
     sensor_state current = sensor_get();
 
     switch (state->drive) {
@@ -200,7 +200,7 @@ void drive(track_state *state) {
         case FIRST_ROUND:
         case SECOND_ROUND:
         case THIRD_ROUND:
-            if(check_state_counter(state, COUNTER_3_HZ)) {
+            if (timers_check_state(state, COUNTER_3_HZ)) {
                 // Check if we were on track before and are now on the start field, WE DID A ROUND
                 if (state->last_pos == POS_TRACK && state->pos == POS_START_FIELD) {
                     switch (state->drive) {
@@ -223,10 +223,10 @@ void drive(track_state *state) {
                     }
                 }
             }
-            driveDo(current, state->sensor_last);
+            drive_apply(current, state->sensor_last);
             break;
         case POST_DRIVE:
-            motor_clear_drive();
+            motor_drive_stop();
             state->action=RESET;
             break;
         case PRE_DRIVE:

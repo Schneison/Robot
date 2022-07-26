@@ -18,8 +18,8 @@ void setup(void) {
     USART_init(UBRR_SETTING);
     ADC_init();
     motor_init();
-    LED_init();
-    setupCountTimer();
+    led_init();
+    timers_init();
 }
 
 /**
@@ -41,50 +41,65 @@ void show_state(track_state *state) {
                     break;
             }
             // Manuel check, so we don't have to create a pointer every tick
-            if (check_state_counter(state, COUNTER_1_HZ)) {
-                char s [sizeof("Round and round I go, currently round 1\n")];
+            if (timers_check_state(state, COUNTER_1_HZ)) {
+                char s[sizeof("Round and round I go, currently round 1\n")];
                 sprintf(s, "Round and round I go, currently round %d\n", round);
                 USART_print(s);
             }
-            LED_State ledState = LED_NONE;
-            if ((state->sensor_last) & SENSOR_LEFT) {
-                ledState |= LED_LEFT;
-            }
-            if ((state->sensor_last) & SENSOR_CENTER) {
-                ledState |= LED_CENTER;
-            }
-            if ((state->sensor_last) & SENSOR_RIGHT) {
-                ledState |= LED_RIGHT;
-            }
-            LED_set(ledState);
+//            LED_State ledState = LED_NONE;
+//            if ((state->sensor_last) & SENSOR_LEFT) {
+//                ledState |= LED_LEFT;
+//            }
+//            if ((state->sensor_last) & SENSOR_CENTER) {
+//                ledState |= LED_CENTER;
+//            }
+//            if ((state->sensor_last) & SENSOR_RIGHT) {
+//                ledState |= LED_RIGHT;
+//            }
+//            LED_set(ledState);
+            //TODO: Remove before deployment
+            led_sensor(state->sensor_last);
             break;
         }
         case FROZEN:
-            print_at_freq(state->counters, COUNTER_1_HZ, "In safe state! Won’t react to any instructions! Rescue me!\n");
+            timers_print(state->counters, COUNTER_1_HZ,
+                         "In safe state! Won’t react to any instructions! Rescue me!\n");
+            if (timers_check_state(state, COUNTER_12_HZ)) {
+                led_chase(&(state->last_led));
+            }
             break;
         case RETURN_HOME:
-            print_at_freq(state->counters, COUNTER_1_HZ, "Returning home, will reset me there\n");
+            timers_print(state->counters, COUNTER_1_HZ, "Returning home, will reset me there\n");
             break;
         case PAUSE:
-            print_at_freq(state->counters, COUNTER_1_HZ, "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again\n");
+            timers_print(state->counters, COUNTER_1_HZ,
+                         "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again\n");
+            if (timers_check_state(state, COUNTER_3_HZ)) {
+                led_chase(&(state->last_led));
+            }
             break;
         case WAIT:
             if (state->pos == POS_START_FIELD) {
-                print_at_freq(state->counters, COUNTER_1_HZ, "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again\n");
+                timers_print(state->counters, COUNTER_1_HZ,
+                             "On the starting field. Waiting for your instructions... Send ? for help.\n");
+                if (timers_check_state(state, COUNTER_5_HZ)) {
+                    led_blink(&(state->last_led));
+                }
             } else {
-                print_at_freq(state->counters, COUNTER_1_HZ,
-                              "Not on the starting field. Place me there please... Send ? for help.\n");
-                LED_State ledState = LED_NONE;
-                if ((state->sensor_last) & SENSOR_LEFT) {
-                    ledState |= LED_LEFT;
-                }
-                if ((state->sensor_last) & SENSOR_CENTER) {
-                    ledState |= LED_CENTER;
-                }
-                if ((state->sensor_last) & SENSOR_RIGHT) {
-                    ledState |= LED_RIGHT;
-                }
-                LED_set(ledState);
+                timers_print(state->counters, COUNTER_1_HZ,
+                             "Not on the starting field. Place me there please... Send ? for help.\n");
+//                LED_State ledState = LED_NONE;
+//                if ((state->sensor_last) & SENSOR_LEFT) {
+//                    ledState |= LED_LEFT;
+//                }
+//                if ((state->sensor_last) & SENSOR_CENTER) {
+//                    ledState |= LED_CENTER;
+//                }
+//                if ((state->sensor_last) & SENSOR_RIGHT) {
+//                    ledState |= LED_RIGHT;
+//                }
+//                LED_set(ledState);
+                led_sensor(state->sensor_last);
             }
             break;
         default:
@@ -93,10 +108,15 @@ void show_state(track_state *state) {
 }
 
 /**
- * @brief Print help message for the given state. Print different if we are located on starting field.
+ * @brief Print help message for the given state. Print different text if we are located on starting field and no at all
+ * if the robot was once in the drive state.
  * @param state Current state
  */
 void print_help(track_state *state) {
+    //Only print help text if S was not received once
+    if (state->has_driven_once) {
+        return;
+    }
     if (state->pos == POS_START_FIELD) {
         USART_print("-X Safe action_state\n-S 3 Rounds\n-P Pause\n-R Reset\n-C Home\n-? Help\n");
     } else {
@@ -117,12 +137,20 @@ void print_fail(unsigned char byte) {
 
 /**
  * @brief Applies effects and show state to the outside that depend on the current action.
- * @param newAction The action to apply.
  */
-void on_action_change(action_state newAction){
-    switch (newAction) {
+void on_action_change(track_state *state) {
+    switch (state->action) {
         case RESET:
             USART_print("Will reset in 5 seconds...\n");
+            break;
+        case WAIT:
+        case FROZEN:
+        case PAUSE:
+            //Reset chase or blink light
+            state->last_led = 0;
+            break;
+        case ROUNDS:
+            state->has_driven_once = 1;
             break;
         default:
             break;
@@ -140,6 +168,9 @@ void read_input(track_state *state) {
     if (!USART_canReceive()) {
         return;
     }
+    if (state->action == FROZEN) {
+        return;
+    }
     unsigned char byte = USART_receiveByte();
     switch (byte) {
         case 'S':
@@ -149,6 +180,13 @@ void read_input(track_state *state) {
             state->action = FROZEN;
             break;
         case 'P':
+            if (state->action == PAUSE) {
+                state->action = ROUNDS;
+                break;
+            }
+            if (state->action != ROUNDS) {
+                return;
+            }
             state->action = PAUSE;
             break;
         case 'C':
@@ -164,7 +202,7 @@ void read_input(track_state *state) {
             print_fail(byte);
             return;
     }
-    on_action_change(state->action);
+    on_action_change(state);
 }
 
 /**
@@ -174,13 +212,13 @@ void read_input(track_state *state) {
  * @param trackState The currently used state
  */
 void update_position(track_state *trackState) {
-    if (check_state_counter(trackState, COUNTER_3_HZ)) {
+    if (timers_check_state(trackState, COUNTER_4_HZ)) {
         trackState->last_pos = trackState->pos;
         // All sensors on, could be home field
         if (trackState->sensor_last == SENSOR_ALL) {
             trackState->homeCache++;
             if (trackState->homeCache > 2) {
-                if(trackState->pos != POS_START_FIELD) {
+                if (trackState->pos != POS_START_FIELD) {
                     USART_print("Start field found \n");
                 }
                 trackState->pos = POS_START_FIELD;
@@ -208,36 +246,43 @@ void update_position(track_state *trackState) {
  * @brief Run loop of the script
  */
 void runLoop(void) {
+    //Create track state
     track_state *trackState = malloc(sizeof(track_state));
     trackState->drive = FIRST_ROUND;
     trackState->action = ROUNDS;
     trackState->pos = POS_UNKNOWN;
     trackState->last_pos = POS_UNKNOWN;
     trackState->homeCache = 0;
-    init_counters(trackState->counters);
+    // Create counters, has to be done before first use
+    timers_create(trackState->counters);
     while (1) {
         //read_input(trackState);
         show_state(trackState);
         update_position(trackState);
-        update_counters(trackState->counters);
+        timers_update(trackState->counters);
         action_state oldAction = trackState->action;
         switch (oldAction) {
             case ROUNDS: {
-                drive(trackState);
+                drive_run(trackState);
                 break;
             }
             case RESET: {
                 reset();
                 break;
             }
-            case PAUSE:
-                //Do nothing, we pause until action changes
-                break;
             default:
+                //Do nothing
                 break;
         }
-        if(oldAction != trackState->action){
-            on_action_change(trackState->action);
+        /**
+         * If the state changes an action was applied, usually when the 3 rounds were driven and the robot is switched to
+         * reset
+         */
+        if (oldAction != trackState->action) {
+            if (oldAction == ROUNDS) {
+                motor_drive_stop();
+            }
+            on_action_change(trackState);
         }
     }
     free(trackState);

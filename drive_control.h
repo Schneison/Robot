@@ -133,7 +133,7 @@ void motor_init(void);
  * @brief Defines speed of the wheels by defining how often a they are turned on,
  * a higher value results in an faster wheel.
  *
- * @details Call #setupMotorTimer() before usage!
+ * @details Call #timers_setup_timer_0() before usage!
  * @param pin PD5/PD6 for left/right motor cycle
  * @param value Defines speed of the wheels. (0 - 255 = 0% - 100%)
  */
@@ -187,9 +187,11 @@ void motor_drive_forward(void);
 void motor_drive_backward(void);
 
 /**
- * @brief Clears all motor register pins
+ * @brief Stops all motors and disables the duty cycle of the robot
+ *
+ * @details Sets all pins and the duty cycle to 0
  */
-void motor_clear_drive(void);
+void motor_drive_stop(void);
 
 /**
  * @brief Drive directions
@@ -225,13 +227,13 @@ direction evaluate_sensors(sensor_state current, sensor_state last);
  *
  * @param current Current sensor state
  */
-void driveDo(sensor_state current, sensor_state last);
+void drive_apply(sensor_state current, sensor_state last);
 
 /**
  * Performance the driving action
  *
  * @param state Current state
  */
-void drive(track_state *state);
+void drive_run(track_state *state);
 
 #endif

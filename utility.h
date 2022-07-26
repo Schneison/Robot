@@ -9,11 +9,12 @@
 #define UTILITY
 
 #include <avr/io.h>
+#include "led_control.h"
 
 /**
  * @brief Amount of counters that are defined in #counter_def
  */
-#define COUNTER_AMOUNT 4
+#define COUNTER_AMOUNT 6
 
 /**
  * @brief Helper struct that is used to check frequency requirements every cycle. For example this is used to print a
@@ -36,28 +37,6 @@ typedef struct Counter {
      */
     uint16_t threshold;
 } Counter;
-
-/**
- * @brief Describes the binary state of the sensors
- */
-typedef enum {
-/**
- * @brief Left sensor is high
- */
-    SENSOR_LEFT = 1,
-/**
- * @brief Center sensor is high
- */
-    SENSOR_CENTER = 2,
-/**
- * @brief Right sensor is high
- */
-    SENSOR_RIGHT = 4,
-/**
- * @brief All sensors are high
- */
-    SENSOR_ALL = 7,
-} sensor_state;
 
 /**
  * @brief Defines the action state of the roboter
@@ -164,10 +143,18 @@ typedef struct track_state {
      */
     track_pos last_pos;
     /**
+     * @brief Last state of the chase light
+     */
+    LED_State last_led;
+    /**
      * @brief Count of seconds of the robot on the board. A value from 0 to 2. If the robot is not on the start field
      * this is 0.
      */
     uint8_t homeCache;
+    /**
+     * @brief If the action state was activated since the last reset at least once.
+     */
+    uint8_t has_driven_once;
 
     /**
      * @brief Array / Pointer that contains the counters for all registered frequencies.

@@ -10,18 +10,18 @@ ISR (TIMER1_COMPA_vect) {
     millis++;
 }
 
-void init_counters(Counter *counters){
+void timers_create(Counter *counters) {
     for (int i = 0; i < COUNTER_AMOUNT; i++) {
-        Counter* counter = &counters[i];
+        Counter *counter = &counters[i];
         counter->value = 0;
         counter->threshold = counter_frequencies[i];
         counter->lastMillis = millis;
     }
 }
 
-void update_counters(Counter *counters) {
+void timers_update(Counter *counters) {
     for (int i = 0; i < COUNTER_AMOUNT; i++) {
-        Counter* counter = &counters[i];
+        Counter *counter = &counters[i];
         // Diff since last true cycle
         uint16_t delta = millis - counter->lastMillis;
         if (delta > counter->threshold) {
@@ -33,11 +33,11 @@ void update_counters(Counter *counters) {
     }
 }
 
-uint8_t check_state_counter(track_state *state, counter_def counterDef) {
-    return check_counter(state->counters, counterDef);
+uint8_t timers_check_state(track_state *state, counter_def counterDef) {
+    return timers_check(state->counters, counterDef);
 }
 
-uint8_t check_counter(Counter *counters, counter_def counterDef) {
+uint8_t timers_check(Counter *counters, counter_def counterDef) {
     return counters && counters[counterDef].value;
 }
 
@@ -47,14 +47,19 @@ uint8_t check_counter(Counter *counters, counter_def counterDef) {
  * @param frequency Frequency on which the given text should be printed.
  * @param text The text that should be printed
  */
-void print_at_freq(Counter *counters, counter_def frequency, const char *text) {
-    if (check_counter(counters, frequency)) {
+void timers_print(Counter *counters, counter_def frequency, const char *text) {
+    if (timers_check(counters, frequency)) {
         USART_print(text);
     }
 }
 
+void timers_init(void) {
+    timers_setup_timer_0();
+    timers_setup_timer_1();
+}
+
 // timer0
-void setupMotorTimer(void) {
+void timers_setup_timer_0(void) {
     // Disable all interrupts
     cli();
     // Set prescaler to 64, cf. datasheet for TCCR0B
@@ -73,7 +78,7 @@ void setupMotorTimer(void) {
 }
 
 // timer1
-void setupCountTimer(void) {
+void timers_setup_timer_1(void) {
     //16E6/64=250E3
     //250E3/250 = 1ms
     cli();
