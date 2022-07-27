@@ -58,6 +58,10 @@ typedef enum {
  * @brief Describes the binary state of the sensors
  */
 typedef enum {
+    /**
+ * @brief No sensor signal
+ */
+    SENSOR_NONE = 0,
 /**
  * @brief Left sensor is high
  */

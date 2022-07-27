@@ -17,8 +17,8 @@ void state_show(track_state *state) {
             }
             // Manuel check, so we don't have to create a pointer every tick
             if (timers_check_state(state, COUNTER_1_HZ)) {
-                char s[sizeof("Round and round I go, currently round 1\n")];
-                sprintf(s, "Round and round I go, currently round %d\n", round);
+                char s[sizeof("Round and round I go, currently round #1\n")];
+                sprintf(s, "Round and round I go, currently round #%d\n", round);
                 USART_print(s);
             }
             //char s[sizeof("Sensor: 111\n")];

@@ -1,81 +1,37 @@
-import tkinter as tk
-from tkinter import ttk, StringVar, VERTICAL, HORIZONTAL, N, S, E, W, FLAT, LEFT
-from tkinter.scrolledtext import ScrolledText
-from typing import Final, Union
-import queue
-from struct import *
 import logging
-from serial import Serial, SerialException, PortNotOpenError, SerialTimeoutException
-import serial as serial
-import time
-import threading
+import tkinter as tk
+from tkinter import ttk, StringVar, FLAT, LEFT
+from tkinter.scrolledtext import ScrolledText
+import queue
+import atexit
+import signal
+import sys
+from dataclasses import dataclass
+from ser import *
+from PIL import Image
+from PIL.ImageTk import PhotoImage
 
-baudrate: Final[int] = 115200
-serial_connected: bool = False
 logger = logging.getLogger(__name__)
 
+SENSOR_NONE = 0
+SENSOR_LEFT = 1
+SENSOR_CENTER = 2
+SENSOR_RIGHT = 4
+SENSOR_ALL = 7
 
-class SerialHandler:
-
-    def __init__(self, ser: Serial):
-        self.ser = ser
-        self.data = []
-        self.stop = False
-        self.thread1 = threading.Thread(target=self.receive_data)
-        self.thread1.daemon = True
-        #     thread2 = threading.Thread(target=self.update_gui)
-        #     thread2.daemon = True
-
-    def stop_threads(self):
-        self.stop = True
-        self.thread1.join()
-        self.stop = False
-        #self.thread2.joint()
-
-    def start_threads(self):
-        self.thread1.start()
-
-    #     thread2 = threading.Thread(target=self.update_gui)
-    #     thread2.daemon = True
-    #     thread2.start()
-    #
-    # def update_gui(self):
-    #     while True:
-    #         try:
-    #             if len(self.temp) < len(self.data) and self.ser is not None:  # if data has been added
-    #                 self.comm_text.configure(state='normal')
-    #                 self.comm_text.insert('end', self.data[len(self.data) - 1] + '\n')
-    #                 self.comm_text.see('end')  # scroll text
-    #                 self.comm_text.configure(state='disabled')
-    #                 self.temp.append(self.data[len(self.data) - 1])
-    #             time.sleep(0.2)
-    #         except:
-    #             pass
-
-    def receive_data(self):
-        while not self.stop:
-            if self.ser is not None:
-                if self.ser.inWaiting() > 0:
-                    logger.log(logging.INFO, self.ser.inWaiting())
-                    try:
-                        txt = self.ser.readline().decode().replace('\n', '')
-                        # print("I received :", txt)
-                        logger.log(logging.INFO, txt)
-                        #self.received = self.ser.readline().decode().replace('\n', '')
-                        #self.data.append(str(self.com_port) + ': ' + self.received)
-                        #print("I received :", self.received)
-                    except:
-                        pass
-            time.sleep(0.05)
+DRIVE_NONE = 0
+DRIVE_LEFT = 1
+DRIVE_STRAIGHT = 2
+DRIVE_RIGHT = 4
 
 
-ser_port: Union[Serial, None] = None
-ser_handler: Union[SerialHandler, None] = None
+@dataclass
+class RobotState:
+    led: int
+    drive_state: int
 
 
 class TextHandler(logging.Handler):
-    """This class allows you to log to a Tkinter Text or ScrolledText widget"""
-
     def __init__(self, text):
         # run the regular Handler __init__
         logging.Handler.__init__(self)
@@ -97,11 +53,6 @@ class TextHandler(logging.Handler):
 
 
 class QueueHandler(logging.Handler):
-    """Class to send logging records to a queue
-
-    It can be used from different threads
-    """
-
     def __init__(self, log_queue):
         super().__init__()
         self.log_queue = log_queue
@@ -111,16 +62,13 @@ class QueueHandler(logging.Handler):
 
 
 class ConsoleUi:
-    """Poll messages from a logging queue and display them in a scrolled text widget"""
-
     def __init__(self, frame):
         self.frame = frame
         # Create a ScrolledText wdiget
         self.scrolled_text = ScrolledText(frame, state='disabled', height=12)
-        self.scrolled_text.grid(row=0, column=0, sticky=(N, S, W, E))
+        self.scrolled_text.grid(row=0, column=0, sticky=tk.NSEW)
         self.scrolled_text.configure(font='TkFixedFont')
         self.scrolled_text.tag_config('INFO', foreground='black')
-        self.scrolled_text.tag_config('DEBUG', foreground='gray')
         self.scrolled_text.tag_config('WARNING', foreground='orange')
         self.scrolled_text.tag_config('ERROR', foreground='red')
         self.scrolled_text.tag_config('CRITICAL', foreground='red', underline=True)
@@ -131,7 +79,7 @@ class ConsoleUi:
         self.queue_handler.setFormatter(formatter)
         logger.addHandler(self.queue_handler)
         # Start polling messages from the queue
-        self.frame.after(100, self.poll_log_queue)
+        self.frame.after(100, self.poll_log)
 
     def display(self, record):
         msg = self.queue_handler.format(record)
@@ -141,7 +89,7 @@ class ConsoleUi:
         # Autoscroll to the bottom
         self.scrolled_text.yview(tk.END)
 
-    def poll_log_queue(self):
+    def poll_log(self):
         # Check every 100ms if there is a new message in the queue to display
         while True:
             try:
@@ -150,40 +98,40 @@ class ConsoleUi:
                 break
             else:
                 self.display(record)
-        self.frame.after(100, self.poll_log_queue)
-
-
-def try_send(data: str):
-    if len(data) > 1 or not data.isalpha() or not data.isupper():
-        print("Not Send: Invalid character")
-        return
-    send_byte(data)
+        self.frame.after(100, self.poll_log)
 
 
 class SerialConnection:
     def __init__(self, frm: ttk.Frame):
         self.port_var = StringVar()
+        self.connect_var = StringVar()
         self.frm = frm
         self.connection_var = StringVar()
         self.init_vars()
         self.init_ui()
 
     def init_vars(self):
-        self.port_var.set("rfcomm0")
+        self.port_var.set("")
+        self.connect_var.set("Open")
 
     def init_ui(self):
         frm = self.frm
-        ttk.Label(frm, text="COM Port", relief=FLAT, justify=LEFT).grid(column=0, row=0, sticky="w")
-        ttk.Entry(frm, textvariable=self.port_var).grid(column=0, row=1, columnspan=2)
-        ttk.Button(frm, text="Apply", command=lambda: self.link_serial()).grid(column=3, row=1)
-        ttk.Label(frm, text="Data", relief=FLAT, justify=LEFT).grid(column=0, row=2, sticky="w")
+        ttk.Label(frm, text="COM Port", relief=FLAT, justify=LEFT).grid(column=0, row=0, sticky=tk.W)
+        ttk.Entry(frm, textvariable=self.port_var).grid(column=0, row=1, columnspan=3, sticky=tk.EW)
+        ttk.Button(frm, textvariable=self.connect_var, command=lambda: self.open_or_close_serial()).grid(column=3,
+                                                                                                         row=1)
+        ttk.Button(frm, text="COM1", command=lambda: self.port_var.set("COM1")).grid(column=0, row=2)
+        ttk.Button(frm, text="/dev/ttyACM0", command=lambda: self.port_var.set("/dev/ttyACM0")).grid(column=1, row=2)
+        ttk.Button(frm, text="rfcomm0", command=lambda: self.port_var.set("rfcomm0")).grid(column=2, row=2)
+        ttk.Label(frm, text="Data", relief=FLAT, justify=LEFT).grid(column=0, row=3, sticky=tk.W)
         data_e = ttk.Entry(frm)
-        data_e.grid(column=0, row=3, columnspan=2)
-        ttk.Button(frm, text="Send", command=lambda: try_send(data_e.get())).grid(column=3, row=3)
+        data_e.grid(column=0, row=4, columnspan=3, sticky=tk.EW)
+        ttk.Button(frm, text="Send", command=lambda: try_send(data_e.get())).grid(column=3, row=4)
 
-    def link_serial(self) -> None:
+    def open_or_close_serial(self) -> None:
         port = self.port_var.get()
-        open_port(port)
+        connected = open_port(port, logger)
+        self.connect_var.set("Close" if connected else "Open")
 
 
 class DriveControl:
@@ -192,113 +140,118 @@ class DriveControl:
         self.init_ui()
 
     def init_ui(self):
+        # -S-
+        # FPR
+        # -H-
         ttk.Button(self.frm, text="Start", command=lambda: try_send('S')).grid(column=1, row=0)
         ttk.Button(self.frm, text="Pause", command=lambda: try_send('P')).grid(column=1, row=1)
         ttk.Button(self.frm, text="Rest", command=lambda: try_send('R')).grid(column=2, row=1)
         ttk.Button(self.frm, text="Home", command=lambda: try_send('C')).grid(column=1, row=2)
         ttk.Button(self.frm, text="Freeze", command=lambda: try_send('X')).grid(column=0, row=1)
+        # Needed for space between the buttons
+        ttk.Label(self.frm, text="").grid(column=1, row=3)
+        # -W-
+        # A-D
+        # -B-
+        ttk.Button(self.frm, text="Forward", command=lambda: try_send('W')).grid(column=1, row=4)
+        ttk.Button(self.frm, text="Right", command=lambda: try_send('D')).grid(column=2, row=5)
+        ttk.Button(self.frm, text="Backward", command=lambda: try_send('B')).grid(column=1, row=6)
+        ttk.Button(self.frm, text="Left", command=lambda: try_send('A')).grid(column=0, row=5)
 
 
-def open_port(port: str):
-    global ser_port
-    global serial_connected
-    global ser_handler
-    if ser_port is not None and ser_port.is_open:
-        ser_port.close()
-        if ser_handler is not None:
-            ser_handler.stop_threads()
-    connect = False
-    try:
-        ser_port = Serial(port=port, baudrate=baudrate, parity=serial.PARITY_NONE,
-                          stopbits=serial.STOPBITS_TWO,
-                          bytesize=serial.EIGHTBITS, )
-        logger.log(logging.INFO, "Connected to " + port)
-        connect = True
-        ser_handler = SerialHandler(ser_port)
-        ser_handler.start_threads()
-    except PortNotOpenError:
-        logger.log(logging.ERROR, "Connection failed, port not open")
-    except SerialTimeoutException:
-        logger.log(logging.ERROR, "Connection failed, timeout")
-    except SerialException as msg:
-        logger.log(logging.ERROR, "Connection failed")
-        logger.log(logging.ERROR, msg)
-        # con.set_state("Connection failed, ")
-    serial_connected = connect
+def create_image(path: str, flip=False) -> PhotoImage:
+    img = Image.open(path).convert("RGBA").resize((80, 80))
+    if flip:
+        img = img.transpose(Image.FLIP_LEFT_RIGHT)
+    return PhotoImage(img)
 
 
-def send_byte(data: str):
-    if not serial_connected:
-        print("Not Send: Not connected")
-        return
-    print("Send: %s" % bytes(data, 'ascii', 'ignore'))
-    ser_port.write(bytes(data, 'ascii', 'ignore'))
-    ser_port.write(bytes('\n', 'ascii', 'ignore'))
-
-
-def read_struc():
-    ser_port.read_until(4)
-
-
-class Example(tk.Frame):
+class StateControl(tk.Frame):
 
     def __init__(self, p: ttk.Frame):
         super().__init__(p)
 
+        self.drive_right = None
+        self.drive_straight = None
+        self.drive_left = None
+        self.arrow_right = create_image("assets/arrow_right.png")
+        self.arrow_right_light = create_image("assets/arrow_right_light.png")
+        self.arrow_left = create_image("assets/arrow_right.png", flip=True)
+        self.arrow_left_light = create_image("assets/arrow_right_light.png", flip=True)
+        self.arrow_straight = create_image("assets/arrow_straight.png")
+        self.arrow_straight_light = create_image("assets/arrow_straight_light.png")
+        self.led_right = None
+        self.led_center = None
+        self.led_left = None
+        self.canvas = None
         self.init_ui()
 
-    def init_ui(self):
-        canvas = tk.Canvas(self)
-        canvas.create_rectangle(30, 10, 120, 80,
-                                 fill="#fb0")
-        canvas.create_rectangle(150, 10, 240, 80,
-                                fill="#f50")
-        canvas.create_rectangle(270, 10, 370, 80,
-                                fill="#05f")
+    def set_state(self, state: RobotState):
+        # Blue LED
+        self.canvas.itemconfig(self.led_left, fill="#05f" if state.led & SENSOR_LEFT else "#667e92")
+        # Green LED
+        self.canvas.itemconfig(self.led_center, fill="#3d7d30" if state.led & SENSOR_CENTER else "#89ac76")
+        # Yellow LED
+        self.canvas.itemconfig(self.led_right, fill="#fb0" if state.led & SENSOR_RIGHT else "#f2e7bf")
+        # Drive Left
+        self.canvas.itemconfig(self.drive_left,
+                               image=self.arrow_left if state.drive_state & DRIVE_LEFT else self.arrow_left_light)
+        # Drive Straight
+        self.canvas.itemconfig(self.drive_straight,
+                               image=self.arrow_straight if state.drive_state & DRIVE_STRAIGHT else self.arrow_straight_light)
+        # Drive Right
+        self.canvas.itemconfig(self.drive_right,
+                               image=self.arrow_right if state.drive_state & DRIVE_RIGHT else self.arrow_right_light)
 
-        canvas.pack(fill=tk.BOTH, expand=1)
+    def init_ui(self):
+        self.canvas = tk.Canvas(self)
+        self.led_left = self.canvas.create_rectangle(30, 10, 120, 80)
+        self.led_center = self.canvas.create_rectangle(150, 10, 240, 80)
+        self.led_right = self.canvas.create_rectangle(270, 10, 370, 80)
+
+        self.drive_left = self.canvas.create_image(130, 150, image=self.arrow_left)
+        self.drive_straight = self.canvas.create_image(200, 150, image=self.arrow_straight)
+        self.drive_right = self.canvas.create_image(270, 150, image=self.arrow_right)
+
+        self.set_state(RobotState(SENSOR_ALL, DRIVE_STRAIGHT))
+
+        self.canvas.pack(fill=tk.BOTH, expand=1)
+
+
+def exit_handler():
+    ser_close()
+
+
+def sigint_handler(signal, frame):
+    exit_handler()
+    print('Interrupted: Close')
+    sys.exit(0)
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.DEBUG)
+    atexit.register(exit_handler)
+    signal.signal(signal.SIGINT, sigint_handler)
+    logging.basicConfig(level=logging.INFO)
     root = tk.Tk()
-    port_var = StringVar()
-    port_var.set("rfcomm0")
-    connection_var = StringVar()
-    connection_var.set("State: Not Connected")
+
     root.title("Robot Control")
     # root.geometry("200x200")
     root.minsize(width=250, height=250)
     frm = ttk.Frame(root, padding=10)
     frm.grid()
     ser_frame = ttk.Frame(frm)
-    ser_frame.grid(sticky=N)
+    ser_frame.grid(sticky=tk.N)
     console_frame = ttk.Labelframe(frm, text="Console")
     console_frame.grid(row=0, column=1)
     ConsoleUi(console_frame)
     SerialConnection(ser_frame)
     drive_frame = ttk.Labelframe(frm, text="Drive")
-    drive_frame.grid(row=1, column=0, sticky=(E, W))
+    drive_frame.grid(row=1, column=0, sticky=tk.NSEW)
     DriveControl(drive_frame)
-    ex = Example(frm)
+    ex = StateControl(frm)
     ex.grid(row=1, column=1)
-    try:
-        root.mainloop()
-    except KeyboardInterrupt:
-        root.destroy()
-
-    # arduino = serial.Serial(port='rfcomm0', baudrate=115200, timeout=.1)
-
-    # def write_read(x):
-    #     arduino.write(bytes(x, 'utf-8'))
-    #     time.sleep(0.05)
-    #     data = arduino.readline()
-    #     return data
-
-    # while True:
-    #     num = input("Enter a number: ")  # Taking input from user
-    #     value = write_read(num)
-    #     print(value)  # printing the value
+    root.mainloop()
+    exit_handler()
 
 
 if __name__ == '__main__':

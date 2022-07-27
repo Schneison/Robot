@@ -88,6 +88,11 @@ typedef enum {
      */
     DS_CHECK_START,
     /**
+ * @brief Shortly before start, recognised starting field and will start in next cycle.
+ * @details This state is needed for calculation reasons
+ */
+    DS_ZERO_ROUND,
+    /**
      * @brief Started an currently driving the first round.
      */
     DS_FIRST_ROUND,
@@ -99,6 +104,10 @@ typedef enum {
     * @brief Finished second round, currently in third and last round.
     */
     DS_THIRD_ROUND,
+    /**
+     * @brief Drive back until on start field again
+     */
+    DS_BACKWARDS,
     /**
      * @brief Finished driving, try to util_reset robot.
      */

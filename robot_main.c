@@ -17,7 +17,7 @@ int main(void) {
 
     //Create track state
     track_state *trackState = malloc(sizeof(track_state));
-    trackState->drive = DS_FIRST_ROUND;
+    trackState->drive = DS_CHECK_START;
     trackState->action = AC_WAIT;
     trackState->pos = POS_UNKNOWN;
     trackState->last_pos = POS_UNKNOWN;

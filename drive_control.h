@@ -86,15 +86,15 @@ typedef enum {
 /**
 * @brief Move motor forward
 */
-    FORWARDS,
+    OR_FORWARDS,
 /**
  * @brief Move motor backward
  */
-    BACKWARDS,
+    OR_BACKWARDS,
 /**
  * @brief Stop the motor movement
  */
-    STOP
+    OR_STOP
 } orientation;
 
 /**
@@ -108,7 +108,7 @@ typedef enum {
 /**
 * @brief Speed of the inner wheel
 */
-    SPEED_INNER = 140,
+    SPEED_INNER = 150,
 /**
 * @brief Speed on a strait line
 */
