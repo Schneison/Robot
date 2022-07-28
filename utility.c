@@ -1,11 +1,11 @@
 #include "utility.h"
 
-void util_reset(void) {
-    //TODO: How to do 5 Sek ? Sleep 4 / 1 and then timeout ?
+_Noreturn void util_reset(void) {
     //Enables the watch dog timer
     wdt_enable(WDTO_1S | WDTO_4S);
-    // Endless loop to trigger the watch dog timer
-    while (1) {};
+    while (1) {
+        //Endless loop to trigger the watch dog timer
+    }
     // Never reached
     wdt_disable();
 }

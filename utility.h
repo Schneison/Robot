@@ -16,7 +16,7 @@
  * @brief Resets the board after 5 seconds by using the watch dog timer.
  * @details For more information on the wdt look at p.76 of the datasheet
  */
-void util_reset(void);
+_Noreturn void util_reset(void);
 
 /**
  * @brief Amount of counters that are defined in #counter_def

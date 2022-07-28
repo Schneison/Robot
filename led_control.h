@@ -22,7 +22,7 @@
  * @brief Amount of led on this roboter
  * @details Defines how many shifts have to be done to update all led values
  */
-#define LED_AMOUNT 3
+const uint8_t LED_AMOUNT = 3;
 
 /**
  * @brief Describes the binary state that is needed to activate the LED'S

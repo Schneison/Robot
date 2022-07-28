@@ -137,7 +137,7 @@ void motor_init(void);
  * @param pin PD5/PD6 for left/right motor cycle
  * @param value Defines speed of the wheels. (0 - 255 = 0% - 100%)
  */
-void setDutyCycle(uint8_t pin, uint8_t value);
+void motor_set_duty(uint8_t pin, speed_value value);
 
 /**
  * @brief Sets the speed of the left motor.
