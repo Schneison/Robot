@@ -81,9 +81,9 @@ class SerialHandler:
         self.ser.write(bytes('\r\n', 'ascii', 'ignore'))
 
     def close(self):
+        self.stop_threads()
         if self.ser and self.ser.is_open:
             self.ser.close()
-        self.stop_threads()
 
 
 ser_handler: Union[SerialHandler, None] = None
