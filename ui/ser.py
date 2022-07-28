@@ -99,6 +99,11 @@ class SerialHandler:
 ser_handler: Union[SerialHandler, None] = None
 
 
+def is_connected() -> bool:
+    """Checks if we have a open connection to a port"""
+    return ser_handler and ser_handler.ser.is_open
+
+
 def try_send(data: str, logger: Logger):
     """Tries to send the given data via serial to the robot"""
     if not ser_handler:

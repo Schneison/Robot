@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import tkinter as tk
 from tkinter import ttk, StringVar, FLAT, LEFT
@@ -7,7 +9,10 @@ import atexit
 import signal
 import sys
 from dataclasses import dataclass
-from ser import UpdateFunction, try_send, open_port, close_port, StateTuple
+from typing import List, Callable, NoReturn
+
+import ser
+from ser import UpdateFunction, try_send, open_port, close_port, StateTuple, is_connected
 from PIL import Image
 from PIL.ImageTk import PhotoImage
 import warnings
@@ -27,18 +32,21 @@ DRIVE_LEFT = 1
 DRIVE_STRAIGHT = 2
 DRIVE_RIGHT = 4
 
-
 @dataclass
 class RobotState:
     """State of the robot, this gets send from the robot if we request it"""
     led: int
     drive_state: int
     action: int
-    pos: int
-    manuel: int
+    home: bool
+    manuel: bool
+    connected: bool
+
+    def with_connection(self, connected) -> RobotState:
+        return RobotState(self.led, self.drive_state, self.action, self.home, self.manuel, connected)
 
 
-STATE_EMPTY = RobotState(SENSOR_NONE, DRIVE_NONE, 0, 0, 0)
+STATE_EMPTY = RobotState(SENSOR_NONE, DRIVE_NONE, 0, False, False, False)
 
 
 class QueueHandler(logging.Handler):
@@ -96,7 +104,7 @@ class ConsoleDisplay:
 
 class ConnectionControl:
     """Controls which can be used to open ports and send data via serial"""
-    def __init__(self, frm: ttk.Frame, update_state: UpdateFunction):
+    def __init__(self, frm: ttk.Frame, update_state: UpdateFunction, con_call: Callable[[bool], NoReturn]):
         self.port_var = StringVar()
         self.connect_var = StringVar()
         self.frm = frm
@@ -104,6 +112,7 @@ class ConnectionControl:
         self.init_vars()
         self.init_ui()
         self.update_state = update_state
+        self.con_call = con_call
 
     def init_vars(self):
         """Initialises the variables used by the ui entries and buttons"""
@@ -129,35 +138,58 @@ class ConnectionControl:
         """Action for the open/close button, tries to open/closes the port contained in the port entry."""
         port = self.port_var.get()
         connected = open_port(port, logger, self.update_state)
+        self.con_call(connected)
         self.connect_var.set("Close" if connected else "Open")
 
 
 class DriveControl:
     """Controls which can be used to drive the robot or give commands"""
+    connection_buttons: List[ttk.Button]
+    manuel_buttons: List[ttk.Button]
+
     def __init__(self, frm: ttk.Labelframe):
         self.frm = frm
+        self.connection_buttons = []
+        self.manuel_buttons = []
         self.init_ui()
+
+    def update_state(self, robot_state: RobotState):
+        """Update the state of the ui elements"""
+        state = tk.NORMAL if robot_state.connected else tk.DISABLED
+        state_manuel = tk.NORMAL if robot_state.connected and robot_state.manuel else tk.DISABLED
+        for widget in self.connection_buttons:
+            widget.configure(state=state)
+        for widget in self.manuel_buttons:
+            widget.configure(state=state_manuel)
 
     def init_ui(self):
         """Creates the ui elements of this control"""
+
+        def add_connection(button: ttk.Button) -> ttk.Button:
+            self.connection_buttons.append(button)
+            return button
+
+        def add_manuel(button: ttk.Button) -> ttk.Button:
+            self.manuel_buttons.append(button)
+            return button
         # -S-
         # FPR
         # -H-
-        ttk.Button(self.frm, text="Start", command=lambda: try_send('S', logger)).grid(column=1, row=0)
-        ttk.Button(self.frm, text="Pause", command=lambda: try_send('P', logger)).grid(column=1, row=1)
-        ttk.Button(self.frm, text="Rest", command=lambda: try_send('R', logger)).grid(column=2, row=1)
-        ttk.Button(self.frm, text="Home", command=lambda: try_send('C', logger)).grid(column=1, row=2)
-        ttk.Button(self.frm, text="Freeze", command=lambda: try_send('X', logger)).grid(column=0, row=1)
+        add_connection(ttk.Button(self.frm, text="Start", command=lambda: try_send('S', logger))).grid(column=1, row=0)
+        add_connection(ttk.Button(self.frm, text="Pause", command=lambda: try_send('P', logger))).grid(column=1, row=1)
+        add_connection(ttk.Button(self.frm, text="Rest", command=lambda: try_send('R', logger))).grid(column=2, row=1)
+        add_connection(ttk.Button(self.frm, text="Home", command=lambda: try_send('C', logger))).grid(column=1, row=2)
+        add_connection(ttk.Button(self.frm, text="Freeze", command=lambda: try_send('X', logger))).grid(column=0, row=1)
         # Needed for space between the buttons
         ttk.Label(self.frm, text="").grid(column=1, row=3)
         # -W-
         # AMD
         # -B-
-        ttk.Button(self.frm, text="Forward", command=lambda: try_send('W', logger)).grid(column=1, row=4)
-        ttk.Button(self.frm, text="Right", command=lambda: try_send('D', logger)).grid(column=2, row=5)
-        ttk.Button(self.frm, text="Manuel", command=lambda: try_send('M', logger)).grid(column=1, row=5)
-        ttk.Button(self.frm, text="Backward", command=lambda: try_send('B', logger)).grid(column=1, row=6)
-        ttk.Button(self.frm, text="Left", command=lambda: try_send('A', logger)).grid(column=0, row=5)
+        add_manuel(ttk.Button(self.frm, text="Forward", command=lambda: try_send('W', logger))).grid(column=1, row=4)
+        add_manuel(ttk.Button(self.frm, text="Right", command=lambda: try_send('D', logger))).grid(column=2, row=5)
+        add_connection(ttk.Button(self.frm, text="Manuel", command=lambda: try_send('M', logger))).grid(column=1, row=5)
+        add_manuel(ttk.Button(self.frm, text="Backward", command=lambda: try_send('B', logger))).grid(column=1, row=6)
+        add_manuel(ttk.Button(self.frm, text="Left", command=lambda: try_send('A', logger))).grid(column=0, row=5)
 
 
 def create_image(path: str, flip=False) -> PhotoImage:
@@ -170,7 +202,8 @@ def create_image(path: str, flip=False) -> PhotoImage:
 
 def convert_tuple_state(state_tuple: StateTuple) -> RobotState:
     """Converts the tuple state to a state object"""
-    return RobotState(state_tuple[0], state_tuple[1], state_tuple[2], state_tuple[3], state_tuple[4])
+    return RobotState(state_tuple[0], state_tuple[1], state_tuple[2], state_tuple[3] > 0, state_tuple[4] > 0,
+                      is_connected())
 
 
 class StateDisplay(tk.Frame):
@@ -193,7 +226,7 @@ class StateDisplay(tk.Frame):
         self.canvas = None
         self.init_ui()
 
-    def set_state(self, state: RobotState):
+    def update_state(self, state: RobotState):
         """Update the state of the ui elements"""
         # Blue LED
         self.canvas.itemconfig(self.led_left, fill="#05f" if state.led & SENSOR_LEFT else "#667e92")
@@ -222,8 +255,6 @@ class StateDisplay(tk.Frame):
         self.drive_straight = self.canvas.create_image(200, 150)
         self.drive_right = self.canvas.create_image(270, 150)
 
-        self.set_state(STATE_EMPTY)
-
         self.canvas.pack(fill=tk.BOTH, expand=1)
 
 
@@ -249,14 +280,17 @@ def create_ui(root: tk.Tk):
     ConsoleDisplay(console_frame)
     drive_frame = ttk.Labelframe(frm, text="Drive")
     drive_frame.grid(row=1, column=0, sticky=tk.NSEW)
-    DriveControl(drive_frame)
+    drive = DriveControl(drive_frame)
     ex = StateDisplay(frm)
     ex.grid(row=1, column=1)
 
-    def update(state_tuple: StateTuple):
-        state = convert_tuple_state(state_tuple)
-        ex.set_state(state)
-    ConnectionControl(ser_frame, update)
+    def update(state: RobotState):
+        ex.update_state(state)
+        drive.update_state(state)
+    ConnectionControl(ser_frame,
+                      lambda state_tuple: update(convert_tuple_state(state_tuple)),
+                      lambda connected: update(STATE_EMPTY.with_connection(connected)))
+    update(STATE_EMPTY)
 
 
 def main() -> None:
