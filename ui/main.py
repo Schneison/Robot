@@ -30,16 +30,19 @@ DRIVE_RIGHT = 4
 
 @dataclass
 class RobotState:
+    """State of the robot, this gets send from the robot if we request it"""
     led: int
     drive_state: int
     action: int
     pos: int
+    manuel: int
 
 
-STATE_EMPTY = RobotState(SENSOR_NONE, DRIVE_NONE, 0, 0)
+STATE_EMPTY = RobotState(SENSOR_NONE, DRIVE_NONE, 0, 0, 0)
 
 
 class QueueHandler(logging.Handler):
+    """Internal queue for the logging, which handles the logged messages to the console ui"""
     def __init__(self, log_queue):
         super().__init__()
         self.log_queue = log_queue
@@ -48,7 +51,8 @@ class QueueHandler(logging.Handler):
         self.log_queue.put(record)
 
 
-class ConsoleUi:
+class ConsoleDisplay:
+    """Scrolling text field which displays messages given to the logger"""
     def __init__(self, frame):
         self.frame = frame
         # Create a ScrolledText wdiget
@@ -68,7 +72,8 @@ class ConsoleUi:
         # Start polling messages from the queue
         self.frame.after(100, self.poll_log)
 
-    def display(self, record):
+    def display_message(self, record):
+        """Displays the given message on the console"""
         msg = self.queue_handler.format(record)
         self.scrolled_text.configure(state='normal')
         self.scrolled_text.insert(tk.END, msg + '\n', record.levelname)
@@ -77,6 +82,7 @@ class ConsoleUi:
         self.scrolled_text.yview(tk.END)
 
     def poll_log(self):
+        """Polls messages from the que"""
         # Check every 100ms if there is a new message in the queue to display
         while True:
             try:
@@ -84,11 +90,12 @@ class ConsoleUi:
             except queue.Empty:
                 break
             else:
-                self.display(record)
+                self.display_message(record)
         self.frame.after(100, self.poll_log)
 
 
-class SerialConnection:
+class ConnectionControl:
+    """Controls which can be used to open ports and send data via serial"""
     def __init__(self, frm: ttk.Frame, update_state: UpdateFunction):
         self.port_var = StringVar()
         self.connect_var = StringVar()
@@ -99,10 +106,12 @@ class SerialConnection:
         self.update_state = update_state
 
     def init_vars(self):
+        """Initialises the variables used by the ui entries and buttons"""
         self.port_var.set("")
         self.connect_var.set("Open")
 
     def init_ui(self):
+        """Creates the ui elements of this control"""
         frm = self.frm
         ttk.Label(frm, text="COM Port", relief=FLAT, justify=LEFT).grid(column=0, row=0, sticky=tk.W)
         ttk.Entry(frm, textvariable=self.port_var).grid(column=0, row=1, columnspan=3, sticky=tk.EW)
@@ -117,17 +126,20 @@ class SerialConnection:
         ttk.Button(frm, text="Send", command=lambda: try_send(data_e.get(), logger)).grid(column=3, row=4)
 
     def open_or_close_serial(self) -> None:
+        """Action for the open/close button, tries to open/closes the port contained in the port entry."""
         port = self.port_var.get()
         connected = open_port(port, logger, self.update_state)
         self.connect_var.set("Close" if connected else "Open")
 
 
 class DriveControl:
+    """Controls which can be used to drive the robot or give commands"""
     def __init__(self, frm: ttk.Labelframe):
         self.frm = frm
         self.init_ui()
 
     def init_ui(self):
+        """Creates the ui elements of this control"""
         # -S-
         # FPR
         # -H-
@@ -149,14 +161,20 @@ class DriveControl:
 
 
 def create_image(path: str, flip=False) -> PhotoImage:
+    """Creates a 80x80 image object for the given path and flips it if needed."""
     img = Image.open(path).convert("RGBA").resize((80, 80))
     if flip:
-        img = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+        img = img.transpose(Image.FLIP_LEFT_RIGHT)
     return PhotoImage(img)
 
 
-class StateControl(tk.Frame):
+def convert_tuple_state(state_tuple: StateTuple) -> RobotState:
+    """Converts the tuple state to a state object"""
+    return RobotState(state_tuple[0], state_tuple[1], state_tuple[2], state_tuple[3], state_tuple[4])
 
+
+class StateDisplay(tk.Frame):
+    """Displays the current state of the robot"""
     def __init__(self, p: ttk.Frame):
         super().__init__(p)
 
@@ -175,10 +193,8 @@ class StateControl(tk.Frame):
         self.canvas = None
         self.init_ui()
 
-    def update_state(self, state_tuple: StateTuple):
-        self.set_state(RobotState(state_tuple[0], state_tuple[1], state_tuple[2], state_tuple[3]))
-
     def set_state(self, state: RobotState):
+        """Update the state of the ui elements"""
         # Blue LED
         self.canvas.itemconfig(self.led_left, fill="#05f" if state.led & SENSOR_LEFT else "#667e92")
         # Green LED
@@ -196,6 +212,7 @@ class StateControl(tk.Frame):
                                image=self.arrow_right if state.drive_state & DRIVE_RIGHT else self.arrow_right_light)
 
     def init_ui(self):
+        """Creates the ui elements of this control"""
         self.canvas = tk.Canvas(self)
         self.led_left = self.canvas.create_rectangle(30, 10, 120, 80)
         self.led_center = self.canvas.create_rectangle(150, 10, 240, 80)
@@ -211,6 +228,7 @@ class StateControl(tk.Frame):
 
 
 def exit_handler():
+    """Handles the cleanup on exit, aka closes all open connections and stops all running threads"""
     close_port()
 
 
@@ -221,22 +239,28 @@ def sigint_handler(signal, frame):
 
 
 def create_ui(root: tk.Tk):
+    """Creates the main ui of this program"""
     frm = ttk.Frame(root, padding=10)
     frm.grid()
     ser_frame = ttk.Frame(frm)
     ser_frame.grid(sticky=tk.N)
     console_frame = ttk.Labelframe(frm, text="Console")
     console_frame.grid(row=0, column=1)
-    ConsoleUi(console_frame)
+    ConsoleDisplay(console_frame)
     drive_frame = ttk.Labelframe(frm, text="Drive")
     drive_frame.grid(row=1, column=0, sticky=tk.NSEW)
     DriveControl(drive_frame)
-    ex = StateControl(frm)
+    ex = StateDisplay(frm)
     ex.grid(row=1, column=1)
-    SerialConnection(ser_frame, ex.update_state)
+
+    def update(state_tuple: StateTuple):
+        state = convert_tuple_state(state_tuple)
+        ex.set_state(state)
+    ConnectionControl(ser_frame, update)
 
 
 def main() -> None:
+    """Main method"""
     atexit.register(exit_handler)
     signal.signal(signal.SIGINT, sigint_handler)
     logging.basicConfig(level=logging.INFO)

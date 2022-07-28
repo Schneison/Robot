@@ -14,8 +14,10 @@ UpdateFunction = Callable[[StateTuple], NoReturn]
 
 
 class SerialHandler:
+    """Handles all operations regarding the serial port"""
 
     def __init__(self, port: str, logger: Logger, update_state: UpdateFunction):
+        """Initialises a serial handler object, and open the given port."""
         self.ser = Serial(port=port, baudrate=baud_rate, parity=serial.PARITY_NONE,
                           stopbits=serial.STOPBITS_TWO,
                           bytesize=serial.EIGHTBITS, timeout=0.2)
@@ -23,29 +25,33 @@ class SerialHandler:
         self.port = port
         self.stop = False
         self.update_state = update_state
-        self.thread1 = threading.Thread(target=self.receive_data)
-        self.thread1.daemon = True
+        self.thread_receive = threading.Thread(target=self.receive_data)
+        self.thread_receive.daemon = True
         self.logger = logger
-        self.thread2 = threading.Thread(target=self.update_gui)
-        self.thread2.daemon = True
+        self.thread_update = threading.Thread(target=self.update_gui)
+        self.thread_update.daemon = True
 
     def stop_threads(self):
+        """Stops all current threads that run on the port"""
         self.stop = True
-        self.thread1.join()
-        self.thread2.join()
+        self.thread_receive.join()
+        self.thread_update.join()
         self.stop = False
 
     def start_threads(self):
-        self.thread1.start()
-        self.thread2.start()
+        """Starts all current threads that run on the port"""
+        self.thread_receive.start()
+        self.thread_update.start()
 
     def update_gui(self):
+        """Run on the update thread to update the current ui state"""
         while not self.stop:
             if not self.data.empty():  # if data has been added
                 self.update_state(self.data.get())
             time.sleep(0.01)
 
     def receive_data(self):
+        """Run on the receive thread to read data from the port"""
         while not self.stop:
             if self.ser is not None and self.ser.is_open and self.ser.inWaiting() > 0:
                 try:
@@ -60,6 +66,7 @@ class SerialHandler:
             time.sleep(0.01)
 
     def read_state(self, txt: str):
+        """Serialises the given text and add it to the state queue"""
         try:
             data = txt[1:len(txt) - 1]
             state_tuple = make_tuple(data)
@@ -68,11 +75,13 @@ class SerialHandler:
             self.logger.log(ERROR, "Failed to read state %s" % msg)
 
     def request_state(self):
+        """Writes message to the port, that request a state update from the robot"""
         if not serial_connected:
             return
         self.ser.write(bytes('N\r\n', 'ascii', 'ignore'))
 
     def send_byte(self, data: str):
+        """Writes the given text to the port"""
         if not serial_connected:
             print("Not Send: Not connected")
             return
@@ -81,6 +90,7 @@ class SerialHandler:
         self.ser.write(bytes('\r\n', 'ascii', 'ignore'))
 
     def close(self):
+        """Close the port and stop all threads"""
         self.stop_threads()
         if self.ser and self.ser.is_open:
             self.ser.close()
@@ -90,6 +100,7 @@ ser_handler: Union[SerialHandler, None] = None
 
 
 def try_send(data: str, logger: Logger):
+    """Tries to send the given data via serial to the robot"""
     if not ser_handler:
         logger.log(ERROR, "Not Send: Not Connected")
         return
@@ -100,11 +111,14 @@ def try_send(data: str, logger: Logger):
 
 
 def close_port():
+    """Closes the serial handler and the associated port"""
     if ser_handler:
         ser_handler.close()
 
 
 def open_port(port: str, logger: Logger, update_state: UpdateFunction) -> bool:
+    """Creates a serial handler, opens the port to the serial, or closes it if it is already open
+     and print a message to the log."""
     global serial_connected
     global ser_handler
     if serial_connected:
@@ -128,4 +142,3 @@ def open_port(port: str, logger: Logger, update_state: UpdateFunction) -> bool:
         logger.log(ERROR, msg)
     serial_connected = connect
     return connect
-
