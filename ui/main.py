@@ -10,6 +10,9 @@ from dataclasses import dataclass
 from ser import UpdateFunction, try_send, open_port, close_port, StateTuple
 from PIL import Image
 from PIL.ImageTk import PhotoImage
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+# Pillow 10
 
 logger = logging.getLogger(__name__)
 
@@ -34,27 +37,6 @@ class RobotState:
 
 
 STATE_EMPTY = RobotState(SENSOR_NONE, DRIVE_NONE, 0, 0)
-
-
-class TextHandler(logging.Handler):
-    def __init__(self, text):
-        # run the regular Handler __init__
-        logging.Handler.__init__(self)
-        # Store a reference to the Text it will log to
-        self.text = text
-
-    def emit(self, record):
-        msg = self.format(record)
-
-        def append():
-            self.text.configure(state='normal')
-            self.text.insert(tk.END, msg + '\n')
-            self.text.configure(state='disabled')
-            # Autoscroll to the bottom
-            self.text.yview(tk.END)
-
-        # This is necessary because we can't modify the Text from other threads
-        self.text.after(0, append)
 
 
 class QueueHandler(logging.Handler):
@@ -169,7 +151,7 @@ class DriveControl:
 def create_image(path: str, flip=False) -> PhotoImage:
     img = Image.open(path).convert("RGBA").resize((80, 80))
     if flip:
-        img = img.transpose(Image.FLIP_LEFT_RIGHT)
+        img = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
     return PhotoImage(img)
 
 
@@ -238,15 +220,7 @@ def sigint_handler(signal, frame):
     sys.exit(0)
 
 
-def main() -> None:
-    atexit.register(exit_handler)
-    signal.signal(signal.SIGINT, sigint_handler)
-    logging.basicConfig(level=logging.INFO)
-    root = tk.Tk()
-
-    root.title("Robot Control")
-    # root.geometry("200x200")
-    root.minsize(width=250, height=250)
+def create_ui(root: tk.Tk):
     frm = ttk.Frame(root, padding=10)
     frm.grid()
     ser_frame = ttk.Frame(frm)
@@ -260,6 +234,15 @@ def main() -> None:
     ex = StateControl(frm)
     ex.grid(row=1, column=1)
     SerialConnection(ser_frame, ex.update_state)
+
+
+def main() -> None:
+    atexit.register(exit_handler)
+    signal.signal(signal.SIGINT, sigint_handler)
+    logging.basicConfig(level=logging.INFO)
+    root = tk.Tk()
+    root.title("Robot Control")
+    create_ui(root)
     root.mainloop()
     exit_handler()
 
