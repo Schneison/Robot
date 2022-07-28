@@ -2,7 +2,7 @@
 
 _Noreturn void util_reset(void) {
     //Enables the watch dog timer
-    wdt_enable(WDTO_1S | WDTO_4S);
+    wdt_enable(WATCH_DOG_TIME);
     while (1) {
         //Endless loop to trigger the watch dog timer
     }

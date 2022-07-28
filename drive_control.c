@@ -2,8 +2,8 @@
 
 void motor_clear(void) {
     // Delete everything on ports B and D
-    DDRD = 0;
-    DDRB = 0;
+    DR_MOTOR_FIRST = 0;
+    DR_MOTOR_SECOND = 0;
 }
 
 void motor_init(void) {
@@ -22,37 +22,33 @@ void motor_init(void) {
 }
 
 void motor_set_duty(uint8_t pin, speed_value value) {
-    // Suggestion to handle PD6 - note the code-clones wrt. PD5 below!
-    // Code-clones are extraordinary f cky! Correct this (tricky though
-    // due to the PP-macros, which you cannot simply pass to functions)!
-    // (But PP-macros can help you here....)
-    if (pin == PD6) {
+    if (pin == OP_M_RE) {
         if (value == 0) {
-            TCCR0A &= ~(1 << COM0A1) & ~(1 << COM0A0);  // Normal port operation mode
-            PORTD &= ~(1 << PD6);                       // PD6 LOW, equals 0% duty,
+            TIMER_0_WAVE &= TIMER_0_NORMAL_OPERATION_A;  // Normal port operation mode
+            OR_M_RE &= ~(1 << OP_M_RE);                       // PD6 LOW, equals 0% duty,
         }                                             // timer disconnected
         else if (value == 255) {
-            TCCR0A &= ~(1 << COM0A1) & ~(1 << COM0A0);  // Normal port operation mode
-            PORTD |= (1 << PD6);                        // PD6 HIGH, equals 100% duty,
+            TIMER_0_WAVE &= TIMER_0_NORMAL_OPERATION_A;  // Normal port operation mode
+            OR_M_RE |= (1 << OP_M_RE);                        // PD6 HIGH, equals 100% duty,
         }                                             // timer disconnected
         else {
-            TCCR0A |= (1 << COM0A1);                    // OC0A to LOW on Compare Match,
-            TCCR0A &= ~(1 << COM0A0);                   // to HIGH at BOTTOM (non-inverting mode)
-            OCR0A = (uint8_t) value;                              // generates sequences of 1-0-1-0...
+            TIMER_0_WAVE |= (1 << COM0A1);                    // OC0A to LOW on Compare Match,
+            TIMER_0_WAVE &= ~(1 << COM0A0);                   // to HIGH at BOTTOM (non-inverting mode)
+            TIMER_0_COMPARE_RESOLUTION_A = (uint8_t) value;                              // generates sequences of 1-0-1-0...
         }                                             // for certain periods of time
     }
 
-    if (pin == PD5) {
+    if (pin == OP_M_LE) {
         if (value == 0) {
-            TCCR0A &= ~(1 << COM0B1) & ~(1 << COM0B0);
-            PORTD &= ~(1 << PD5);
+            TIMER_0_WAVE &= TIMER_0_NORMAL_OPERATION_B;
+            OR_M_LE &= ~(1 << OP_M_LE);
         } else if (value == 255) {
-            TCCR0A &= ~(1 << COM0B1) & ~(1 << COM0B0);
-            PORTD |= (1 << PD5);
+            TIMER_0_WAVE &= TIMER_0_NORMAL_OPERATION_B;
+            OR_M_LE |= (1 << OP_M_LE);
         } else {
-            TCCR0A |= (1 << COM0B1);
-            TCCR0A &= ~(1 << COM0B0);
-            OCR0B = (uint8_t) value;
+            TIMER_0_WAVE |= (1 << COM0B1);
+            TIMER_0_WAVE &= ~(1 << COM0B0);
+            TIMER_0_COMPARE_RESOLUTION_B = (uint8_t) value;
         }
     }
 }
@@ -116,12 +112,14 @@ void motor_drive_left(void) {
 }
 
 void motor_drive_stop(void) {
-    motor_set_speed(SPEED_ZERO, SPEED_ZERO);
-    //Reset
-    PORTB &= ~(1 << PB0);
-    PORTB &= ~(1 << PB1);
-    PORTB &= ~(1 << PB3);
-    PORTD &= ~(1 << PD7);
+    motor_set_left(OR_STOP, SPEED_ZERO);
+    motor_set_right(OR_STOP, SPEED_ZERO);
+//    motor_set_speed(SPEED_ZERO, SPEED_ZERO);
+//    //Reset
+//    PORTB &= ~(1 << PB0);
+//    PORTB &= ~(1 << PB1);
+//    PORTB &= ~(1 << PB3);
+//    PORTD &= ~(1 << PD7);
 }
 
 direction evaluate_sensors(sensor_state current, sensor_state last) {
@@ -155,6 +153,33 @@ void drive_apply(sensor_state current, sensor_state last) {
             motor_drive_left();
             break;
         default:
+            break;
+    }
+}
+
+void drive_home(track_state *state) {
+    switch (state->drive) {
+        case DS_ZERO_ROUND:
+        case DS_FIRST_ROUND:
+        case DS_SECOND_ROUND:
+        case DS_THIRD_ROUND:
+            //When on start field begin first round
+            if (state->pos == POS_START_FIELD) {
+                state->drive = DS_BACKWARDS;
+            }
+            break;
+        case DS_BACKWARDS:
+            motor_drive_backward();
+            if (state->sensor_current == SENSOR_ALL) {
+                state->drive = DS_POST_DRIVE;
+            }
+            break;
+        case DS_CHECK_START:
+        case DS_POST_DRIVE:
+            motor_drive_stop();
+            state->action = AC_RESET;
+            break;
+        case DS_PRE_DRIVE:
             break;
     }
 }

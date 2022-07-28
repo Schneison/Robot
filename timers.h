@@ -11,7 +11,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdlib.h>
-#include "iesusart.h"
+#include "usart.h"
 #include <stdio.h>
 #include "utility.h"
 
@@ -77,11 +77,27 @@ void timers_update(Counter *counters);
  * @brief Timer 0 settings (waveform generation mode and port operation)
  */
 #define TIMER_0_WAVE TCCR0A
+/**
+ * @brief Timer 0 normal operation mode for compare A
+ */
+#define TIMER_0_NORMAL_OPERATION_A ~(1 << COM0A1) & ~(1 << COM0A0)
+/**
+ * @brief Timer 0 normal operation mode for compare B
+ */
+#define TIMER_0_NORMAL_OPERATION_B ~(1 << COM0A1) & ~(1 << COM0A0)
 
 /**
  * @brief Set waveform generation mode to Fast PWM, frequency = F_CPU / (PRESCALER * 2^8)
  */
 #define TIMER_0_WAVE_MODE ((1 << WGM00) | (1 << WGM01))
+/**
+ * @brief Counter 0 counter resolution A
+ */
+#define TIMER_0_COMPARE_RESOLUTION_A OCR0A
+/**
+ * @brief Counter 0 counter resolution B
+ */
+#define TIMER_0_COMPARE_RESOLUTION_B OCR0B
 
 /**
  * @brief Control Register A and B of timer1
@@ -128,7 +144,7 @@ uint8_t timers_check_state(track_state *state, counter_def counterDef);
  * @retval 1 if the frequency is meet this cycle.
  * @retval 0 if the frequency is not meet this cycle.
  */
-uint8_t timers_check(Counter *counters, counter_def counterDef);
+uint8_t timers_check(const Counter *counters, counter_def counterDef);
 
 /**
  * @brief Prints then given message if the frequency requirement is currently meed.

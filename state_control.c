@@ -52,17 +52,6 @@ void state_show(track_state *state) {
             } else {
                 timers_print(state->counters, COUNTER_1_HZ,
                              "Not on the starting field. Place me there please... Send ? for help.\n");
-//                LED_State ledState = LED_NONE;
-//                if ((state->sensor_last) & SENSOR_LEFT) {
-//                    ledState |= LED_LEFT;
-//                }
-//                if ((state->sensor_last) & SENSOR_CENTER) {
-//                    ledState |= LED_CENTER;
-//                }
-//                if ((state->sensor_last) & SENSOR_RIGHT) {
-//                    ledState |= LED_RIGHT;
-//                }
-//                led_set(ledState);
                 led_sensor(state->sensor_last);
             }
             break;
@@ -71,7 +60,7 @@ void state_show(track_state *state) {
     }
 }
 
-void state_print_help(track_state *state) {
+void state_print_help(const track_state *state) {
     //Only print help text if S was not received once
     if (state->has_driven_once) {
         USART_print("AAAAAAA");
@@ -82,12 +71,6 @@ void state_print_help(track_state *state) {
     } else {
         USART_print("Not on start field, please position on start field!\n");
     }
-}
-
-void state_print_fail(unsigned char byte) {
-    char s[90];// More is better
-    sprintf(s, "Received undefined Sign %d\n", byte);
-    USART_print(s);
 }
 
 void state_on_action_change(track_state *state, action_type oldAction) {
@@ -196,13 +179,16 @@ _Noreturn void state_run_loop(track_state *trackState) {
         state_show(trackState);
         action_type oldAction = trackState->action;
         switch (oldAction) {
+            case AC_RETURN_HOME: {
+                drive_home(trackState);
+                break;
+            }
             case AC_ROUNDS: {
                 drive_run(trackState);
                 break;
             }
             case AC_RESET: {
                 util_reset();
-                break;
             }
             default:
                 //Do nothing

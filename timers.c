@@ -37,7 +37,7 @@ uint8_t timers_check_state(track_state *state, counter_def counterDef) {
     return timers_check(state->counters, counterDef);
 }
 
-uint8_t timers_check(Counter *counters, counter_def counterDef) {
+uint8_t timers_check(const Counter *counters, counter_def counterDef) {
     return counters && counters[counterDef].value;
 }
 

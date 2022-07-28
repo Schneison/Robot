@@ -3,30 +3,23 @@
 void ADC_clear(void) {
     // The following lines still let the digital input registers enabled,
     // though that's not a good idea (energy-consumption).
-
-    // Klare Verhältnisse erstma!
-    ADMUX = 0;
+    A_MUX_SELECTION = 0;
 }
 
-/** Initializes the ADC-unit. There is ONE single ADC unit on the
- * microcontroller, but different "channels" (input pins) can be
- * connected to the ADC via a MUX-register. The s4etup of the ADC is
- * done in this method, the MUX is used in the read-function.
- */
 void ADC_init(void) {
 
     // Sets AVcc as the ADC's voltage source and as the reference,
     // while that voltage stems from the AREF-pin (5V when the robots is
     //  powered by batteries, lower otherwise).
-    ADMUX |= (1 << REFS0);
+    A_MUX_SELECTION |= (1 << A_MUX_VOLTTAGE_REF);
 
     // This sets how fast (and: accurate) the ADC can run.
     // All these bits set to 1 set a sysclock-division of 128,
     // so the ADC can run with up to 125 kHz.
-    ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
+    A_MUX_STATUS |= A_MUX_STATUS_PRE_SCALE;
 
     // This enables/really turns on the ADC.
-    ADCSRA |= (1 << ADEN);
+    A_MUX_STATUS |= (1 << A_MUX_STATUS_ENABLE);
 
     // The following lines of code start a single measurement in single
     // conversion mode. Needed once to "warm up" the ADC. The contents
@@ -35,11 +28,11 @@ void ADC_init(void) {
     // conversion is done. The first conversion is not only inreliable,
     // but also 25 ADC-cycles long, while the next conversions are around
     // 13 cycles long.
-    ADCSRA |= (1 << ADSC);
-    while (ADCSRA & (1 << ADSC)) {
+    A_MUX_STATUS |= (1 << A_MUX_STATUS_START);
+    while (A_MUX_STATUS & (1 << A_MUX_STATUS_START)) {
         // zzzZZZzzzZZZzzz ... take a sleep until measurement done.
     }
-    ADCW;
+    A_MUX_RESULT;
 }
 
 /** We have a 10-bit-ADC, so somewhere in memory we have to read that
@@ -50,18 +43,18 @@ uint16_t ADC_read(uint8_t channel) {
 
     // The following line does set all ADMUX-MUX-pins to 0, disconnects
     // all channels from the MUX.
-    ADMUX &= ~(ADMUX_CHN_ALL);
-    ADMUX |= channel;
+    A_MUX_SELECTION &= ~ADMUX_CHN_ALL;
+    A_MUX_SELECTION |= channel;
 
     // We start a single measurement and then busy-wait until
     // the ADSC-bit goes to 0, signalling the end of the measurement.
-    ADCSRA |= (1 << ADSC);
-    while (ADCSRA & (1 << ADSC)) {
+    A_MUX_STATUS |= (1 << A_MUX_STATUS_START);
+    while (A_MUX_STATUS & (1 << A_MUX_STATUS_START)) {
         // zzzZZZzzzZZZzzz ... take a sleep until measurement done.
     }
     // Again, a pointer-airthmetical expression. the ADC-register has a
     // lower and a higher portion, but
-    return ADCW;
+    return A_MUX_RESULT;
 }
 
 uint16_t ADC_read_avg(uint8_t channel, uint8_t amount_samples) {

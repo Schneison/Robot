@@ -11,6 +11,26 @@
 #include <avr/io.h>
 #include "utility.h"
 
+/** @brief Active channels and reference of the admux */
+#define A_MUX_SELECTION ADMUX
+/** @brief Admux voltage reference */
+#define A_MUX_VOLTTAGE_REF REFS0
+/** @brief Status of the adc control registry */
+#define A_MUX_STATUS ADCSRA
+/** @brief Flag to enable the admux*/
+#define A_MUX_STATUS_ENABLE ADEN
+/** @brief Flag to start adc conversion */
+#define A_MUX_STATUS_START ADSC
+/** @brief Bits determine the division factor between the system clock
+ * frequency and the input clock to the ADC
+ * @details See datasheet p.319
+ * @details sysclock-division of 128
+ * @details With this the ADC can run with up to 125 kHz
+ */
+#define A_MUX_STATUS_PRE_SCALE (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0)
+/** @brief Registry that contains the result when the conversion is complete */
+#define A_MUX_RESULT ADCW
+
 /**
  * @brief First channel, used by right sensor
  * @sa #ADMUX_CHN_ADC1
@@ -89,6 +109,10 @@ sensor_state sensor_get();
 
 /**
  * @brief Initialises the sensor module
+ * @details There is ONE single ADC unit on the microcontroller but different "channels"
+ * @details The setup of the ADC is done in this method, the MUX is used in the read-function.
+ * @sa #ADC_read
+ * @sa #ADC_read_avg
  */
 void ADC_init(void);
 

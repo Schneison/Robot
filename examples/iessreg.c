@@ -22,7 +22,7 @@
 #define IP_LF_L PINC2
 
 // Robot funktion/peripheral SR
-#define REGWIDTH 3
+#define REG_WIDTH 3
 
 // SR clock
 #define DR_SR_CLK  DDRD
@@ -60,17 +60,17 @@ void clk() {
   the robot's shift-register to the real hardware.
 */
 void update_hardware(srr_t *regmdl) {
-    for(cntv8_t i = 0; i < REGWIDTH; i++) {
+    for (cntv8_t i = 0; i < REG_WIDTH; i++) {
         unsigned char position_set = (*regmdl & (1 << i));
         if (position_set) {
-           OR_SR_DATA |= (1 << OP_SR_DATA);
-           switch (position_set) {
-              case (1 << SR_LED_BLUE):
-                 USART_print("LEFT LED SET/LD FIRES!\n\n");
-                 break;
-              case (1 << SR_LED_GREEN):
-                 USART_print("MIDDLE LED SET/LF FIRES!\n\n");
-                 break;
+            OR_SR_DATA |= (1 << OP_SR_DATA);
+            switch (position_set) {
+                case (1 << SR_LED_BLUE):
+                    USART_print("LEFT LED SET/LD FIRES!\n\n");
+                    break;
+                case (1 << SR_LED_GREEN):
+                    USART_print("MIDDLE LED SET/LF FIRES!\n\n");
+                    break;
               case (1 << SR_LED_YELLOW):
                  USART_print("RIGHT LED SET/LF FIRES!\n\n");
                  break;

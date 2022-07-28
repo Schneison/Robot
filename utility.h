@@ -23,6 +23,9 @@ _Noreturn void util_reset(void);
  */
 #define COUNTER_AMOUNT 7
 
+/** @brief Contains parameters for a 5 second timer */
+#define WATCH_DOG_TIME (WDTO_1S | WDTO_4S)
+
 /**
  * @brief Helper struct that is used to check frequency requirements every cycle. For example this is used to print a
  * message every 1 HZ or every 5 HZ.
