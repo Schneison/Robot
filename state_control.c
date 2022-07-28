@@ -21,9 +21,6 @@ void state_show(track_state *state) {
                 sprintf(s, "Round and round I go, currently round #%d\n", round);
                 USART_print(s);
             }
-            //char s[sizeof("Sensor: 111\n")];
-            //sprintf(s, "Sensor: %d%d%d\n", state->sensor_last & SENSOR_LEFT,state->sensor_last & SENSOR_CENTER,state->sensor_last & SENSOR_RIGHT);
-            //USART_print(s);
             //TODO: Remove before deployment
             led_sensor(state->sensor_last);
             break;
@@ -55,19 +52,7 @@ void state_show(track_state *state) {
             } else {
                 timers_print(state->counters, COUNTER_1_HZ,
                              "Not on the starting field. Place me there please... Send ? for help.\n");
-                LED_State ledState = LED_NONE;
-                if ((state->sensor_last) & SENSOR_LEFT) {
-                    ledState |= LED_LEFT;
-                }
-                if ((state->sensor_last) & SENSOR_CENTER) {
-                    ledState |= LED_CENTER;
-                }
-                if ((state->sensor_last) & SENSOR_RIGHT) {
-                    ledState |= LED_RIGHT;
-                }
-                led_set(ledState);
-                //led_sensor(state->sensor_last);
-                //led_set(LED_ALL);
+                led_sensor(state->sensor_last);
             }
             break;
         default:
@@ -75,7 +60,7 @@ void state_show(track_state *state) {
     }
 }
 
-void state_print_help(track_state *state) {
+void state_print_help(const track_state *state) {
     //Only print help text if S was not received once
     if (state->has_driven_once) {
         USART_print("AAAAAAA");
@@ -86,12 +71,6 @@ void state_print_help(track_state *state) {
     } else {
         USART_print("Not on start field, please position on start field!\n");
     }
-}
-
-void state_print_fail(unsigned char byte) {
-    char s[90];// More is better
-    sprintf(s, "Received undefined Sign %d\n", byte);
-    USART_print(s);
 }
 
 void state_on_action_change(track_state *state, action_type oldAction) {
@@ -160,33 +139,34 @@ void state_read_input(track_state *state) {
 }
 
 void state_update_position(track_state *trackState) {
-    if (timers_check_state(trackState, COUNTER_12_HZ)) {
-        trackState->last_pos = trackState->pos;
-        // All sensors on, could be home field
-        if (trackState->sensor_last == SENSOR_ALL) {
-            trackState->homeCache++;
-            if (trackState->homeCache > 2) {
-                if (trackState->pos != POS_START_FIELD) {
-                    USART_print("Start field found \n");
-                }
-                trackState->pos = POS_START_FIELD;
-                trackState->homeCache = 3;
-            } else {
-                char s[sizeof("Start field tick 1\n")];
-                sprintf(s, "Start field tick %d\n", trackState->homeCache);
-                USART_print(s);
+    if (!timers_check_state(trackState, COUNTER_12_HZ)) {
+        return;
+    }
+    trackState->last_pos = trackState->pos;
+    // All sensors on, could be home field
+    if (trackState->sensor_last == SENSOR_ALL) {
+        trackState->homeCache++;
+        if (trackState->homeCache > 2) {
+            if (trackState->pos != POS_START_FIELD) {
+                USART_print("Start field found \n");
             }
-            return;
-        }
-        trackState->homeCache = 0;
-        if (trackState->action == AC_ROUNDS) {
-            if ((trackState->pos) != POS_TRACK) {
-                USART_print("Start field lost \n");
-            }
-            trackState->pos = POS_TRACK;
+            trackState->pos = POS_START_FIELD;
+            trackState->homeCache = 3;
         } else {
-            trackState->pos = POS_UNKNOWN;
+            char s[sizeof("Start field tick 1\n")];
+            sprintf(s, "Start field tick %d\n", trackState->homeCache);
+            USART_print(s);
         }
+        return;
+    }
+    trackState->homeCache = 0;
+    if (trackState->action == AC_ROUNDS) {
+        if ((trackState->pos) != POS_TRACK) {
+            USART_print("Start field lost \n");
+        }
+        trackState->pos = POS_TRACK;
+    } else {
+        trackState->pos = POS_UNKNOWN;
     }
 }
 
@@ -199,13 +179,16 @@ _Noreturn void state_run_loop(track_state *trackState) {
         state_show(trackState);
         action_type oldAction = trackState->action;
         switch (oldAction) {
+            case AC_RETURN_HOME: {
+                drive_home(trackState);
+                break;
+            }
             case AC_ROUNDS: {
                 drive_run(trackState);
                 break;
             }
             case AC_RESET: {
                 util_reset();
-                break;
             }
             default:
                 //Do nothing

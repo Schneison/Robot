@@ -1,44 +1,31 @@
 /**
- * @file iesusart.c
+ * @file usart.c
  * @brief Basic serial communication via USART for ATMEGA328
  * @version 0.1
  * @date 26.06.2022
  */
 
-#include "iesusart.h"
+#include "usart.h"
 
 unsigned char USART_receiveByte(void) {
-    while (!USART_canReceive()) {}
-    return UDR0;
-}
-
-void USART_receiveString(unsigned char *buffer, uint8_t max_len) {
-    unsigned char c_char;
-    uint8_t len = 0;
-
-    c_char = USART_receiveByte();
-
-    while (c_char != '\n' && len < max_len - 1) {
-        *buffer++ = c_char;
-        len++;
-        c_char = USART_receiveByte();
+    while (!USART_canReceive()) {
+        // Wait for data in buffer
     }
-
-    *buffer = '\0';
+    return UB_DATA;
 }
 
 
 uint8_t USART_canReceive() {
-    return UCSR0A & (1 << RXC0);
+    return UB_STATUS & (1 << UB_STATUS_REC_COMPLETE);
 }
 
 void USART_transmitByte(unsigned char data) {
     // Wait for empty transmit buffer
-    while (!(UCSR0A & (1 << UDRE0))) {
+    while (!(UB_STATUS & (1 << UB_STATUS_EMPTY_FLAG))) {
         // Busy waiting! zzzZZZzzzZZZzzz
     }
     // Put data into buffer, send the data
-    UDR0 = data;
+    UB_DATA = data;
 }
 
 void USART_print(const char *c) {
@@ -50,13 +37,13 @@ void USART_print(const char *c) {
 
 void USART_init(unsigned long ubrr) {
     // Set baud rate, high byte first
-    UBRR0H = (unsigned char) (ubrr >> 8);
+    UB_BAUD_RATE_HIGH = (unsigned char) (ubrr >> 8);
     // Set baud rate, low byte second
-    UBRR0L = (unsigned char) ubrr;
+    UB_BAUD_RATE_LOW = (unsigned char) ubrr;
     // Enable receiver/transmitter
-    UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+    UB_RE_TR = (1 << UB_RECEIVER_FLAG) | (1 << UB_TRANSMITTER_FLAG);
     // Frame format: 8 data, 2 stop bits
-    UCSR0C = (1 << USBS0) | (3 << UCSZ00);
+    UB_FORMAT = (1 << UB_FORMAT_8_DATA) | (3 << UB_FORMAT_2_STOP_BITS);
     /* Transmit something right after initialization to overcome the lagg at the
      * start of a simulation in SimulIDE.
     */

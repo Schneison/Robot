@@ -10,14 +10,22 @@
 
 #include <avr/io.h>
 
-/**
- * @brief LED shift register input pin
- */
-#define LED PB2
-/**
- * @brief LED shift register clock flag pin
- */
+// SR clock
+#define DR_SR_CLK  DDRD
+#define DP_SR_CLK  DDD4
+
+// SR data
+#define DR_SR_DATA DDRB
+#define DP_SR_DATA DDB2
+
+/** @brief LED shift register port */
+#define LED_PORT PORTB
+/** @brief LED shift register input pin */
+#define LED_INPUT PB2
+/** @brief LED shift register clock flag pin */
 #define LED_CLOCK PD4
+/** @brief LED shift register clock port */
+#define LED_CLOCK_PORT PORTD
 /**
  * @brief Amount of led on this roboter
  * @details Defines how many shifts have to be done to update all led values

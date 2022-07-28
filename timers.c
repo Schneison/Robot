@@ -37,7 +37,7 @@ uint8_t timers_check_state(track_state *state, counter_def counterDef) {
     return timers_check(state->counters, counterDef);
 }
 
-uint8_t timers_check(Counter *counters, counter_def counterDef) {
+uint8_t timers_check(const Counter *counters, counter_def counterDef) {
     return counters && counters[counterDef].value;
 }
 
@@ -81,7 +81,7 @@ void timers_setup_timer_1(void) {
     //TIMER_1_CONTROL |= (1 << TIMER_1_MODE);
     //TIMER_1_CONTROL |= (1 << TIMER_1_COMPARE_MODE);
     //TIMER_1_COMPARE_RESOLUTION = TIMER_1_COMPARE_VALUE;
-    TCCR1B = 0; // TODO: Yes / no ?
+    TCCR1B = 0;
     TCCR1B |= (1 << CS10) | (1 << CS11); // Prescaler: 64 => 16E6/64 ticks/second
     TCCR1B |= (1 << WGM12); // Use Timer 1 in CTC-mode
     TIMSK1 |= (1 << OCIE1A); // Enable compare-match-interrupt for OCR1A

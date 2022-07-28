@@ -12,7 +12,7 @@
 #include "timers.h"
 #include <util/delay.h>
 #include "robot_sensor.h"
-#include "iesusart.h"
+#include "usart.h"
 #include "utility.h"
 
 // Direction Register = DR
@@ -59,6 +59,11 @@
 /** @brief Output Pin of the right wheel backward */
 #define OP_M_RB PB1
 
+/** @brief First of the two data direction registries used by this module*/
+#define DR_MOTOR_FIRST DDRD
+/** @brief Second of the two data direction registries used by this module*/
+#define DR_MOTOR_SECOND DDRB
+
 // Left Enable
 /** @brief Direction Register of the left motor speed */
 #define DR_M_LE DDRD
@@ -78,6 +83,7 @@
 #define OR_M_RE PORTD
 /** @brief Output Pin of the right motor speed  */
 #define OP_M_RE PD6
+
 
 /**
  * @brief Possible directions of the two motors.
@@ -137,7 +143,7 @@ void motor_init(void);
  * @param pin PD5/PD6 for left/right motor cycle
  * @param value Defines speed of the wheels. (0 - 255 = 0% - 100%)
  */
-void setDutyCycle(uint8_t pin, uint8_t value);
+void motor_set_duty(uint8_t pin, speed_value value);
 
 /**
  * @brief Sets the speed of the left motor.
@@ -231,7 +237,14 @@ direction evaluate_sensors(sensor_state current, sensor_state last);
 void drive_apply(sensor_state current, sensor_state last);
 
 /**
- * Performance the driving action
+ * @brief Called home, finish this round and reset
+ *
+ * @param state Current state
+ */
+void drive_home(track_state *state);
+
+/**
+ * @brief Performance the driving action
  *
  * @param state Current state
  */

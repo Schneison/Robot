@@ -11,7 +11,7 @@
 #include <avr/wdt.h>
 #include "robot_sensor.h"
 #include "timers.h"
-#include "iesusart.h"
+#include "usart.h"
 #include "drive_control.h"
 #include "state_control.h"
 #include "led_control.h"
@@ -29,14 +29,7 @@ void state_show(track_state *state);
  * if the robot was once in the drive state.
  * @param state Current state
  */
-void state_print_help(track_state *state);
-
-/**
- * Print fail message if character was not defined for an action.
- *
- * @param byte The character which was not defined.
- */
-void state_print_fail(unsigned char byte);
+void state_print_help(const track_state *state);
 
 /**
  * @brief Applies effects and show state to the outside that depend on the current action.
