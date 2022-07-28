@@ -7,8 +7,7 @@ import atexit
 import signal
 import sys
 from dataclasses import dataclass
-from typing import Callable
-from ser import *
+from ser import UpdateFunction, try_send, open_port, close_port, StateTuple
 from PIL import Image
 from PIL.ImageTk import PhotoImage
 
@@ -230,7 +229,7 @@ class StateControl(tk.Frame):
 
 
 def exit_handler():
-    ser_close()
+    close_port()
 
 
 def sigint_handler(signal, frame):

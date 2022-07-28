@@ -99,7 +99,7 @@ def try_send(data: str, logger: logging.Logger):
     ser_handler.send_byte(data)
 
 
-def ser_close():
+def close_port():
     if ser_handler:
         ser_handler.close()
 
@@ -109,7 +109,7 @@ def open_port(port: str, logger: logging.Logger, update_state: UpdateFunction) -
     global ser_handler
     if serial_connected:
         logger.log(logging.INFO, "Disconnected from: " + ser_handler.port)
-        ser_close()
+        close_port()
         serial_connected = False
         ser_handler = None
         return False
