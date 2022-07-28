@@ -7,6 +7,7 @@ import atexit
 import signal
 import sys
 from dataclasses import dataclass
+from typing import Callable
 from ser import *
 from PIL import Image
 from PIL.ImageTk import PhotoImage
@@ -29,6 +30,11 @@ DRIVE_RIGHT = 4
 class RobotState:
     led: int
     drive_state: int
+    action: int
+    pos: int
+
+
+STATE_EMPTY = RobotState(SENSOR_NONE, DRIVE_NONE, 0, 0)
 
 
 class TextHandler(logging.Handler):
@@ -102,13 +108,14 @@ class ConsoleUi:
 
 
 class SerialConnection:
-    def __init__(self, frm: ttk.Frame):
+    def __init__(self, frm: ttk.Frame, update_state: UpdateFunction):
         self.port_var = StringVar()
         self.connect_var = StringVar()
         self.frm = frm
         self.connection_var = StringVar()
         self.init_vars()
         self.init_ui()
+        self.update_state = update_state
 
     def init_vars(self):
         self.port_var.set("")
@@ -126,11 +133,11 @@ class SerialConnection:
         ttk.Label(frm, text="Data", relief=FLAT, justify=LEFT).grid(column=0, row=3, sticky=tk.W)
         data_e = ttk.Entry(frm)
         data_e.grid(column=0, row=4, columnspan=3, sticky=tk.EW)
-        ttk.Button(frm, text="Send", command=lambda: try_send(data_e.get())).grid(column=3, row=4)
+        ttk.Button(frm, text="Send", command=lambda: try_send(data_e.get(), logger)).grid(column=3, row=4)
 
     def open_or_close_serial(self) -> None:
         port = self.port_var.get()
-        connected = open_port(port, logger)
+        connected = open_port(port, logger, self.update_state)
         self.connect_var.set("Close" if connected else "Open")
 
 
@@ -143,20 +150,21 @@ class DriveControl:
         # -S-
         # FPR
         # -H-
-        ttk.Button(self.frm, text="Start", command=lambda: try_send('S')).grid(column=1, row=0)
-        ttk.Button(self.frm, text="Pause", command=lambda: try_send('P')).grid(column=1, row=1)
-        ttk.Button(self.frm, text="Rest", command=lambda: try_send('R')).grid(column=2, row=1)
-        ttk.Button(self.frm, text="Home", command=lambda: try_send('C')).grid(column=1, row=2)
-        ttk.Button(self.frm, text="Freeze", command=lambda: try_send('X')).grid(column=0, row=1)
+        ttk.Button(self.frm, text="Start", command=lambda: try_send('S', logger)).grid(column=1, row=0)
+        ttk.Button(self.frm, text="Pause", command=lambda: try_send('P', logger)).grid(column=1, row=1)
+        ttk.Button(self.frm, text="Rest", command=lambda: try_send('R', logger)).grid(column=2, row=1)
+        ttk.Button(self.frm, text="Home", command=lambda: try_send('C', logger)).grid(column=1, row=2)
+        ttk.Button(self.frm, text="Freeze", command=lambda: try_send('X', logger)).grid(column=0, row=1)
         # Needed for space between the buttons
         ttk.Label(self.frm, text="").grid(column=1, row=3)
         # -W-
-        # A-D
+        # AMD
         # -B-
-        ttk.Button(self.frm, text="Forward", command=lambda: try_send('W')).grid(column=1, row=4)
-        ttk.Button(self.frm, text="Right", command=lambda: try_send('D')).grid(column=2, row=5)
-        ttk.Button(self.frm, text="Backward", command=lambda: try_send('B')).grid(column=1, row=6)
-        ttk.Button(self.frm, text="Left", command=lambda: try_send('A')).grid(column=0, row=5)
+        ttk.Button(self.frm, text="Forward", command=lambda: try_send('W', logger)).grid(column=1, row=4)
+        ttk.Button(self.frm, text="Right", command=lambda: try_send('D', logger)).grid(column=2, row=5)
+        ttk.Button(self.frm, text="Manuel", command=lambda: try_send('M', logger)).grid(column=1, row=5)
+        ttk.Button(self.frm, text="Backward", command=lambda: try_send('B', logger)).grid(column=1, row=6)
+        ttk.Button(self.frm, text="Left", command=lambda: try_send('A', logger)).grid(column=0, row=5)
 
 
 def create_image(path: str, flip=False) -> PhotoImage:
@@ -186,6 +194,9 @@ class StateControl(tk.Frame):
         self.canvas = None
         self.init_ui()
 
+    def update_state(self, state_tuple: StateTuple):
+        self.set_state(RobotState(state_tuple[0], state_tuple[1], state_tuple[2], state_tuple[3]))
+
     def set_state(self, state: RobotState):
         # Blue LED
         self.canvas.itemconfig(self.led_left, fill="#05f" if state.led & SENSOR_LEFT else "#667e92")
@@ -209,11 +220,11 @@ class StateControl(tk.Frame):
         self.led_center = self.canvas.create_rectangle(150, 10, 240, 80)
         self.led_right = self.canvas.create_rectangle(270, 10, 370, 80)
 
-        self.drive_left = self.canvas.create_image(130, 150, image=self.arrow_left)
-        self.drive_straight = self.canvas.create_image(200, 150, image=self.arrow_straight)
-        self.drive_right = self.canvas.create_image(270, 150, image=self.arrow_right)
+        self.drive_left = self.canvas.create_image(130, 150)
+        self.drive_straight = self.canvas.create_image(200, 150)
+        self.drive_right = self.canvas.create_image(270, 150)
 
-        self.set_state(RobotState(SENSOR_ALL, DRIVE_STRAIGHT))
+        self.set_state(STATE_EMPTY)
 
         self.canvas.pack(fill=tk.BOTH, expand=1)
 
@@ -244,12 +255,12 @@ def main() -> None:
     console_frame = ttk.Labelframe(frm, text="Console")
     console_frame.grid(row=0, column=1)
     ConsoleUi(console_frame)
-    SerialConnection(ser_frame)
     drive_frame = ttk.Labelframe(frm, text="Drive")
     drive_frame.grid(row=1, column=0, sticky=tk.NSEW)
     DriveControl(drive_frame)
     ex = StateControl(frm)
     ex.grid(row=1, column=1)
+    SerialConnection(ser_frame, ex.update_state)
     root.mainloop()
     exit_handler()
 

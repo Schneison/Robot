@@ -1,96 +1,123 @@
-from typing import Final, Union
+from typing import Final, Union, Literal, Callable, Tuple, NoReturn
 import logging
 from serial import Serial, SerialException, PortNotOpenError, SerialTimeoutException
 import serial as serial
 import time
 import threading
+import queue
+from ast import literal_eval as make_tuple
 
 baudrate: Final[int] = 9600
 serial_connected: bool = False
+StateTuple = Tuple[int, int, int, int]
+UpdateFunction = Callable[[StateTuple], NoReturn]
 
 
 class SerialHandler:
 
-    def __init__(self, ser: Serial, logger: logging.Logger):
-        self.ser = ser
-        self.data = []
+    def __init__(self, port: str, logger: logging.Logger, update_state: UpdateFunction):
+        self.ser = Serial(port=port, baudrate=baudrate, parity=serial.PARITY_NONE,
+                          stopbits=serial.STOPBITS_TWO,
+                          bytesize=serial.EIGHTBITS, timeout=0.2)
+        self.data = queue.Queue()
+        self.port = port
         self.stop = False
+        self.update_state = update_state
         self.thread1 = threading.Thread(target=self.receive_data)
         self.thread1.daemon = True
         self.logger = logger
-        #     thread2 = threading.Thread(target=self.update_gui)
-        #     thread2.daemon = True
+        self.thread2 = threading.Thread(target=self.update_gui)
+        self.thread2.daemon = True
 
     def stop_threads(self):
         self.stop = True
         self.thread1.join()
+        self.thread2.join()
         self.stop = False
-        #self.thread2.joint()
 
     def start_threads(self):
         self.thread1.start()
+        self.thread2.start()
 
-    #     thread2 = threading.Thread(target=self.update_gui)
-    #     thread2.daemon = True
-    #     thread2.start()
-    #
-    # def update_gui(self):
-    #     while True:
-    #         try:
-    #             if len(self.temp) < len(self.data) and self.ser is not None:  # if data has been added
-    #                 self.comm_text.configure(state='normal')
-    #                 self.comm_text.insert('end', self.data[len(self.data) - 1] + '\n')
-    #                 self.comm_text.see('end')  # scroll text
-    #                 self.comm_text.configure(state='disabled')
-    #                 self.temp.append(self.data[len(self.data) - 1])
-    #             time.sleep(0.2)
-    #         except:
-    #             pass
+    def update_gui(self):
+        while True:
+            if not self.data.empty():  # if data has been added
+                self.update_state(self.data.get())
+            time.sleep(0.01)
 
     def receive_data(self):
         while not self.stop:
-            if self.ser is not None and self.ser.inWaiting() > 0:
+            if self.ser is not None and self.ser.is_open and self.ser.inWaiting() > 0:
                 try:
                     txt = self.ser.readline().decode().replace('\n', '')
-                    # print("I received :", txt)
-                    self.logger.log(logging.INFO, txt)
-                    #self.received = self.ser.readline().decode().replace('\n', '')
-                    #self.data.append(str(self.com_port) + ': ' + self.received)
-                    #print("I received :", self.received)
+                    # State info
+                    if txt.startswith('[') and txt.endswith(']'):
+                        self.read_state(txt)
+                    else:
+                        self.logger.log(logging.INFO, txt)
                 except:
                     pass
-            time.sleep(0.05)
+            time.sleep(0.01)
+
+    def read_state(self, txt: str):
+        try:
+            data = txt[1:len(txt) - 1]
+            state_tuple = make_tuple(data)
+            self.data.put(state_tuple)
+        except SyntaxError as msg:
+            logging.log(logging.ERROR, "Failed to read state %s" % msg)
+
+    def request_state(self):
+        if not serial_connected:
+            return
+        self.ser.write(bytes('N\r\n', 'ascii', 'ignore'))
+
+    def send_byte(self, data: str):
+        if not serial_connected:
+            print("Not Send: Not connected")
+            return
+        print("Send: %s" % bytes(data, 'ascii', 'ignore'))
+        self.ser.write(bytes(data, 'ascii', 'ignore'))
+        self.ser.write(bytes('\r\n', 'ascii', 'ignore'))
+
+    def close(self):
+        if self.ser and self.ser.is_open:
+            self.ser.close()
+        self.stop_threads()
 
 
-ser_port: Union[Serial, None] = None
 ser_handler: Union[SerialHandler, None] = None
 
 
-def try_send(data: str):
+def try_send(data: str, logger: logging.Logger):
+    if not ser_handler:
+        logger.log(logging.ERROR, "Not Send: Not Connected")
+        return
     if len(data) > 1 or not data.isalpha() or not data.isupper():
         print("Not Send: Invalid character")
         return
-    send_byte(data)
+    ser_handler.send_byte(data)
 
 
-def open_port(port: str, logger: logging.Logger) -> bool:
-    global ser_port
+def ser_close():
+    if ser_handler:
+        ser_handler.close()
+
+
+def open_port(port: str, logger: logging.Logger, update_state: UpdateFunction) -> bool:
     global serial_connected
     global ser_handler
     if serial_connected:
-        logger.log(logging.INFO, "Disconnected from: " + ser_port.portstr)
+        logger.log(logging.INFO, "Disconnected from: " + ser_handler.port)
         ser_close()
         serial_connected = False
+        ser_handler = None
         return False
     connect = False
     try:
-        ser_port = Serial(port=port, baudrate=baudrate, parity=serial.PARITY_NONE,
-                          stopbits=serial.STOPBITS_TWO,
-                          bytesize=serial.EIGHTBITS, timeout=0.2)
         logger.log(logging.INFO, "Connected to " + port)
         connect = True
-        serial_connected = True
-        ser_handler = SerialHandler(ser_port, logger)
+        ser_handler = SerialHandler(port, logger, update_state)
         ser_handler.start_threads()
     except PortNotOpenError:
         logger.log(logging.ERROR, "Connection failed, port not open")
@@ -101,24 +128,4 @@ def open_port(port: str, logger: logging.Logger) -> bool:
         logger.log(logging.ERROR, msg)
     serial_connected = connect
     return connect
-
-
-def send_byte(data: str):
-    if not serial_connected:
-        print("Not Send: Not connected")
-        return
-    print("Send: %s" % bytes(data, 'ascii', 'ignore'))
-    ser_port.write(bytes(data, 'ascii', 'ignore'))
-    ser_port.write(bytes('\r\n', 'ascii', 'ignore'))
-
-
-def read_struc():
-    ser_port.read_until(4)
-
-
-def ser_close():
-    if ser_port and ser_port.is_open:
-        ser_port.close()
-    if ser_handler:
-        ser_handler.stop_threads()
 
