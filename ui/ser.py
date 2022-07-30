@@ -8,9 +8,11 @@ import queue
 from ast import literal_eval as make_tuple
 
 baud_rate: Final[int] = 9600
-serial_connected: bool = False
+"""baudrate of the usert serial connection of the board"""
 StateTuple = Tuple[int, int, int, int]
+"""Type of the tuple that gets send from the robot"""
 UpdateFunction = Callable[[StateTuple], NoReturn]
+"""Function signature of a function that accepts a state tuple and returns nothing."""
 
 
 class SerialHandler:
@@ -54,6 +56,7 @@ class SerialHandler:
         """Run on the receive thread to read data from the port"""
         while not self.stop:
             if self.ser is not None and self.ser.is_open and self.ser.inWaiting() > 0:
+                # noinspection PyBroadException
                 try:
                     txt = self.ser.readline().decode().replace('\n', '')
                     # State info
@@ -76,13 +79,13 @@ class SerialHandler:
 
     def request_state(self):
         """Writes message to the port, that request a state update from the robot"""
-        if not serial_connected:
+        if not ser_handler:
             return
         self.ser.write(bytes('N\r\n', 'ascii', 'ignore'))
 
     def send_byte(self, data: str):
         """Writes the given text to the port"""
-        if not serial_connected:
+        if not ser_handler:
             print("Not Send: Not connected")
             return
         print("Send: %s" % bytes(data, 'ascii', 'ignore'))
@@ -97,6 +100,7 @@ class SerialHandler:
 
 
 ser_handler: Union[SerialHandler, None] = None
+"""Current handler for the serial port, none if no port is connected"""
 
 
 def is_connected() -> bool:
@@ -124,12 +128,10 @@ def close_port():
 def open_port(port: str, logger: Logger, update_state: UpdateFunction) -> bool:
     """Creates a serial handler, opens the port to the serial, or closes it if it is already open
      and print a message to the log."""
-    global serial_connected
     global ser_handler
-    if serial_connected:
+    if ser_handler:
         logger.log(INFO, "Disconnected from " + ser_handler.port)
         close_port()
-        serial_connected = False
         ser_handler = None
         return False
     connect = False
@@ -145,5 +147,4 @@ def open_port(port: str, logger: Logger, update_state: UpdateFunction) -> bool:
     except SerialException as msg:
         logger.log(ERROR, "Connection failed")
         logger.log(ERROR, msg)
-    serial_connected = connect
     return connect

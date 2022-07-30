@@ -16,6 +16,7 @@ from ser import UpdateFunction, try_send, open_port, close_port, StateTuple, is_
 from PIL import Image
 from PIL.ImageTk import PhotoImage
 import warnings
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 # Pillow 10
 
@@ -31,6 +32,7 @@ DRIVE_NONE = 0
 DRIVE_LEFT = 1
 DRIVE_STRAIGHT = 2
 DRIVE_RIGHT = 4
+
 
 @dataclass
 class RobotState:
@@ -51,6 +53,7 @@ STATE_EMPTY = RobotState(SENSOR_NONE, DRIVE_NONE, 0, False, False, False)
 
 class QueueHandler(logging.Handler):
     """Internal queue for the logging, which handles the logged messages to the console ui"""
+
     def __init__(self, log_queue):
         super().__init__()
         self.log_queue = log_queue
@@ -61,6 +64,7 @@ class QueueHandler(logging.Handler):
 
 class ConsoleDisplay:
     """Scrolling text field which displays messages given to the logger"""
+
     def __init__(self, frame):
         self.frame = frame
         # Create a ScrolledText wdiget
@@ -104,6 +108,7 @@ class ConsoleDisplay:
 
 class ConnectionControl:
     """Controls which can be used to open ports and send data via serial"""
+
     def __init__(self, frm: ttk.Frame, update_state: UpdateFunction, con_call: Callable[[bool], NoReturn]):
         self.port_var = StringVar()
         self.connect_var = StringVar()
@@ -172,6 +177,7 @@ class DriveControl:
         def add_manuel(button: ttk.Button) -> ttk.Button:
             self.manuel_buttons.append(button)
             return button
+
         # -S-
         # FPR
         # -H-
@@ -208,6 +214,7 @@ def convert_tuple_state(state_tuple: StateTuple) -> RobotState:
 
 class StateDisplay(tk.Frame):
     """Displays the current state of the robot"""
+
     def __init__(self, p: ttk.Frame):
         super().__init__(p)
 
@@ -287,6 +294,7 @@ def create_ui(root: tk.Tk):
     def update(state: RobotState):
         ex.update_state(state)
         drive.update_state(state)
+
     ConnectionControl(ser_frame,
                       lambda state_tuple: update(convert_tuple_state(state_tuple)),
                       lambda connected: update(STATE_EMPTY.with_connection(connected)))
