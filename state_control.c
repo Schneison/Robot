@@ -202,8 +202,8 @@ void state_update_position(track_state *trackState) {
 
 void state_send_update(track_state *trackState) {
     if (trackState->ui_connection == UI_CONNECTED && timers_check_state(trackState, COUNTER_3_HZ)) {
-        char s[sizeof("[(7,7,7,7,7)]\n")];
-        sprintf(s, "[(%d,%d,%d,%d,%d)]\n",
+        char s[sizeof("[(7,7,7,7,100,7)]\n")];
+        sprintf(s, "[(%d,%d,%d,%d,%d,%d)]\n",
                 // Last sensor state
                 trackState->sensor_last,
                 // Direction of driving
@@ -212,6 +212,8 @@ void state_send_update(track_state *trackState) {
                 trackState->action,
                 // On start field
                 trackState->pos == POS_START_FIELD,
+                // Battery voltage in percent times 100
+                sensor_get_battery(),
                 // Is manual
                 trackState->action == AC_MANUAL);
         usart_print(s);
@@ -221,7 +223,7 @@ void state_send_update(track_state *trackState) {
 _Noreturn void state_run_loop(track_state *trackState) {
     while (1) {
         state_read_input(trackState);
-        trackState->sensor_current = sensor_get();
+        trackState->sensor_current = sensor_get_state();
         state_update_position(trackState);
         timers_update(trackState->counters);
         state_show(trackState);

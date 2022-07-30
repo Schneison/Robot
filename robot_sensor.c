@@ -1,12 +1,12 @@
 #include "robot_sensor.h"
 
-void ADC_clear(void) {
+void sensor_clear(void) {
     // The following lines still let the digital input registers enabled,
     // though that's not a good idea (energy-consumption).
     A_MUX_SELECTION = 0;
 }
 
-void ADC_init(void) {
+void sensor_init(void) {
 
     // Sets AVcc as the ADC's voltage source and as the reference,
     // while that voltage stems from the AREF-pin (5V when the robots is
@@ -38,7 +38,7 @@ void ADC_init(void) {
 /** We have a 10-bit-ADC, so somewhere in memory we have to read that
  * 10 bits.  Due to this, this function returns a 16-bit-value.
  */
-uint16_t ADC_read(uint8_t channel) {
+uint16_t sensor_adc_read(uint8_t channel) {
     // Remember to have the ADC initialized!
 
     // The following line does set all ADMUX-MUX-pins to 0, disconnects
@@ -57,27 +57,33 @@ uint16_t ADC_read(uint8_t channel) {
     return A_MUX_RESULT;
 }
 
-uint16_t ADC_read_avg(uint8_t channel, uint8_t amount_samples) {
+uint16_t sensor_adc_read_avg(uint8_t channel, uint8_t amount_samples) {
     // How large does our datatype need to be?
     float sum = 0;
 
     for (uint8_t i = 0; i < amount_samples; ++i) {
-        sum += ADC_read(channel);
+        sum += sensor_adc_read(channel);
     }
 
     return (uint16_t) (sum / (float) amount_samples);
 }
 
-sensor_state sensor_get() {
+sensor_state sensor_get_state() {
     sensor_state value = 0;
-    if (ADC_read_avg(ADMUX_CHN_ADC2, ADC_AVG_AMOUNT) > SIGNAL_LEFT_UPPER) {
+    if (sensor_adc_read_avg(ADMUX_CHN_ADC2, ADC_AVG_AMOUNT) > SIGNAL_LEFT_UPPER) {
         value |= SENSOR_LEFT;
     }
-    if (ADC_read_avg(ADMUX_CHN_ADC1, ADC_AVG_AMOUNT) > SIGNAL_CENTER_UPPER) {
+    if (sensor_adc_read_avg(ADMUX_CHN_ADC1, ADC_AVG_AMOUNT) > SIGNAL_CENTER_UPPER) {
         value |= SENSOR_CENTER;
     }
-    if (ADC_read_avg(ADMUX_CHN_ADC0, ADC_AVG_AMOUNT) > SIGNAL_RIGHT_UPPER) {
+    if (sensor_adc_read_avg(ADMUX_CHN_ADC0, ADC_AVG_AMOUNT) > SIGNAL_RIGHT_UPPER) {
         value |= SENSOR_RIGHT;
     }
     return value;
+}
+
+uint8_t sensor_get_battery(void) {
+    return (uint8_t) (
+            ((sensor_adc_read_avg(ADMUX_CHN_ADC3, ADC_AVG_AMOUNT) - BATTERY_MIN)
+             / (BATTERY_MAX - BATTERY_MIN)) * 100);
 }

@@ -32,33 +32,44 @@
 #define A_MUX_RESULT ADCW
 
 /**
- * @brief First channel, used by right sensor
+ * @brief First channel, used for right sensor
  * @sa #ADMUX_CHN_ADC1
  * @sa #ADMUX_CHN_ADC2
+ * @sa #ADMUX_CHN_ADC3
  * @sa #ADMUX_CHN_ALL
  */
 #define ADMUX_CHN_ADC0 0 // 0000 0000
 /**
- * @brief Second channel, used by center sensor
+ * @brief Second channel, used for center sensor
  * @sa #ADMUX_CHN_ADC0
  * @sa #ADMUX_CHN_ADC2
+ * @sa #ADMUX_CHN_ADC3
  * @sa #ADMUX_CHN_ALL
  */
 #define ADMUX_CHN_ADC1 1 // 0000 0001
 /**
- * @brief Third channel, used by left sensor
+ * @brief Third channel, used for left sensor
  * @sa #ADMUX_CHN_ADC0
  * @sa #ADMUX_CHN_ADC1
+ * @sa #ADMUX_CHN_ADC3
  * @sa #ADMUX_CHN_ALL
  */
 #define ADMUX_CHN_ADC2 2 // 0000 0010
+/**
+ * @brief Third channel, used for the battery
+ * @sa #ADMUX_CHN_ADC0
+ * @sa #ADMUX_CHN_ADC1
+ * @sa #ADMUX_CHN_ADC2
+ * @sa #ADMUX_CHN_ALL
+ */
+#define ADMUX_CHN_ADC3 4 // 0000 0010
 /**
  * @brief Constant that contains all possible channels
  * @sa #ADMUX_CHN_ADC0
  * @sa #ADMUX_CHN_ADC1
  * @sa #ADMUX_CHN_ADC2
  */
-#define ADMUX_CHN_ALL 7  // 0000 0111
+#define ADMUX_CHN_ALL 15  // 0000 1111
 
 /**
  * @brief Amount of measurements made by the analog-digital-converter
@@ -83,13 +94,22 @@
 #define SIGNAL_LEFT_UPPER 250
 
 /**
+ * @brief Min Operating Voltage of the board
+ */
+#define BATTERY_MIN 1.8
+/**
+ * @brief Max Operating Voltage of the board
+ */
+#define BATTERY_MAX 5.5
+
+/**
  * @brief Reads the output signals on the given channel of the adc (analog-digital-converter) module
  * @param channel Channel on the adc module as defined
  * @details We have a 10-bit-ADC, so somewhere in memory we have to read that
  * 10 bits.  Due to this, this function returns a 16-bit-value.
  * @return Digital value measured
  */
-uint16_t ADC_read(uint8_t channel);
+uint16_t sensor_adc_read(uint8_t channel);
 
 /**
  * @brief Reads the output signals on the given channel of the adc (analog-digital-converter) module but with a given
@@ -99,28 +119,34 @@ uint16_t ADC_read(uint8_t channel);
  *
  * @return Average digital value measured
  */
-uint16_t ADC_read_avg(uint8_t channel, uint8_t amount_samples);
+uint16_t sensor_adc_read_avg(uint8_t channel, uint8_t amount_samples);
 
 /**
  * @brief Reads the state of all field sensors.
  * @retval sensor_state#SENSOR_LEFT
  */
-sensor_state sensor_get();
+sensor_state sensor_get_state();
+
+/**
+ * @brief Reads the state of the battery and retrieves a percent value of voltage of the battery multiplied by 100
+ * @retval 0 to 100, based on the percent of voltage of the battery multiplied by 100
+ */
+uint8_t sensor_get_battery(void);
 
 /**
  * @brief Initialises the sensor module
  * @details There is ONE single ADC unit on the microcontroller but different "channels"
  * @details The setup of the ADC is done in this method, the MUX is used in the read-function.
- * @sa #ADC_read
- * @sa #ADC_read_avg
+ * @sa #sensor_adc_read
+ * @sa #sensor_adc_read_avg
  */
-void ADC_init(void);
+void sensor_init(void);
 
 /**
  * @brief Clears all pins used by the sensor module.
  *
- * @details Required to be called before #ADC_init()
+ * @details Required to be called before #sensor_init()
  */
-void ADC_clear(void);
+void sensor_clear(void);
 
 #endif

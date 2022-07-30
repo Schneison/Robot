@@ -2,10 +2,10 @@
 
 void setup(void) {
     motor_clear();
-    ADC_clear();
+    sensor_clear();
 
     usart_init(UBRR_SETTING);
-    ADC_init();
+    sensor_init();
     motor_init();
     led_init();
     timers_init();

@@ -39,17 +39,17 @@
  * connected to the ADC via a MUX-register. The s4etup of the ADC is
  * done in this method, the MUX is used in the read-function.
  */
-void ADC_init(void) {
-  // The following lines still let the digital input registers enabled,
-  // though that's not a good idea (energy-consumption).
+void sensor_init(void) {
+    // The following lines still let the digital input registers enabled,
+    // though that's not a good idea (energy-consumption).
 
-  // Klare Verhältnisse erstma!
-  ADMUX = 0;
+    // Klare Verhältnisse erstma!
+    ADMUX = 0;
 
-  // Sets AVcc as the ADC's voltage source and as the reference,
-  // while that voltage stems from the AREF-pin (5V when the robots is
-  //  powered by batteries, lower otherwise).
-  ADMUX = (1<<REFS0);
+    // Sets AVcc as the ADC's voltage source and as the reference,
+    // while that voltage stems from the AREF-pin (5V when the robots is
+    //  powered by batteries, lower otherwise).
+    ADMUX = (1 << REFS0);
 
   // This sets how fast (and: accurate) the ADC can run.
   // All these bits set to 1 set a sysclock-division of 128,
@@ -76,17 +76,17 @@ void ADC_init(void) {
 /** We have a 10-bit-ADC, so somewhere in memory we have to read that
  * 10 bits.  Due to this, this function returns a 16-bit-value.
  */
-uint16_t ADC_read(uint8_t channel) {
-  // Remember to have the ADC initialized!
+uint16_t sensor_adc_read(uint8_t channel) {
+    // Remember to have the ADC initialized!
 
-  // The following line does set all ADMUX-MUX-pins to 0, disconnects
-  // all channels from the MUX.
-  ADMUX &= ~(ADMUX_CHN_ALL);
-  ADMUX |= channel;
+    // The following line does set all ADMUX-MUX-pins to 0, disconnects
+    // all channels from the MUX.
+    ADMUX &= ~(ADMUX_CHN_ALL);
+    ADMUX |= channel;
 
-  // We start a single measurement and then busy-wait until
-  // the ADSC-bit goes to 0, signalling the end of the measurement.
-  ADCSRA |= (1<<ADSC);
+    // We start a single measurement and then busy-wait until
+    // the ADSC-bit goes to 0, signalling the end of the measurement.
+    ADCSRA |= (1 << ADSC);
   while (ADCSRA & (1<<ADSC)) {
     // zzzZZZzzzZZZzzz ... take a sleep until measurement done.
   }
@@ -97,15 +97,15 @@ uint16_t ADC_read(uint8_t channel) {
 
 /** Used to read multiple measurements to reduce noise.
  */
-uint16_t ADC_read_avg(uint8_t channel, uint8_t nsamples) {
-  // How large does our datatype need to be?
-  uint32_t sum = 0;
+uint16_t sensor_adc_read_avg(uint8_t channel, uint8_t amount_samples) {
+    // How large does our datatype need to be?
+    uint32_t sum = 0;
 
-  for (uint8_t i = 0; i < nsamples; ++i ) {
-    sum += ADC_read(channel);
-  }
+    for (uint8_t i = 0; i < amount_samples; ++i) {
+        sum += sensor_adc_read(channel);
+    }
 
-  return (uint16_t)( sum / (float)nsamples );
+    return (uint16_t) (sum / (float) amount_samples);
 }
 
 int main(void) {
@@ -115,7 +115,7 @@ int main(void) {
     DR_ADC1 &= ~(1 << DP_ADC1);
     DR_ADC2 &= ~(1 << DP_ADC2);
 
-    ADC_init();
+    sensor_init();
 
     unsigned char strbuff[sizeof(ADCMSG) + 15]; // WTF, why + 15? Oo
 
@@ -128,9 +128,9 @@ int main(void) {
     uint16_t adcval2 = 0;
 
     while(1) {
-        adcval0 = ADC_read_avg(ADMUX_CHN_ADC0, ADC_AVG_WINDOW);
-        adcval1 = ADC_read_avg(ADMUX_CHN_ADC1, ADC_AVG_WINDOW);
-        adcval2 = ADC_read_avg(ADMUX_CHN_ADC2, ADC_AVG_WINDOW);
+        adcval0 = sensor_adc_read_avg(ADMUX_CHN_ADC0, ADC_AVG_WINDOW);
+        adcval1 = sensor_adc_read_avg(ADMUX_CHN_ADC1, ADC_AVG_WINDOW);
+        adcval2 = sensor_adc_read_avg(ADMUX_CHN_ADC2, ADC_AVG_WINDOW);
 
         sprintf(strbuff, ADCMSG, adcval0, adcval1, adcval2);
 
