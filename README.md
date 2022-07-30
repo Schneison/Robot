@@ -70,6 +70,6 @@ The following targets are defined in the makefile:
 - `flash` 
   - Flashes the program on to the roboter
 - `documentation` 
-  - Creates doxygen docs at `./docs/` 
+  - Creates doxygen docs at `./dox/` 
 - `clean` 
   - Clears `./out/ ` directory, removes ".o" and ".hex" files
