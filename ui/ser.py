@@ -48,7 +48,7 @@ class SerialHandler:
     def update_gui(self):
         """Run on the update thread to update the current ui state"""
         # Wait for connection to be established before requiring stat updates
-        time.sleep(1)
+        time.sleep(0.5)
         # Activate request for tat updates
         self.send_byte("Y")
         while not self.stop:
@@ -96,9 +96,13 @@ class SerialHandler:
         self.ser.write(bytes(data, 'ascii', 'ignore'))
         self.ser.write(bytes('\r\n', 'ascii', 'ignore'))
 
-    def close(self):
+    def close(self, manual=False):
         """Close the port and stop all threads"""
         self.stop_threads()
+        if manual:
+            # Stop state requests
+            self.send_byte("Q")
+        time.sleep(0.5)
         if self.ser and self.ser.is_open:
             self.ser.close()
 
@@ -123,10 +127,10 @@ def try_send(data: str, logger: Logger):
     ser_handler.send_byte(data)
 
 
-def close_port():
+def close_port(manual=False):
     """Closes the serial handler and the associated port"""
     if ser_handler:
-        ser_handler.close()
+        ser_handler.close(manual)
 
 
 def open_port(port: str, logger: Logger, update_state: UpdateFunction) -> bool:
@@ -135,7 +139,7 @@ def open_port(port: str, logger: Logger, update_state: UpdateFunction) -> bool:
     global ser_handler
     if ser_handler:
         logger.log(INFO, "Disconnected from " + ser_handler.port)
-        close_port()
+        close_port(True)
         ser_handler = None
         return False
     connect = False
