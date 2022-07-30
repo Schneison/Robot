@@ -200,28 +200,6 @@ void motor_drive_backward(void);
 void motor_drive_stop(void);
 
 /**
- * @brief Drive directions
- */
-typedef enum {
-/**
- * @brief No direction, don't drive
- */
-    DIR_NONE,
-/**
- * @brief Drive straight forward
- */
-    DIR_FORWARD,
-/**
- * @brief Turn right
- */
-    DIR_RIGHT,
-/**
- * @brief Turn left
- */
-    DIR_LEFT,
-} direction;
-
-/**
  * @brief Reads sensor input and evaluates the direction that the robot has to drive.
  * @param current Current sensor state
  * @param last Sensor state in the last cycle
@@ -234,7 +212,16 @@ direction evaluate_sensors(sensor_state current, sensor_state last);
  * @param current Current sensor state
  * @param last State of the sensors in the last cycle.
  */
-void drive_apply(sensor_state current, sensor_state last);
+void drive_apply(track_state *state, sensor_state current, sensor_state last);
+
+/**
+ * @brief Drive the robot into the given direction
+ * @details Called by manual mode and by the line following after evaluation of the sensors
+ *
+ * @param state Current state
+ * @param dir Direction to drive
+ */
+void drive_move_direction(track_state *state, direction dir);
 
 /**
  * @brief Called home, finish this round and reset
@@ -242,6 +229,13 @@ void drive_apply(sensor_state current, sensor_state last);
  * @param state Current state
  */
 void drive_home(track_state *state);
+
+/**
+ * @brief Manual drive, controlled by the serial
+ *
+ * @param state Current state
+ */
+void drive_manual(track_state *state);
 
 /**
  * @brief Performance the driving action

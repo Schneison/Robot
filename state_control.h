@@ -62,4 +62,10 @@ void state_update_position(track_state *trackState);
  */
 _Noreturn void state_run_loop(track_state *trackState);
 
+/**
+ * @brief Sends state to the user interface if we are connected to our personal implementation.
+ * @param trackState Internal state
+ */
+void state_send_update(track_state *trackState);
+
 #endif

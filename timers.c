@@ -10,18 +10,18 @@ ISR (TIMER1_COMPA_vect) {
     millis++;
 }
 
-void timers_create(Counter *counters) {
+void timers_create(counter *counters) {
     for (int i = 0; i < COUNTER_AMOUNT; i++) {
-        Counter *counter = &counters[i];
+        counter *counter = &counters[i];
         counter->value = 0;
         counter->threshold = counter_frequencies[i];
         counter->lastMillis = millis;
     }
 }
 
-void timers_update(Counter *counters) {
+void timers_update(counter *counters) {
     for (int i = 0; i < COUNTER_AMOUNT; i++) {
-        Counter *counter = &counters[i];
+        counter *counter = &counters[i];
         // Diff since last true cycle
         uint16_t delta = millis - counter->lastMillis;
         if (delta > counter->threshold) {
@@ -37,13 +37,13 @@ uint8_t timers_check_state(track_state *state, counter_def counterDef) {
     return timers_check(state->counters, counterDef);
 }
 
-uint8_t timers_check(const Counter *counters, counter_def counterDef) {
+uint8_t timers_check(const counter *counters, counter_def counterDef) {
     return counters && counters[counterDef].value;
 }
 
-void timers_print(Counter *counters, counter_def frequency, const char *text) {
+void timers_print(counter *counters, counter_def frequency, const char *text) {
     if (timers_check(counters, frequency)) {
-        USART_print(text);
+        usart_print(text);
     }
 }
 

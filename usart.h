@@ -72,30 +72,29 @@
  * @brief Reads a byte from the receive buffer.
  * @return received byte
  */
-unsigned char USART_receiveByte(void);
+unsigned char usart_receive_byte(void);
 
 /**
  * @brief Checks if there is any data to be read
  * @return
  */
-uint8_t USART_canReceive();
+uint8_t usart_can_receive();
 
 /**
  * @brief Writes a byte to the transmit buffer
  * @param data Byte that shall be transmitted
  */
-void USART_transmitByte(unsigned char data);
-
+void usart_transmit_byte(unsigned char data);
 
 /**
  * @brief Transmitters a string (char by char) until '\0’ is reached
  */
-void USART_print(const char *c);
+void usart_print(const char *c);
 
 /**
  * @brief Sets up the USART port (The USART baudrate register)
  * @param ubrr Content to write into the UBRR register
  */
-void USART_init(unsigned long ubrr);
+void usart_init(unsigned long ubrr);
 
 #endif

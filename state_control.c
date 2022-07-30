@@ -15,11 +15,11 @@ void state_show(track_state *state) {
                 default:
                     break;
             }
-            // Manuel check, so we don't have to create a pointer every tick
+            // Manual check, so we don't have to create a pointer every tick
             if (timers_check_state(state, COUNTER_1_HZ)) {
                 char s[sizeof("Round and round I go, currently round #1\n")];
                 sprintf(s, "Round and round I go, currently round #%d\n", round);
-                USART_print(s);
+                usart_print(s);
             }
             //TODO: Remove before deployment
             led_sensor(state->sensor_last);
@@ -31,6 +31,9 @@ void state_show(track_state *state) {
             if (timers_check_state(state, COUNTER_12_HZ)) {
                 led_chase(&(state->last_led));
             }
+            break;
+        case AC_MANUAL:
+            led_sensor(state->sensor_last);
             break;
         case AC_RETURN_HOME:
             timers_print(state->counters, COUNTER_1_HZ, "Returning home, will util_reset me there\n");
@@ -63,23 +66,22 @@ void state_show(track_state *state) {
 void state_print_help(const track_state *state) {
     //Only print help text if S was not received once
     if (state->has_driven_once) {
-        USART_print("AAAAAAA");
         return;
     }
     if (state->pos == POS_START_FIELD) {
-        USART_print("-X Safe action_state\n-S 3 Rounds\n-P Pause\n-R Reset\n-C Home\n-? Help\n");
+        usart_print("-X Safe action_state\n-S 3 Rounds\n-P Pause\n-R Reset\n-C Home\n-? Help\n");
     } else {
-        USART_print("Not on start field, please position on start field!\n");
+        usart_print("Not on start field, please position on start field!\n");
     }
 }
 
 void state_on_action_change(track_state *state, action_type oldAction) {
-    if(oldAction == AC_ROUNDS){
+    if (oldAction == AC_ROUNDS) {
         motor_drive_stop();
     }
     switch (state->action) {
         case AC_RESET:
-            USART_print("Will util_reset in 5 seconds...\n");
+            usart_print("Will util_reset in 5 seconds...\n");
             break;
         case AC_WAIT:
         case AC_FROZEN:
@@ -94,18 +96,18 @@ void state_on_action_change(track_state *state, action_type oldAction) {
             break;
     }
     //TODO: remove
-    USART_print("State change....\n");
+    usart_print("State change....\n");
 }
 
 void state_read_input(track_state *state) {
-    if (!USART_canReceive()) {
+    if (!usart_can_receive()) {
         return;
     }
     if (state->action == AC_FROZEN) {
         return;
     }
     action_type oldAction = state->action;
-    unsigned char byte = USART_receiveByte();
+    unsigned char byte = usart_receive_byte();
     switch (byte) {
         case 'S':
             state->action = AC_ROUNDS;
@@ -126,6 +128,15 @@ void state_read_input(track_state *state) {
         case 'C':
             state->action = AC_RETURN_HOME;
             break;
+        case 'M':
+            state->action = AC_MANUAL;
+            break;
+        case 'Y':
+            state->ui_connection = UI_CONNECTED;
+            break;
+        case 'Q':
+            state->ui_connection = UI_DISCONNECTED;
+            break;
         case 'R':
             state->action = AC_RESET;
             break;
@@ -133,6 +144,25 @@ void state_read_input(track_state *state) {
             state_print_help(state);
             return;
         default:
+            if (state->action != AC_MANUAL) {
+                return;
+            }
+            switch (byte) {
+                case 'W':
+                    state->manual_dir = DIR_FORWARD;
+                    break;
+                case 'A':
+                    state->manual_dir = DIR_LEFT;
+                    break;
+                case 'D':
+                    state->manual_dir = DIR_RIGHT;
+                    break;
+                case 'B':
+                    state->manual_dir = DIR_BACK;
+                    break;
+                default:
+                    break;
+            }
             return;
     }
     state_on_action_change(state, oldAction);
@@ -148,25 +178,43 @@ void state_update_position(track_state *trackState) {
         trackState->homeCache++;
         if (trackState->homeCache > 2) {
             if (trackState->pos != POS_START_FIELD) {
-                USART_print("Start field found \n");
+                usart_print("Start field found \n");
             }
             trackState->pos = POS_START_FIELD;
             trackState->homeCache = 3;
         } else {
             char s[sizeof("Start field tick 1\n")];
             sprintf(s, "Start field tick %d\n", trackState->homeCache);
-            USART_print(s);
+            usart_print(s);
         }
         return;
     }
     trackState->homeCache = 0;
     if (trackState->action == AC_ROUNDS) {
         if ((trackState->pos) != POS_TRACK) {
-            USART_print("Start field lost \n");
+            usart_print("Start field lost \n");
         }
         trackState->pos = POS_TRACK;
     } else {
         trackState->pos = POS_UNKNOWN;
+    }
+}
+
+void state_send_update(track_state *trackState) {
+    if (trackState->ui_connection == UI_CONNECTED && timers_check_state(trackState, COUNTER_3_HZ)) {
+        char s[sizeof("[(7,7,7,7,7)]\n")];
+        sprintf(s, "[(%d,%d,%d,%d,%d)]\n",
+                // Last sensor state
+                trackState->sensor_last,
+                // Direction of driving
+                trackState->last_dir,
+                // Current action
+                trackState->action,
+                // On start field
+                trackState->pos == POS_START_FIELD,
+                // Is manual
+                trackState->action == AC_MANUAL);
+        usart_print(s);
     }
 }
 
@@ -177,8 +225,13 @@ _Noreturn void state_run_loop(track_state *trackState) {
         state_update_position(trackState);
         timers_update(trackState->counters);
         state_show(trackState);
+        state_send_update(trackState);
         action_type oldAction = trackState->action;
         switch (oldAction) {
+            case AC_MANUAL: {
+                drive_manual(trackState);
+                break;
+            }
             case AC_RETURN_HOME: {
                 drive_home(trackState);
                 break;

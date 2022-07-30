@@ -46,8 +46,8 @@ typedef enum {
 /**
  * @brief Contains the frequencies for the corresponding counters in #counter_def
  */
-static const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 5, 1000 / 6, 1000 / 8, 1000 / 3, 1000 / 12,
-                                                             1000 / 4};
+static const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 5, 1000 / 6, 1000 / 8, 1000 / 3,
+                                                             1000 / 12, 1000 / 4};
 
 /**
  * @brief Creates all internal timers/counters and place them in the given array.
@@ -55,7 +55,7 @@ static const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 5,
  * @param counters Array of counters, has to be the size of #COUNTER_AMOUNT
  * @sa #counter_def
  */
-void timers_create(Counter *counters);
+void timers_create(counter *counters);
 
 /**
  * @brief Updates all counters based on the current millisecond value that is created by the internal board timer1.
@@ -63,7 +63,7 @@ void timers_create(Counter *counters);
  * @sa #timers_setup_timer_1()
  * @param counters Array / Pointer that contains the counters for all registered frequencies.
  */
-void timers_update(Counter *counters);
+void timers_update(counter *counters);
 
 /**
  * @brief  Timer Control Register of the first timer
@@ -144,7 +144,7 @@ uint8_t timers_check_state(track_state *state, counter_def counterDef);
  * @retval 1 if the frequency is meet this cycle.
  * @retval 0 if the frequency is not meet this cycle.
  */
-uint8_t timers_check(const Counter *counters, counter_def counterDef);
+uint8_t timers_check(const counter *counters, counter_def counterDef);
 
 /**
  * @brief Prints then given message if the frequency requirement is currently meed.
@@ -153,7 +153,7 @@ uint8_t timers_check(const Counter *counters, counter_def counterDef);
  * @param text The text that should be printed
  * @param counters Array of counters, has to be the size of #COUNTER_AMOUNT, and is typically located on the global state
  */
-void timers_print(Counter *counters, counter_def frequency, const char *text);
+void timers_print(counter *counters, counter_def frequency, const char *text);
 
 /**
  * @brief Setup method for timers module, setups all timers

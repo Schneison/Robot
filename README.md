@@ -20,14 +20,18 @@ three LEDs.
 ## Modes
 The current mode is selected by sending the related key via a serial connection to the board.
 
-| Mode   | Key | Description                                                                              |
-|--------|-----|------------------------------------------------------------------------------------------|
-| Drive  | S   | The robot should drive 3 rounds around the track, then stop and reset on the start field |
-| Pause  | P   | The robot should do nothing and wait for the key to be entered again to leave this mode. |
-| Home   | C   | Finish this round, then drive back to the start field and reset.                         |
-| Freeze | X   | Save state! The robot reacts to nothing and waits for external reset.                    |
-| Help   | ?   | Prints help text to the serial, if located on the start field.                           |
-
+| Mode           | Key        | Description                                                                              |
+|----------------|------------|------------------------------------------------------------------------------------------|
+| Drive          | S          | The robot should drive 3 rounds around the track, then stop and reset on the start field |
+| Pause          | P          | The robot should do nothing and wait for the key to be entered again to leave this mode. |
+| Home           | C          | Finish this round, then drive back to the start field and reset.                         |
+| Freeze         | X          | Save state! The robot reacts to nothing and waits for external reset.                    |
+| Help           | ?          | Prints help text to the serial, if located on the start field.                           |
+| Rest           | R          | Resets the robot after 5 seconds                                                         |
+| Manual Control | M          | Enables manual control for the robot                                                     |
+| UI Connect     | Y          | Connects the ui (internally used)                                                        |
+| UI Disconnect  | Q          | Disconnects the ui (internally used)                                                     |
+| Manual Drive   | W, A, B, D | Drive forward, left, backward or right in manual control.                                |   
 ---
 ## User Interface
 Implemented via python with the help of [tkinter](https://docs.python.org/3/library/tkinter.html). Can be used to send 

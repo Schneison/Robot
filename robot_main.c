@@ -4,7 +4,7 @@ void setup(void) {
     motor_clear();
     ADC_clear();
 
-    USART_init(UBRR_SETTING);
+    usart_init(UBRR_SETTING);
     ADC_init();
     motor_init();
     led_init();
@@ -22,6 +22,8 @@ int main(void) {
     trackState->pos = POS_UNKNOWN;
     trackState->last_pos = POS_UNKNOWN;
     trackState->homeCache = 0;
+    trackState->manual_dir = DIR_NONE;
+    trackState->ui_connection = UI_DISCONNECTED;
     // Create counters, has to be done before first use
     timers_create(trackState->counters);
     state_run_loop(trackState);

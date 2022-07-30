@@ -1,11 +1,11 @@
-from typing import Final, Union, Literal, Callable, Tuple, NoReturn
+import queue
+import serial as serial
+import threading
+import time
+from ast import literal_eval as make_tuple
 from logging import Logger, INFO, ERROR
 from serial import Serial, SerialException, PortNotOpenError, SerialTimeoutException
-import serial as serial
-import time
-import threading
-import queue
-from ast import literal_eval as make_tuple
+from typing import Final, Union, Callable, Tuple, NoReturn
 
 baud_rate: Final[int] = 9600
 serial_connected: bool = False
@@ -45,6 +45,10 @@ class SerialHandler:
 
     def update_gui(self):
         """Run on the update thread to update the current ui state"""
+        # Wait for connection to be established before requiring stat updates
+        time.sleep(1)
+        # Activate request for tat updates
+        self.send_byte("Y")
         while not self.stop:
             if not self.data.empty():  # if data has been added
                 self.update_state(self.data.get())

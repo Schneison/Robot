@@ -60,7 +60,7 @@ typedef enum {
 * @brief Signals that this is a chase state and we are on the way back
 */
     CHASE_FLAG = 8,
-} LED_State;
+} led_state;
 
 /**
  * @brief Describes the binary state of the sensors
@@ -104,21 +104,21 @@ void led_clock(void);
  * @param state Defines the set led's
  * @sa #LED_State
  */
-void led_set(LED_State state);
+void led_set(led_state state);
 
 /**
  * Updates the chase light that is used in some action states.
  *
  * @param lastState The last state of the chase light.
  */
-void led_chase(LED_State *lastState);
+void led_chase(led_state *lastState);
 
 /**
  * Enables all led's if they are off, and vise versa.
  *
  * @param lastState The last state of the blink light.
  */
-void led_blink(LED_State *lastState);
+void led_blink(led_state *lastState);
 
 /**
  * Lets the led's show the current state of the sensors.

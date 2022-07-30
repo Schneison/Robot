@@ -123,7 +123,7 @@ void motor_drive_stop(void) {
 }
 
 direction evaluate_sensors(sensor_state current, sensor_state last) {
-    if(current == SENSOR_NONE){
+    if (current == SENSOR_NONE) {
         // Right Sensor
         if (last & SENSOR_RIGHT) {
             return DIR_RIGHT;
@@ -134,14 +134,13 @@ direction evaluate_sensors(sensor_state current, sensor_state last) {
         }
     }
     if ((current & SENSOR_CENTER) && ((current & SENSOR_LEFT) && (current & SENSOR_RIGHT) ||
-                                           !(current & SENSOR_LEFT) && !(current & SENSOR_RIGHT))) {
+                                      !(current & SENSOR_LEFT) && !(current & SENSOR_RIGHT))) {
         return DIR_FORWARD;
     }
     return DIR_NONE;
 }
 
-void drive_apply(sensor_state current, sensor_state last) {
-    direction dir = evaluate_sensors(current, last);
+void drive_move_direction(track_state *state, direction dir) {
     switch (dir) {
         case DIR_FORWARD:
             motor_drive_forward();
@@ -152,9 +151,18 @@ void drive_apply(sensor_state current, sensor_state last) {
         case DIR_LEFT:
             motor_drive_left();
             break;
+        case DIR_BACK:
+            motor_drive_backward();
+            break;
         default:
             break;
     }
+    state->last_dir = dir;
+}
+
+void drive_apply(track_state *state, sensor_state current, sensor_state last) {
+    direction dir = evaluate_sensors(current, last);
+    drive_move_direction(state, dir);
 }
 
 void drive_home(track_state *state) {
@@ -169,7 +177,7 @@ void drive_home(track_state *state) {
             }
             break;
         case DS_BACKWARDS:
-            motor_drive_backward();
+            drive_move_direction(state, DIR_BACK);
             if (state->sensor_current == SENSOR_ALL) {
                 state->drive = DS_POST_DRIVE;
             }
@@ -184,13 +192,17 @@ void drive_home(track_state *state) {
     }
 }
 
+void drive_manual(track_state *state) {
+    drive_move_direction(state, state->manual_dir);
+}
+
 void drive_run(track_state *state) {
     switch (state->drive) {
         case DS_CHECK_START:
             //When on start field begin first round
             if (state->pos == POS_START_FIELD) {
                 state->drive = DS_ZERO_ROUND;
-                USART_print("Here I go again on my own, going down the only round I’ve ever known…\n");
+                usart_print("Here I go again on my own, going down the only round I’ve ever known…\n");
             }
             break;
         case DS_ZERO_ROUND:
@@ -204,15 +216,15 @@ void drive_run(track_state *state) {
                         state->drive = DS_FIRST_ROUND;
                         break;
                     case DS_FIRST_ROUND:
-                        USART_print("YEAH, done round 1, going for round 2/3\n");
+                        usart_print("YEAH, done round 1, going for round 2/3\n");
                         state->drive = DS_SECOND_ROUND;
                         break;
                     case DS_SECOND_ROUND:
-                        USART_print("YEAH YEAH, done round 2, going for round 3/3\n");
+                        usart_print("YEAH YEAH, done round 2, going for round 3/3\n");
                         state->drive = DS_THIRD_ROUND;
                         break;
                     case DS_THIRD_ROUND:
-                        USART_print("YEAH YEAH YEAH , I really did it my way. ... And what's my purpose\n"
+                        usart_print("YEAH YEAH YEAH , I really did it my way. ... And what's my purpose\n"
                                     "and the general sense of my further life now? Type ? for help\n");
                         state->drive = DS_BACKWARDS;
                         break;
@@ -221,11 +233,11 @@ void drive_run(track_state *state) {
                         break;
                 }
             }
-            drive_apply(state->sensor_current, state->sensor_last);
+            drive_apply(state, state->sensor_current, state->sensor_last);
             break;
         case DS_BACKWARDS:
             motor_drive_backward();
-            if(state->sensor_current == SENSOR_ALL){
+            if (state->sensor_current == SENSOR_ALL) {
                 state->drive = DS_POST_DRIVE;
             }
             break;

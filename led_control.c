@@ -12,7 +12,7 @@ void led_clock(void) {
     LED_CLOCK_PORT &= ~(1 << LED_CLOCK);
 }
 
-void led_set(LED_State state) {
+void led_set(led_state state) {
     // Updates LED positions from left to right
     for (int i = LED_AMOUNT - 1; i >= 0; i--) {
         if ((state >> i) & 1) {
@@ -24,7 +24,7 @@ void led_set(LED_State state) {
     }
 }
 
-void led_chase(LED_State *lastState) {
+void led_chase(led_state *lastState) {
     int state = *lastState;
     // From right to left
     if ((state & CHASE_FLAG) == CHASE_FLAG) {
@@ -35,7 +35,7 @@ void led_chase(LED_State *lastState) {
     led_set(*lastState);
 }
 
-void led_blink(LED_State *lastState) {
+void led_blink(led_state *lastState) {
     if (*lastState) {
         *lastState = LED_NONE;
     } else {
@@ -45,7 +45,7 @@ void led_blink(LED_State *lastState) {
 }
 
 void led_sensor(sensor_state sensorState) {
-    LED_State ledState = LED_NONE;
+    led_state ledState = LED_NONE;
     if (sensorState & SENSOR_LEFT) {
         ledState |= LED_LEFT;
     }
