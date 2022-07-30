@@ -1,25 +1,7 @@
+Project Robot
+========
 
-<style>
-.flex-container {
-  display: flex;
-justify-content: center;
-align-items: center;
-gap: 50px;
-}
-</style>
-<h1 align="center" class="flex-container">
-	<div>
-	Project Robot
-	</div>
-	<div>
-	  <a href="https://github.com/{{cookiecutter.github_username}}/{{cookiecutter.repo_slug}}">
-		<!-- Please provide path to your logo here -->
-		<img src="images/icon.png" alt="Logo" width="60" height="60">
-	  </a>
-	</div>
-</h1>
-
-> Small program for a line following robot which can accept a variety of instructions via a bluetooth connection. 
+> Small program for a line following robot which can accept a variety of instructions via a bluetooth connection.
 
 ---
 ## About
@@ -31,7 +13,7 @@ Used to follow a black line on a test ground. Furthermore, the robot was equippe
 three LEDs.
 
 <h1 align="center">
-<img src="images/robot.png" alt="Logo" width="500" height="300">
+<img src="images/robot.png" alt=" " width="500" height="300">
 </h1>
 
 ---
@@ -54,7 +36,7 @@ Furthermore the current state of the field sensors can be seen and the direction
 This is possible thanks to an ongoing message exchange between the robot and the user interface.
 
 <h1 align="center">
-<img src="images/user_interface.png" alt="Logo" width="666" height="356">
+<img src="images/user_interface.png" alt=" " width="666" height="356">
 </h1>
 
 ---
