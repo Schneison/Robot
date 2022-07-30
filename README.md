@@ -1,25 +1,7 @@
+Project Robot
+========
 
-<style>
-.flex-container {
-  display: flex;
-justify-content: center;
-align-items: center;
-gap: 50px;
-}
-</style>
-<h1 align="center" class="flex-container">
-	<div>
-	Project Robot
-	</div>
-	<div>
-	  <a href="https://github.com/{{cookiecutter.github_username}}/{{cookiecutter.repo_slug}}">
-		<!-- Please provide path to your logo here -->
-		<img src="images/icon.png" alt="Logo" width="60" height="60">
-	  </a>
-	</div>
-</h1>
-
-> Small program for a line following robot which can accept a variety of instructions via a bluetooth connection. 
+> Small program for a line following robot which can accept a variety of instructions via a bluetooth connection.
 
 ---
 ## About
@@ -31,7 +13,7 @@ Used to follow a black line on a test ground. Furthermore, the robot was equippe
 three LEDs.
 
 <h1 align="center">
-<img src="images/robot.png" alt="Logo" width="500" height="300">
+<img src="images/robot.png" alt=" " width="500" height="300">
 </h1>
 
 ---
@@ -54,7 +36,7 @@ Furthermore the current state of the field sensors can be seen and the direction
 This is possible thanks to an ongoing message exchange between the robot and the user interface.
 
 <h1 align="center">
-<img src="images/user_interface.png" alt="Logo" width="666" height="356">
+<img src="images/user_interface.png" alt=" " width="666" height="356">
 </h1>
 
 ---
@@ -65,11 +47,18 @@ Additionally, we use [Doxygen](https://doxygen.nl/) to generate the correspondin
 The following targets are defined in the makefile:
 - `compile`
   - Compiles all sources
-- `link` 
+- `link`
   - Creates ".o" files for every C file in `./out/` and creates ".hex" file also in `./out/`
-- `flash` 
+- `flash`
   - Flashes the program on to the roboter
-- `documentation` 
-  - Creates doxygen docs at `./dox/` 
-- `clean` 
+- `documentation`
+  - Creates doxygen docs at `./dox/`
+- `clean`
   - Clears `./out/ ` directory, removes ".o" and ".hex" files
+
+---
+
+## License
+
+Copyright (c) 2022 Larson Schneider<br>
+Licensed under the MIT license.
