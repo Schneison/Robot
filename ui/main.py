@@ -9,7 +9,7 @@ import atexit
 import signal
 import sys
 from dataclasses import dataclass
-from typing import List, Callable, NoReturn
+from typing import List, Callable, NoReturn, Union
 
 import ser
 from ser import UpdateFunction, try_send, open_port, close_port, StateTuple, is_connected
@@ -42,13 +42,14 @@ class RobotState:
     action: int
     home: bool
     manuel: bool
+    battery: int
     connected: bool
 
     def with_connection(self, connected) -> RobotState:
-        return RobotState(self.led, self.drive_state, self.action, self.home, self.manuel, connected)
+        return RobotState(self.led, self.drive_state, self.action, self.home, self.manuel, self.battery, connected)
 
 
-STATE_EMPTY = RobotState(SENSOR_NONE, DRIVE_NONE, 0, False, False, False)
+STATE_EMPTY = RobotState(SENSOR_NONE, DRIVE_NONE, 0, False, False, 0, False)
 
 
 class QueueHandler(logging.Handler):
@@ -209,11 +210,14 @@ def create_image(path: str, flip=False) -> PhotoImage:
 def convert_tuple_state(state_tuple: StateTuple) -> RobotState:
     """Converts the tuple state to a state object"""
     return RobotState(state_tuple[0], state_tuple[1], state_tuple[2], state_tuple[3] > 0, state_tuple[4] > 0,
-                      is_connected())
+                      state_tuple[5], is_connected())
 
 
 class StateDisplay(tk.Frame):
     """Displays the current state of the robot"""
+
+    canvas: Union[tk.Canvas, None]
+    battery: Union[ttk.Progressbar, None]
 
     def __init__(self, p: ttk.Frame):
         super().__init__(p)
@@ -231,10 +235,13 @@ class StateDisplay(tk.Frame):
         self.led_center = None
         self.led_left = None
         self.canvas = None
+        self.battery = None
         self.init_ui()
 
     def update_state(self, state: RobotState):
         """Update the state of the ui elements"""
+        # Battery
+        self.battery.configure(value=state.battery)
         # Blue LED
         self.canvas.itemconfig(self.led_left, fill="#05f" if state.led & SENSOR_LEFT else "#667e92")
         # Green LED
@@ -252,6 +259,11 @@ class StateDisplay(tk.Frame):
                                image=self.arrow_right if state.drive_state & DRIVE_RIGHT else self.arrow_right_light)
 
     def init_ui(self):
+        frm = ttk.Labelframe(self, text="Battery")
+        self.battery = ttk.Progressbar(frm, maximum=100)
+        self.battery.pack()
+        frm.pack(pady=4, fill=tk.X, expand=1)
+        self.battery.pack(pady=4, fill=tk.X, expand=1)
         """Creates the ui elements of this control"""
         self.canvas = tk.Canvas(self)
         self.led_left = self.canvas.create_rectangle(30, 10, 120, 80)
