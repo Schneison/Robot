@@ -47,11 +47,18 @@ Additionally, we use [Doxygen](https://doxygen.nl/) to generate the correspondin
 The following targets are defined in the makefile:
 - `compile`
   - Compiles all sources
-- `link` 
+- `link`
   - Creates ".o" files for every C file in `./out/` and creates ".hex" file also in `./out/`
-- `flash` 
+- `flash`
   - Flashes the program on to the roboter
-- `documentation` 
-  - Creates doxygen docs at `./dox/` 
-- `clean` 
+- `documentation`
+  - Creates doxygen docs at `./dox/`
+- `clean`
   - Clears `./out/ ` directory, removes ".o" and ".hex" files
+
+---
+
+## License
+
+Copyright (c) 2022 Larson Schneider<br>
+Licensed under the MIT license.
