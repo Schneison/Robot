@@ -86,9 +86,9 @@ void state_on_action_change(track_state *state, action_type oldAction) {
         case AC_RESET:
             usart_print("Will util_reset in 5 seconds...\n");
             break;
-        case AC_WAIT:
-        case AC_FROZEN:
-        case AC_PAUSE:
+        case AC_WAIT: //Fallthrough
+        case AC_FROZEN: //Fallthrough
+        case AC_PAUSE: //Fallthrough
             //Reset chase or blink light
             state->last_led = 0;
             break;

@@ -168,10 +168,10 @@ void drive_apply(track_state *state, sensor_state current, sensor_state last) {
 
 void drive_home(track_state *state) {
     switch (state->drive) {
-        case DS_ZERO_ROUND:
-        case DS_FIRST_ROUND:
-        case DS_SECOND_ROUND:
-        case DS_THIRD_ROUND:
+        case DS_ZERO_ROUND: //Fallthrough
+        case DS_FIRST_ROUND: //Fallthrough
+        case DS_SECOND_ROUND: //Fallthrough
+        case DS_THIRD_ROUND: //Fallthrough
             //When on start field begin first round
             if (state->pos == POS_START_FIELD) {
                 state->drive = DS_BACKWARDS;
@@ -209,10 +209,10 @@ void drive_run(track_state *state) {
                 );
             }
             break;
-        case DS_ZERO_ROUND:
-        case DS_FIRST_ROUND:
-        case DS_SECOND_ROUND:
-        case DS_THIRD_ROUND:
+        case DS_ZERO_ROUND: //Fallthrough
+        case DS_FIRST_ROUND: //Fallthrough
+        case DS_SECOND_ROUND: //Fallthrough
+        case DS_THIRD_ROUND: //Fallthrough
             if (timers_check_state(state, COUNTER_12_HZ) &&
                 state->pos == POS_TRACK && state->last_pos == POS_START_FIELD) {
                 switch (state->drive) {
