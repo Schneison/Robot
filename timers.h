@@ -16,56 +16,6 @@
 #include "utility.h"
 
 /**
- * @brief Counter variable, which contains a value from 0 to 255. This value represents the milliseconds since the last
- * second. One unit is (1000/255) ms.
- */
-extern uint16_t millis;
-
-/**
- * @brief Defines counters with different frequencies to allow output in the given frequencies.
- */
-typedef enum {
-    /**
-     * @brief 1 HZ Counter
-     */
-    COUNTER_1_HZ,
-    /**
- * @brief 5 HZ Counter
- */
-    COUNTER_5_HZ,
-    COUNTER_6_HZ,
-    /**
- * @brief 8 HZ Counter
- */
-    COUNTER_8_HZ,
-    COUNTER_3_HZ,
-    COUNTER_12_HZ,
-    COUNTER_4_HZ,
-} counter_def;
-
-/**
- * @brief Contains the frequencies for the corresponding counters in #counter_def
- */
-static const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 5, 1000 / 6, 1000 / 8, 1000 / 3,
-                                                             1000 / 12, 1000 / 4};
-
-/**
- * @brief Creates all internal timers/counters and place them in the given array.
- *
- * @param counters Array of counters, has to be the size of #COUNTER_AMOUNT
- * @sa #counter_def
- */
-void timers_create(counter *counters);
-
-/**
- * @brief Updates all counters based on the current millisecond value that is created by the internal board timer1.
- * <p>Allocates and initialises the counters if the pointer is NULL.
- * @sa #timers_setup_timer_1()
- * @param counters Array / Pointer that contains the counters for all registered frequencies.
- */
-void timers_update(counter *counters);
-
-/**
  * @brief  Timer Control Register of the first timer
  */
 #define TIMER_0_CONTROL TCCR0B
@@ -80,11 +30,11 @@ void timers_update(counter *counters);
 /**
  * @brief Timer 0 normal operation mode for compare A
  */
-#define TIMER_0_NORMAL_OPERATION_A ~(1 << COM0A1) & ~(1 << COM0A0)
+#define TIMER_0_NORMAL_OPERATION_A (~(1 << COM0A1) & ~(1 << COM0A0))
 /**
  * @brief Timer 0 normal operation mode for compare B
  */
-#define TIMER_0_NORMAL_OPERATION_B ~(1 << COM0A1) & ~(1 << COM0A0)
+#define TIMER_0_NORMAL_OPERATION_B (~(1 << COM0A1) & ~(1 << COM0A0))
 
 /**
  * @brief Set waveform generation mode to Fast PWM, frequency = F_CPU / (PRESCALER * 2^8)
@@ -126,6 +76,59 @@ void timers_update(counter *counters);
 #define TIMER_1_COMPARE_VALUE 250
 
 /**
+ * @brief Counter variable, which contains a value from 0 to 255. This value represents the
+ * milliseconds since the last second. One unit is (1000/255) ms.
+ */
+extern uint16_t millis;
+
+/**
+ * @brief Defines counters with different frequencies to allow output in the given frequencies.
+ */
+typedef enum {
+    /**
+     * @brief 1 HZ Counter
+     */
+    COUNTER_1_HZ,
+    /**
+ * @brief 5 HZ Counter
+ */
+    COUNTER_5_HZ,
+    COUNTER_6_HZ,
+    /**
+ * @brief 8 HZ Counter
+ */
+    COUNTER_8_HZ,
+    COUNTER_3_HZ,
+    COUNTER_12_HZ,
+    COUNTER_4_HZ,
+} counter_def;
+
+/**
+ * @brief Contains the frequencies for the corresponding counters in #counter_def
+ */
+static const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 5,
+                                                             1000 / 6, 1000 / 8,
+                                                             1000 / 3, 1000 / 12,
+                                                             1000 / 4};
+
+/**
+ * @brief Creates all internal timers/counters and place them in the given array.
+ *
+ * @param counters Array of counters, has to be the size of #COUNTER_AMOUNT
+ * @sa #counter_def
+ */
+void timers_create(counter *counters);
+
+/**
+ * @brief Updates all counters based on the current millisecond value that is created by the
+ * internal board timer1.
+ * <p>Allocates and initialises the counters if the pointer is NULL.
+ * @sa #timers_setup_timer_1()
+ * @param counters Array / Pointer that contains the counters for all registered frequencies.
+ */
+void timers_update(counter *counters);
+
+/**
  * @copybrief timers_check(struct Counter*, counter_def)
  * @param state Current state of the robot that contains the counters.
  * @param counterDef The definition of the counter that should be checked.
@@ -136,7 +139,8 @@ void timers_update(counter *counters);
 uint8_t timers_check_state(track_state *state, counter_def counterDef);
 
 /**
- * @brief Checks if the counter that is defined with the given definition has a true value this cycle.
+ * @brief Checks if the counter that is defined with the given definition has a true value this
+ * cycle.
  *
  * @param counters Array / Pointer that contains the counters for all registered frequencies.
  * @param counterDef The definition of the counter that should be checked.
@@ -151,7 +155,8 @@ uint8_t timers_check(const counter *counters, counter_def counterDef);
  *
  * @param frequency Frequency on which the given text should be printed.
  * @param text The text that should be printed
- * @param counters Array of counters, has to be the size of #COUNTER_AMOUNT, and is typically located on the global state
+ * @param counters Array of counters, has to be the size of #COUNTER_AMOUNT, and is typically
+ * located on the global state
  */
 void timers_print(counter *counters, counter_def frequency, const char *text);
 

@@ -36,7 +36,8 @@ void state_show(track_state *state) {
             led_sensor(state->sensor_last);
             break;
         case AC_RETURN_HOME:
-            timers_print(state->counters, COUNTER_1_HZ, "Returning home, will util_reset me there\n");
+            timers_print(state->counters, COUNTER_1_HZ,
+                         "Returning home, will util_reset me there\n");
             break;
         case AC_PAUSE:
             timers_print(state->counters, COUNTER_1_HZ,
@@ -48,13 +49,15 @@ void state_show(track_state *state) {
         case AC_WAIT:
             if ((state->pos) == POS_START_FIELD) {
                 timers_print(state->counters, COUNTER_1_HZ,
-                             "On the starting field. Waiting for your instructions... Send ? for help.\n");
+                             "On the starting field. Waiting for your instructions..."
+                             " Send ? for help.\n");
                 if (timers_check_state(state, COUNTER_5_HZ)) {
                     led_blink(&(state->last_led));
                 }
             } else {
                 timers_print(state->counters, COUNTER_1_HZ,
-                             "Not on the starting field. Place me there please... Send ? for help.\n");
+                             "Not on the starting field. Place me there please... "
+                             "Send ? for help.\n");
                 led_sensor(state->sensor_last);
             }
             break;
@@ -201,7 +204,8 @@ void state_update_position(track_state *trackState) {
 }
 
 void state_send_update(track_state *trackState) {
-    if (trackState->ui_connection == UI_CONNECTED && timers_check_state(trackState, COUNTER_3_HZ)) {
+    if (trackState->ui_connection == UI_CONNECTED && timers_check_state(trackState,
+                                                                        COUNTER_3_HZ)) {
         char s[sizeof("[(7,7,7,7,100,7)]\n")];
         sprintf(s, "[(%d,%d,%d,%d,%d,%d)]\n",
                 // Last sensor state

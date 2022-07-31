@@ -27,8 +27,8 @@ _Noreturn void util_reset(void);
 #define WATCH_DOG_TIME (WDTO_1S | WDTO_4S)
 
 /**
- * @brief Helper struct that is used to check frequency requirements every cycle. For example this is used to print a
- * message every 1 HZ or every 5 HZ.
+ * @brief Helper struct that is used to check frequency requirements every cycle. For example this
+ * is used to print a message every 1 HZ or every 5 HZ.
  * <p>
  * The amount of defined counters is #COUNTER_AMOUNT
  * @details All counters for the frequencies 1HZ, 5HZ and 8HZ are located in the enum #counter_def
@@ -181,8 +181,8 @@ typedef enum {
 } ui_state;
 
 /**
- * @brief Reflects the current inputs of the robot (sensors, position on the track), currently performed action and last
- * inputs.
+ * @brief Reflects the current inputs of the robot (sensors, position on the track), currently
+ * performed action and last inputs.
  */
 typedef struct track_state {
     /**
@@ -214,8 +214,8 @@ typedef struct track_state {
      */
     led_state last_led;
     /**
-     * @brief Count of seconds of the robot on the board. A value from 0 to 2. If the robot is not on the start field
-     * this is 0.
+     * @brief Count of seconds of the robot on the board. A value from 0 to 2. If the robot is not
+     * on the start field this is 0.
      */
     uint8_t homeCache;
     /**

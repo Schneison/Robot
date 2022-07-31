@@ -33,7 +33,8 @@ void motor_set_duty(uint8_t pin, speed_value value) {
         }                                             // timer disconnected
         else {
             TIMER_0_WAVE |= (1 << COM0A1);                    // OC0A to LOW on Compare Match,
-            TIMER_0_WAVE &= ~(1 << COM0A0);                   // to HIGH at BOTTOM (non-inverting mode)
+            TIMER_0_WAVE &=
+                    ~(1 << COM0A0);                   // to HIGH at BOTTOM (non-inverting mode)
             TIMER_0_COMPARE_RESOLUTION_A = (uint8_t) value;                              // generates sequences of 1-0-1-0...
         }                                             // for certain periods of time
     }
@@ -202,7 +203,10 @@ void drive_run(track_state *state) {
             //When on start field begin first round
             if (state->pos == POS_START_FIELD) {
                 state->drive = DS_ZERO_ROUND;
-                usart_print("Here I go again on my own, going down the only round I’ve ever known…\n");
+                usart_print(
+                        "Here I go again on my own, going down the only round I’ve ever known…"
+                        "\n"
+                );
             }
             break;
         case DS_ZERO_ROUND:
@@ -224,8 +228,10 @@ void drive_run(track_state *state) {
                         state->drive = DS_THIRD_ROUND;
                         break;
                     case DS_THIRD_ROUND:
-                        usart_print("YEAH YEAH YEAH , I really did it my way. ... And what's my purpose\n"
-                                    "and the general sense of my further life now? Type ? for help\n");
+                        usart_print(
+                                "YEAH YEAH YEAH , I really did it my way. ... And what's my "
+                                "purpose\n and the general sense of my further life now?"
+                                " Type ? for help\n");
                         state->drive = DS_BACKWARDS;
                         break;
                     default:

@@ -112,8 +112,8 @@
 uint16_t sensor_adc_read(uint8_t channel);
 
 /**
- * @brief Reads the output signals on the given channel of the adc (analog-digital-converter) module but with a given
- * amount of time, to reduce noise
+ * @brief Reads the output signals on the given channel of the adc (analog-digital-converter) module
+ * but with a given amount of time, to reduce noise
  * @param channel Channel on the adc module as defined
  * @param amount_samples Numbers of samples used
  *
@@ -128,7 +128,8 @@ uint16_t sensor_adc_read_avg(uint8_t channel, uint8_t amount_samples);
 sensor_state sensor_get_state();
 
 /**
- * @brief Reads the state of the battery and retrieves a percent value of voltage of the battery multiplied by 100
+ * @brief Reads the state of the battery and retrieves a percent value of voltage of the battery
+ * multiplied by 100
  * @retval 0 to 100, based on the percent of voltage of the battery multiplied by 100
  */
 uint8_t sensor_get_battery(void);

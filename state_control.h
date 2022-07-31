@@ -19,14 +19,15 @@
 #include <stdlib.h>
 
 /**
- * @brief Represents the current state to the outside world. For example printing USART message or turn on led's.
+ * @brief Represents the current state to the outside world. For example printing USART message or
+ * turn on led's.
  * @param state Current state
  */
 void state_show(track_state *state);
 
 /**
- * @brief Print help message for the given state. Print different text if we are located on starting field and no at all
- * if the robot was once in the drive state.
+ * @brief Print help message for the given state. Print different text if we are located on starting
+ * field and no at all if the robot was once in the drive state.
  * @param state Current state
  */
 void state_print_help(const track_state *state);
@@ -39,8 +40,8 @@ void state_print_help(const track_state *state);
 void state_on_action_change(track_state *state, action_type oldAction);
 
 /**
- * @brief Tries to read an input from the USART, apply the action behind the character if any is defined, send an
- * error message for undefined characters.
+ * @brief Tries to read an input from the USART, apply the action behind the character if any is
+ * defined, send an error message for undefined characters.
  * @details Defined characters are: S, X; P, C, R, ?
  *
  * @param state Internal state
