@@ -1,7 +1,7 @@
 include Makeconfig.mk
 
 # all targets that don't correspond to files
-.PHONY: force list-headers help cppcheck compile flash documentation link clean
+.PHONY: info force list-headers help cppcheck compile flash documentation link clean
 
 all: compile link flash documentation
 	@echo Done.
@@ -10,7 +10,7 @@ force: clean all
 
 help:
 	@echo "Some useful make targets:"
-	@echo " make all          	- Build entire project"
+	@echo " make all          	- Build entire project and documentation"
 	@echo " make compile      	- Compiles the .c and .h files"
 	@echo " make link         	- Links the .c and .h files to .o files"
 	@echo " make flash        	- Flashes the project to the board via serial"
@@ -20,6 +20,15 @@ help:
 	@echo " make indent       	- Applies style conventions to current .c and .h files"
 	@echo " make documentation	- Create doxygen documentation for this project"
 	@echo ""
+
+
+info:
+	@echo "[*] Output dir:      ${OUT_O_DIR}   "
+	@echo "[*] Sources:         ${C_SRC}       "
+	@echo "[*] Headers:         ${H_SRC}       "
+	@echo "[*] Objects:         ${O_SRC}       "
+	@echo "[*] Devise:          ${DEVICE}      "
+	@echo "[*] Baud:        	${BAUD}        "
 
 compile: $(C_SRC) $(H_SRC)
 
