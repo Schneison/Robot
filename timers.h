@@ -8,11 +8,11 @@
 #ifndef TIMERS
 #define TIMERS
 
+#include <stdlib.h>
+#include <stdio.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <stdlib.h>
 #include "usart.h"
-#include <stdio.h>
 #include "utility.h"
 
 /**
@@ -82,6 +82,14 @@
 extern uint16_t millis;
 
 /**
+ * @brief Contains the frequencies for the corresponding counters in #counter_def
+ */
+static const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 5,
+                                                             1000 / 6, 1000 / 8,
+                                                             1000 / 3, 1000 / 12,
+                                                             1000 / 4};
+
+/**
  * @brief Defines counters with different frequencies to allow output in the given frequencies.
  */
 typedef enum {
@@ -102,14 +110,6 @@ typedef enum {
     COUNTER_12_HZ,
     COUNTER_4_HZ,
 } counter_def;
-
-/**
- * @brief Contains the frequencies for the corresponding counters in #counter_def
- */
-static const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 5,
-                                                             1000 / 6, 1000 / 8,
-                                                             1000 / 3, 1000 / 12,
-                                                             1000 / 4};
 
 /**
  * @brief Creates all internal timers/counters and place them in the given array.

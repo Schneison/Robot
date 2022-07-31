@@ -8,9 +8,9 @@
 #ifndef MOTOR_DRIVE
 #define MOTOR_DRIVE
 
+#include <util/delay.h>
 #include <avr/io.h>
 #include "timers.h"
-#include <util/delay.h>
 #include "robot_sensor.h"
 #include "usart.h"
 #include "utility.h"

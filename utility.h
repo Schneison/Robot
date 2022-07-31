@@ -9,14 +9,8 @@
 #define UTILITY
 
 #include <avr/io.h>
-#include "led_control.h"
 #include <avr/wdt.h>
-
-/**
- * @brief Resets the board after 5 seconds by using the watch dog timer.
- * @details For more information on the wdt look at p.76 of the datasheet
- */
-_Noreturn void util_reset(void);
+#include "led_control.h"
 
 /**
  * @brief Amount of counters that are defined in #counter_def
@@ -243,5 +237,10 @@ typedef struct track_state {
     ui_state ui_connection;
 } track_state;
 
+/**
+ * @brief Resets the board after 5 seconds by using the watch dog timer.
+ * @details For more information on the wdt look at p.76 of the datasheet
+ */
+_Noreturn void util_reset(void);
 
 #endif //UTILITY

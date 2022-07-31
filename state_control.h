@@ -8,6 +8,8 @@
 #ifndef STATE_CONTROL_H
 #define STATE_CONTROL_H
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <avr/wdt.h>
 #include "robot_sensor.h"
 #include "timers.h"
@@ -15,8 +17,6 @@
 #include "drive_control.h"
 #include "state_control.h"
 #include "led_control.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 /**
  * @brief Represents the current state to the outside world. For example printing USART message or
