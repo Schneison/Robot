@@ -1,9 +1,25 @@
 include Makeconfig.mk
 
 # all targets that don't correspond to files
-.PHONY: cppcheck compile flash documentation link clean
+.PHONY: force list-headers help cppcheck compile flash documentation link clean
 
-all: compile link flash cppcheck documentation
+all: compile link flash documentation
+	@echo Done.
+
+force: clean all
+
+help:
+	@echo "Some useful make targets:"
+	@echo " make all          	- Build entire project"
+	@echo " make compile      	- Compiles the .c and .h files"
+	@echo " make link         	- Links the .c and .h files to .o files"
+	@echo " make flash        	- Flashes the project to the board via serial"
+	@echo " make force        	- Force rebuild of entire project and documentation (clean first)"
+	@echo " make clean        	- Remove all build output"
+	@echo " make cppcheck     	- Static code analysis tool for the C"
+	@echo " make indent       	- Applies style conventions to current .c and .h files"
+	@echo " make documentation	- Create doxygen documentation for this project"
+	@echo ""
 
 compile: $(C_SRC) $(H_SRC)
 
@@ -20,8 +36,7 @@ indent:
 	indent state_control.c -kr -i4 -nut -ss -saw -psl -o state_control.out
 
 cppcheck: $(C_SRC)
-	cppcheck *.c
-	cppcheck *.h
+	cppcheck *.c *.h $(CPPCHECK_FLAGS)
 
 documentation: $(C_SRC) $(H_SRC)
 	doxygen $(DOX)

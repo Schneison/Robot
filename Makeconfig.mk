@@ -13,3 +13,4 @@ DUDE_FLAGS = -p $(DEVICE) -c $(PROGRAMMER_ID) -P $(PORT) -b $(BAUD)
 CFLAGS = -mmcu=${DEVICE} -Os -D F_CPU=${F_CPU}
 CC = avr-gcc
 DOX = Doxyfile
+CPPCHECK_FLAGS = --enable=style,warning
