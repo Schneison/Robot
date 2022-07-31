@@ -1,13 +1,27 @@
 include Makeconfig.mk
 
 # all targets that don't correspond to files
-.PHONY: flash documentation link clean
+.PHONY: cppcheck compile flash documentation link clean
 
-all: link flash documentation
+all: compile link flash cppcheck documentation
+
+compile: $(C_SRC) $(H_SRC)
 
 link: $(TARGET_FILE)
 
 flash: $(TARGET_FILE).hex
+
+indent:
+	# "Aufgabenblatt_3.pdf S.8"
+	# "https://www.gnu.org/software/indent/manual/indent.html"
+	#-kr -bad -br -brs -brf -ce -cdw -bfda -sar -i4 -lp -as -cli4
+#-nbad -bap -nbc -bbo -hnl -br -brs -c33 -cd33 -ncdb -ce -ci4 -cli4 -d0 -di1 -nfc1 -i8 -ip0 -l80 -lp -npcs -nprs -npsl -sai -saf -saw -ncs -nsc -sob -nfca -cp33 -ss -ts8 -il1
+#-cli4 -as -ip4 -i4 -il4 -l100 -br -cdw -ce
+	indent state_control.c -kr -i4 -nut -ss -saw -psl -o state_control.out
+
+cppcheck: $(C_SRC)
+	cppcheck *.c
+	cppcheck *.h
 
 documentation: $(C_SRC) $(H_SRC)
 	doxygen $(DOX)

@@ -255,8 +255,8 @@ _Noreturn void state_run_loop(track_state *trackState) {
         }
         trackState->sensor_last = trackState->sensor_current;
         /**
-         * If the state changes an action was applied, usually when the 3 rounds were driven and the robot is switched to
-         * util_reset
+         * If the state changes an action was applied, usually when the 3 rounds were driven and the
+         * robot is switched to util_reset
          */
         if (oldAction != trackState->action) {
             state_on_action_change(trackState, oldAction);

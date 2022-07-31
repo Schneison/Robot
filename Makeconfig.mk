@@ -1,5 +1,7 @@
 FILES = robot_main utility timers usart robot_sensor drive_control state_control led_control
 O_SRC = $(addprefix $(OUT_O_DIR)/, $(addsuffix .o, $(FILES)))
+C_SRC = $(addsuffix .c, $(FILES))
+H_SRC = $(addsuffix .h, $(FILES))
 F_CPU = 16E6
 DEVICE = atmega328p
 PROGRAMMER_ID = arduino
