@@ -3,5 +3,6 @@ tmpfile.hex
 .o
 dox/
 /out/
+/indent/
 
 .idea
