@@ -62,14 +62,14 @@
  * @sa #ADMUX_CHN_ADC2
  * @sa #ADMUX_CHN_ALL
  */
-#define ADMUX_CHN_ADC3 4 // 0000 0010
+#define ADMUX_CHN_ADC3 3 // 0000 0011
 /**
  * @brief Constant that contains all possible channels
  * @sa #ADMUX_CHN_ADC0
  * @sa #ADMUX_CHN_ADC1
  * @sa #ADMUX_CHN_ADC2
  */
-#define ADMUX_CHN_ALL 15  // 0000 1111
+#define ADMUX_CHN_ALL 7  // 0000 0111
 
 /**
  * @brief Amount of measurements made by the analog-digital-converter
@@ -81,7 +81,7 @@
  * @brief Threshold of the right sensor
  * @details This will determine if the signal of the sensor is read as positive.
  */
-#define SIGNAL_RIGHT_UPPER 450
+#define SIGNAL_RIGHT_UPPER 220
 /**
  * @brief Threshold of the center sensor
  * @details This will determine if the signal of the sensor is read as positive.
@@ -96,11 +96,13 @@
 /**
  * @brief Min Operating Voltage of the board
  */
-#define BATTERY_MIN 1.8
+#define BATTERY_MIN 20
 /**
  * @brief Max Operating Voltage of the board
  */
-#define BATTERY_MAX 5.5
+#define BATTERY_MAX 220
+
+#define BATTERY_RANGE 10
 
 /**
  * @brief Reads the output signals on the given channel of the adc (analog-digital-converter) module

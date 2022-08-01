@@ -320,7 +320,7 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO)
     root = tk.Tk()
     root.title("Robot Control")
-    root.wm_iconbitmap("assets/icon.ico")
+    # root.wm_iconbitmap("assets/icon.ico")
     root.resizable(False, False)
     create_ui(root)
     root.mainloop()

@@ -92,9 +92,8 @@ void motor_set_left(orientation dir, speed_value speed_state) {
 }
 
 void motor_drive_right(void) {
-    motor_set_speed(SPEED_INNER, SPEED_OUTER);
-    motor_set_left(OR_FORWARDS, SPEED_INNER);
-    motor_set_right(OR_BACKWARDS, SPEED_OUTER);
+    motor_set_left(OR_FORWARDS, SPEED_OUTER);
+    motor_set_right(OR_BACKWARDS, SPEED_INNER);
 }
 
 void motor_drive_forward(void) {
@@ -108,28 +107,77 @@ void motor_drive_backward(void) {
 }
 
 void motor_drive_left(void) {
-    motor_set_right(OR_FORWARDS, SPEED_INNER);
-    motor_set_left(OR_BACKWARDS, SPEED_OUTER);
+    motor_set_right(OR_FORWARDS, SPEED_OUTER);
+    motor_set_left(OR_BACKWARDS, SPEED_INNER);
 }
 
 void motor_drive_stop(void) {
     motor_set_left(OR_STOP, SPEED_ZERO);
     motor_set_right(OR_STOP, SPEED_ZERO);
-//    motor_set_speed(SPEED_ZERO, SPEED_ZERO);
-//    //Reset
-//    PORTB &= ~(1 << PB0);
-//    PORTB &= ~(1 << PB1);
-//    PORTB &= ~(1 << PB3);
-//    PORTD &= ~(1 << PD7);
 }
 
-direction evaluate_sensors(sensor_state current, sensor_state last) {
+void motor_update_brick(track_state *state, sensor_state current){
+    state->sensor_brick <<= 3;
+    state->sensor_brick |= current;
+    state->sensor_brick &= BRICK_ALL;
+}
+
+void print_bits(uint16_t brick){
+    int i = 0;
+    char s[2];
+    for(;i<BRICK_CACHED_AMOUNT * 3;++i){
+        sprintf(s, "%d", (brick & BRICK_ALL) ? 1 : 0);
+        // print last bit and shift left.
+        usart_print(s);
+        brick <<=1;
+    }
+    usart_print("\n");
+}
+
+sensor_state motor_brick_sensor(uint16_t brick, sensor_state state, uint8_t threshold){
+    int v = 0;
+    for(int i = 0;i < BRICK_CACHED_AMOUNT;i++){
+        if(brick & (state << i)){
+            v++;
+        }
+    }
+    return v >= threshold ? state : SENSOR_NONE;
+}
+
+sensor_state motor_evaluate_brick(uint16_t brick){
+    sensor_state brick_state = SENSOR_NONE;
+    brick_state |= motor_brick_sensor(brick, SENSOR_LEFT, BRICK_THRESHOLD);
+    brick_state |= motor_brick_sensor(brick, SENSOR_RIGHT, BRICK_THRESHOLD);
+    brick_state |= motor_brick_sensor(brick, SENSOR_CENTER, BRICK_THRESHOLD);
+    return brick_state;
+}
+
+//direction motor_evaluate_sensors(sensor_state current, sensor_state last) {
+//    // None
+//    /*if(!current){
+//        if(last & SENSOR_LEFT) {
+//            return DIR_LEFT;
+//        }else if (last & SENSOR_RIGHT) {
+//            return DIR_RIGHT;
+//        }
+//    }*/
+//    if(current & SENSOR_LEFT && !(current & SENSOR_RIGHT)) {
+//        return DIR_LEFT;
+//    }else if (current & SENSOR_RIGHT && !(current & SENSOR_LEFT)) {
+//        return DIR_RIGHT;
+//    }else if ((current & SENSOR_CENTER)) {
+//        return DIR_FORWARD;
+//    }
+//    return DIR_NONE;
+//}
+
+direction motor_evaluate_sensors(sensor_state current, sensor_state last) {
     if (current == SENSOR_NONE) {
         // Right Sensor
         if (last & SENSOR_RIGHT) {
             return DIR_RIGHT;
         }
-            // Left Sensor
+        // Left Sensor
         else if (last & SENSOR_LEFT) {
             return DIR_LEFT;
         }
@@ -161,8 +209,25 @@ void drive_move_direction(track_state *state, direction dir) {
     state->last_dir = dir;
 }
 
+sensor_state last_valid;
+sensor_state last_;
+
 void drive_apply(track_state *state, sensor_state current, sensor_state last) {
-    direction dir = evaluate_sensors(current, last);
+    sensor_state brick_last = motor_evaluate_brick(state->sensor_brick);
+    motor_update_brick(state, current);
+    sensor_state brick_current = motor_evaluate_brick(state->sensor_brick);
+//    print_bits(0b000011001111);
+//    direction dir = motor_evaluate_sensors(current, last);
+    if(current && current != last_valid){
+        last_valid = brick_current;
+    }
+    if(last_ != current) {
+        char s[sizeof("00\n")];
+        sprintf(s, "%d\n", current);
+        usart_print(s);
+        last_ = current;
+    }
+    direction dir = motor_evaluate_sensors(current, last);
     drive_move_direction(state, dir);
 }
 
@@ -194,7 +259,18 @@ void drive_home(track_state *state) {
 }
 
 void drive_manual(track_state *state) {
-    drive_move_direction(state, state->manual_dir);
+    if(timers_check_state(state, COUNTER_1_HZ) &&( state->manual_dir || state->manual_dir_last)) {
+        if(state->manual_dir_last){
+            motor_drive_stop();
+            state->manual_dir_last = 0;
+            usart_print("drive stop\n");
+        }else {
+            drive_move_direction(state, state->manual_dir);
+            state->manual_dir = DIR_NONE;
+            state->manual_dir_last = 1;
+            usart_print("drive\n");
+        }
+    }
 }
 
 void drive_run(track_state *state) {

@@ -84,6 +84,12 @@
 /** @brief Output Pin of the right motor speed  */
 #define OP_M_RE PD6
 
+/** @brief Amount of cached states */
+#define BRICK_CACHED_AMOUNT 4
+/** @brief Valid bits of the brick parameter */
+#define BRICK_ALL (1 << 12) - 1
+/** @brief Amount of last states that have to be containing the wanted state to be evaluated as true */
+#define BRICK_THRESHOLD 2
 
 /**
  * @brief Possible directions of the two motors.
@@ -118,11 +124,11 @@ typedef enum {
 /**
 * @brief Speed on a strait line
 */
-    SPEED_STRAIT = 140,
+    SPEED_STRAIT = 120,
 /**
 * @brief Speed of the outer wheel
 */
-    SPEED_OUTER = 220
+    SPEED_OUTER = 230
 } speed_value;
 
 /**
@@ -200,15 +206,25 @@ void motor_drive_backward(void);
 void motor_drive_stop(void);
 
 /**
+ * @brief Updates the brick sate of the sensors.
+ *
+ * @param state Current sensor state
+ * @param current  Current sensor state
+ * @sa #track_state.sensor_brick
+ */
+void motor_update_brick(track_state *state, sensor_state current);
+
+/**
  * @brief Reads sensor input and evaluates the direction that the robot has to drive.
  * @param current Current sensor state
  * @param last Sensor state in the last cycle
  */
-direction evaluate_sensors(sensor_state current, sensor_state last);
+direction motor_evaluate_sensors(sensor_state current, sensor_state last);
 
 /**
  * @brief Perform driving of the robot
  *
+ * @param state Current global state
  * @param current Current sensor state
  * @param last State of the sensors in the last cycle.
  */

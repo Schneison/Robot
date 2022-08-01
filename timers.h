@@ -87,7 +87,7 @@ extern uint16_t millis;
 static const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 5,
                                                              1000 / 6, 1000 / 8,
                                                              1000 / 3, 1000 / 12,
-                                                             1000 / 4};
+                                                             1000 / 24, 1000 / 4};
 
 /**
  * @brief Defines counters with different frequencies to allow output in the given frequencies.
@@ -108,6 +108,7 @@ typedef enum {
     COUNTER_8_HZ,
     COUNTER_3_HZ,
     COUNTER_12_HZ,
+    COUNTER_24_HZ,
     COUNTER_4_HZ,
 } counter_def;
 
@@ -129,7 +130,7 @@ void timers_create(counter *counters);
 void timers_update(counter *counters);
 
 /**
- * @copybrief timers_check(struct Counter*, counter_def)
+ * @copybrief timers_check(const counter*, counter_def)
  * @param state Current state of the robot that contains the counters.
  * @param counterDef The definition of the counter that should be checked.
  * @details The amount of counter is defined by #COUNTER_AMOUNT.

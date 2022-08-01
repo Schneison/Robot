@@ -36,16 +36,8 @@ link: $(TARGET_FILE)
 
 flash: $(TARGET_FILE).hex
 
-null :=
-space := ${null} ${null}
-
-indent:
+indent: $(C_SRC) $(H_SRC)
 	@mkdir -p indent
-	# "Aufgabenblatt_3.pdf S.8"
-	# "https://www.gnu.org/software/indent/manual/indent.html"
-	#-kr -bad -br -brs -brf -ce -cdw -bfda -sar -i4 -lp -as -cli4
-#-nbad -bap -nbc -bbo -hnl -br -brs -c33 -cd33 -ncdb -ce -ci4 -cli4 -d0 -di1 -nfc1 -i8 -ip0 -l80 -lp -npcs -nprs -npsl -sai -saf -saw -ncs -nsc -sob -nfca -cp33 -ss -ts8 -il1
-#-cli4 -as -ip4 -i4 -il4 -l100 -br -cdw -ce
 	for file in $(C_SRC); do \
   		indent $$file -brf -kr -i4 -nut -o indent/$$file;\
   	done
@@ -53,8 +45,6 @@ indent:
 	for file in $(H_SRC); do \
 		indent $$file -brf -kr -i4 -nut -o indent/$$file;\
 	done
-
-	# $(foreach file, $(C_SRC), indent $(file) -kr -i4 -nut -o indent/$(file).out)
 
 cppcheck: $(C_SRC)
 	cppcheck *.c *.h $(CPPCHECK_FLAGS)
@@ -72,12 +62,6 @@ $(TARGET_FILE).hex: $(TARGET_FILE)
 	avr-objcopy -O ihex $(TARGET_FILE) $(TARGET_FILE).hex
 	avrdude $(DUDE_FLAGS) -U flash:w:$(TARGET_FILE).hex:i
 
-
-# target: prerequisites ; recipe
-# 	recipe
-
-# "percent" (%) sign is used for pattern matching, and it requires one in the target as well as (at least) one in the prerequisites
-# "$@" means 'the target of this rule', and "$<" means 'this rule's first listed prerequisite'
 $(OUT_O_DIR)/%.o: %.c %.h
 	@mkdir -p $(@D)
 

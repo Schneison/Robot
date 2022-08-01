@@ -48,7 +48,7 @@ class SerialHandler:
     def update_gui(self):
         """Run on the update thread to update the current ui state"""
         # Wait for connection to be established before requiring stat updates
-        time.sleep(0.5)
+        time.sleep(2)
         # Activate request for tat updates
         self.send_byte("Y")
         while not self.stop:

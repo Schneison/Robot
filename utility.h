@@ -15,7 +15,7 @@
 /**
  * @brief Amount of counters that are defined in #counter_def
  */
-#define COUNTER_AMOUNT 7
+#define COUNTER_AMOUNT 8
 
 /** @brief Contains parameters for a 5 second timer */
 #define WATCH_DOG_TIME (WDTO_1S | WDTO_4S)
@@ -196,6 +196,12 @@ typedef struct track_state {
      */
     sensor_state sensor_current;
     /**
+     * @brief Caches the last three sensor states in pakages, the first three bits are the last
+     * state, the next three bits the one before and so on
+     * @brief States older than 3 cycles will simply be shifted out of the valid area
+     */
+    uint16_t sensor_brick;
+    /**
      * @brief Position of the robot on the track
      */
     track_pos pos;
@@ -227,9 +233,17 @@ typedef struct track_state {
      */
     direction manual_dir;
     /**
+     * @brief If the manuel mode drove in the last manual tick
+     */
+    uint8_t manual_dir_last;
+    /**
      * @brief Last driven direction, used by ui state
      */
     direction last_dir;
+    /**
+     * @brief Last valid driven direction that was not none
+     */
+    direction dir_last_valid;
 
     /**
      * @brief Connection state to the ui

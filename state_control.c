@@ -27,8 +27,8 @@ void state_show(track_state *state) {
         }
         case AC_FROZEN:
             timers_print(state->counters, COUNTER_1_HZ,
-                         "In safe state! Won’t react to any instructions! Rescue me!\n");
-            if (timers_check_state(state, COUNTER_12_HZ)) {
+                         "In safe state! Won't react to any instructions! Rescue me!\n");
+            if (timers_check_state(state, COUNTER_24_HZ)) {
                 led_chase(&(state->last_led));
             }
             break;
@@ -136,10 +136,10 @@ void state_read_input(track_state *state) {
             break;
         case 'Y':
             state->ui_connection = UI_CONNECTED;
-            break;
+            return;
         case 'Q':
             state->ui_connection = UI_DISCONNECTED;
-            break;
+            return;
         case 'R':
             state->action = AC_RESET;
             break;
@@ -206,7 +206,7 @@ void state_update_position(track_state *trackState) {
 void state_send_update(track_state *trackState) {
     if (trackState->ui_connection == UI_CONNECTED && timers_check_state(trackState,
                                                                         COUNTER_3_HZ)) {
-        char s[sizeof("[(7,7,7,7,100,7)]\n")];
+        char* s = "[(7,7,7,7,100,7)]\n";
         sprintf(s, "[(%d,%d,%d,%d,%d,%d)]\n",
                 // Last sensor state
                 trackState->sensor_last,
@@ -216,10 +216,16 @@ void state_send_update(track_state *trackState) {
                 trackState->action,
                 // On start field
                 trackState->pos == POS_START_FIELD,
-                // Battery voltage in percent times 100
-                sensor_get_battery(),
                 // Is manual
-                trackState->action == AC_MANUAL);
+                trackState->action == AC_MANUAL,
+                // Battery voltage in percent times 100
+                sensor_get_battery());
+        usart_print(s);
+    }
+    if(timers_check_state(trackState, COUNTER_1_HZ)){
+        char s[sizeof("100\n")];
+        sprintf(s, "%d\n",
+                sensor_get_battery());
         usart_print(s);
     }
 }

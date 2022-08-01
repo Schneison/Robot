@@ -23,7 +23,11 @@ int main(void) {
     trackState->last_pos = POS_UNKNOWN;
     trackState->homeCache = 0;
     trackState->manual_dir = DIR_NONE;
+    trackState->manual_dir_last = 0;
+    trackState->last_dir=0;
     trackState->ui_connection = UI_DISCONNECTED;
+    trackState->sensor_brick = 0;
+    trackState->dir_last_valid = 0;
     // Create counters, has to be done before first use
     timers_create(trackState->counters);
     state_run_loop(trackState);

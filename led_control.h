@@ -11,11 +11,15 @@
 #include <avr/io.h>
 
 // SR clock
+/** @brief Direction Register of the shift clock */
 #define DR_SR_CLK  DDRD
+/** @brief Direction Register Pin of shift clock   */
 #define DP_SR_CLK  DDD4
 
 // SR data
+/** @brief Direction Register of data to shift */
 #define DR_SR_DATA DDRB
+/** @brief Direction Register Pin of data to shift  */
 #define DP_SR_DATA DDB2
 
 /** @brief LED shift register port */
@@ -102,7 +106,7 @@ void led_clock(void);
  * @brief Updates the state of led by shifting the registry.
  * @details Uses #led_clock to shift the registry
  * @param state Defines the set led's
- * @sa #LED_State
+ * @sa #led_state
  */
 void led_set(led_state state);
 
