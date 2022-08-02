@@ -1,9 +1,32 @@
 /**
- * @file state_control.h
+ * @file
  * @author Larson Schneider
  * @date 09.07.2022
- * @brief Utility class
+ * @brief Main module for state handling
  * @version 0.1
+ *
+ * This modules handles the global state of the robot and calls every other modules. It is the key
+ * point of the program. It reads inputs, changes operation modes, prints messages via the usart
+ * module and so on.
+ */
+
+/**
+ * @page states State module
+ * This modules handles the global state of the robot and calls every other modules. It is the key
+ * point of the program. It reads inputs, changes operation modes, prints messages via the usart
+ * module and so on.
+ * @tableofcontents
+ * @section secGloStat Global State
+ * The global state is a section of the dynamic memory that is reserved in the form of a struct
+ * and contains all kind of variables that are used by the @ref modules to do various things and
+ * keep track of old states to evaluate or over function boarders.
+ * @section secCycle Working Cycle
+ * @section secInput Read Input
+ */
+
+/**
+ * @page ui User Interface
+ * @section secUIUpdate State Updates
  */
 #ifndef STATE_CONTROL_H
 #define STATE_CONTROL_H

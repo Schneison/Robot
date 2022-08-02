@@ -1,9 +1,45 @@
 /**
- * @file timers.h
+ * @file
  * @author Larson Schneider
  * @date 06.07.2022
  * @brief Utility class
  * @version 0.1
+ */
+/**
+ * @page timers Timer module
+ * @tableofcontents
+ * @section secFre Frequencies
+ * Many tasks of this project are executed in on pre defined frequencies, i.e. every half second,
+ * second, and so on. For this function we need a clock / timer that counts how many milliseconds
+ * passed since the last check. In our case we use the @ref secTimer1 "Timer 1" for this task. The
+ * timer is setup for with matching values to accomplish this task for more information see
+ * the timer 1 section. @n
+ * For every pre defined unique frequency we have a struct array in the
+ * @ref secGloStat "global state". The struct itself is called "counter" and is a helper to
+ * keep control over the different frequencies without doing to much boiler plate code.
+ * @section secCounter Counters
+ * Counters are a helper struct to keep track of all frequencies there associated time in
+ * milliseconds and an variable that contains the last time value on that the frequency requirement
+ * was meet. Every start of a @ref secCycle "work cycle" every counter will be checked if the delta
+ * between the last time the frequency requirement was meet and the current time is equal or exceeds
+ * the associated time of the frequency. If so the counter will revive an enabled value for this
+ * cycle and the last time variable will be set to the current time. In the next cycle the counter
+ * will be disabled again automatically because the delta is to small.
+ * @section secTimer0 Timer 0
+ * This timer used by the duty cycle of the motors. It is a 8-Bit timer wich pre-scale value is set
+ * to 64 (For reference: @ref TIMER_0_PRE_SCALE). The operation mode is set to fast PWM (i.e. it
+ * waits until the compared value is meet and then resets its value to 0 and the frequency is set to
+ * @ref F_CPU / (PRESCALER * 2^8)). The two compare values of this timer A and B are set by the
+ * @ref secDriDuty "duty cycle" to the corresponding speed value of the wheels.
+ * @n
+ * For more info see datasheet p.142
+ * @section secTimer1 Timer 1
+ * This timer is used for the counters used to check for meet frequency requirements. This timer is
+ * a 16-Bit timer and has a pre-scale value set to 64. The frequency is defined by @ref F_CPU /
+ * PRESCALER. Here only the compare value A is used and set to 250 together with the defined
+ * pre-scale value the timer will meet is compare value every milli second. If the timer value
+ * exceeds or equals the compare value an interrupt will be caused wich increases the internal
+ * current time value which is used by the @ref secCounter "counter" structures.
  */
 #ifndef TIMERS
 #define TIMERS

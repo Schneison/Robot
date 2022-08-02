@@ -1,9 +1,15 @@
 /**
- * @file led_control.h
+ * @file
  * @author Larson Schneider
  * @date 09.07.2022
- * @brief Utility class for led functions
+ * @brief Contains functions and structs for handling the leds (light-emitting diodes) of the robot
  * @version 0.1
+ *
+ * This module is mainly used to control the leds.
+ *
+ * Most importantly are the functions that are called to handle states from other modules and
+ * convert these to an led state. @n
+ * For reference see @ref led_chase, @ref led_blink, @ref led_sensor
  */
 #ifndef LED_CONTROL_H
 #define LED_CONTROL_H
@@ -93,7 +99,9 @@ typedef enum {
 } sensor_state;
 
 /**
- * @brief Initialises all pins that are used by the LED module.
+ * @brief Initialises all pins and registries that are used by the LED module.
+ *
+ *
  */
 void led_init(void);
 

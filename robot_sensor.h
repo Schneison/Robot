@@ -1,5 +1,5 @@
 /**
- * @file robot_sensor.h
+ * @file
  * @author Larson Schneider
  * @date 06.07.2022
  * @brief Reads the sensors of the roboter

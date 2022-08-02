@@ -4,7 +4,8 @@ uint16_t millis = 0;
 
 /**
  * @brief Updates counter variables
- * @details Called after the millis timer reaches the compare value
+ *
+ * Called after the millis timer reaches the compare value
  */
 ISR (TIMER1_COMPA_vect) {
     millis++;

@@ -1,3 +1,10 @@
+/**
+ * @file robot_sensor.c
+ * @author Larson Schneider
+ * @date 06.07.2022
+ * @brief Reads the sensors of the roboter
+ * @version 0.1
+ */
 #include "robot_sensor.h"
 
 void sensor_clear(void) {

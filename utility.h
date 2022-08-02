@@ -1,9 +1,26 @@
 /**
- * @file utility.h
+ * @file
  * @author Larson Schneider
  * @date 06.07.2022
- * @brief Utility class
+ * @brief Utility module common structures
  * @version 0.1
+ *
+ * This module contains structs and functions that are used in a wide range of other modules and
+ * serves as a key module.
+ */
+/**
+ * @page utility Utility module
+ * @tableofcontents
+ * @section secReset Reset
+ * We reset the board with the help of the watchdog timer with a 5 second delay until reset. Once
+ * we start the reset process the function will never left.
+ * \paragraph paWatchdog Watchdog Timer
+ * The watchdog timer is a software timer that is used to detect of the board malfunctions or is
+ * stuck in an endless loop. If so the timer resets the board so it is no longer stuck nad instead
+ * works as intended. This behaviour can be used by us to reset the board manually if we want so,
+ * This is very easy first we set the timer to the wanted time until the reset and then we simply
+ * enter an endless loop which never can be left and does nothing. The watchdog timer that thinks
+ * the board is stuck, which is is in fact, and resets the board.
  */
 #ifndef UTILITY
 #define UTILITY
@@ -80,25 +97,15 @@ typedef enum {
  * @brief Drive directions
  */
 typedef enum {
-/**
- * @brief No direction, don't drive
- */
+    /** @brief No direction, don't drive */
     DIR_NONE,
-/**
- * @brief Drive straight forward
- */
+    /** @brief Drive straight forward */
     DIR_FORWARD,
-/**
- * @brief Turn right
- */
+    /** @brief Turn right */
     DIR_RIGHT,
-/**
- * @brief Turn left
- */
+    /** @brief Turn left */
     DIR_LEFT,
-/**
- * @brief Drive straight backward
- */
+    /** @brief Drive straight backward */
     DIR_BACK,
 } direction;
 

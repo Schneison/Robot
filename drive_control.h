@@ -1,9 +1,37 @@
 /**
- * @file drive_control.h
+ * @file
  * @author Larson Schneider
  * @date 06.07.2022
- * @brief Controls movement of the roboter
+ * @brief Controls movement speed and direction of the robot
  * @version 0.1
+ *
+ * This module contains functions to control the speed of the motors and the direction of these. @n
+ * It also contains enums that define @ref orientation "moving orientations" or pre defined possible
+ * @ref speed_value "speed values" for the motors. @n The @ref direction "driving directions" itself
+ * are defined in the utility module.
+ */
+
+/**
+ * @page drive Driving module
+ * @tableofcontents
+ * @section secDriTask Module Tasks
+ * The main task of this module is to drive the robot in relation to the data that the @ref sensor
+ * "sensor module" retrieves so that the robot will follow the line on the ground as long as has not
+ * finished 3 rounds or was called home. @n
+ * @subsection subDriTaskMain Main (S)
+ * In the main operation mode the robot should start on the @ref startingField starting field and
+ * then drive 3 rounds around the @ref track. @n At the end it should stop on the starting field and
+ * reset itself after 5 seconds. For this see: @ref secReset
+ *
+ * @section secDriDuty The Duty cycle
+ * The duty cycle of our motors is used to control the received voltage and therefore the speed
+ * of the motors. We use a timer (in this case @ref secTimer0) to control how long and often a motor
+ * receives voltage. We realize this through enable and disable the pin if the compare value of the
+ * timer exceeds or is equal to the defined compare value of one of the motors. We so the pin will
+ * change from 1 to 0. In the default position the pin is set to 1, i.e enabled.
+ *
+ * @section secDriDir Driving direction evaluation
+ * The direction the robot will drive
  */
 #ifndef MOTOR_DRIVE
 #define MOTOR_DRIVE
@@ -142,10 +170,12 @@ void motor_clear(void);
 void motor_init(void);
 
 /**
- * @brief Defines speed of the wheels by defining how often a they are turned on,
+ * @brief Defines speed of the wheels on one side.
+ *
+ * Defines speed of the wheels by defining how often a they are turned on,
  * a higher value results in an faster wheel.
  *
- * @details Call #timers_setup_timer_0() before usage!
+ * @pre Call #timers_setup_timer_0() before usage!
  * @param pin PD5/PD6 for left/right motor cycle
  * @param value Defines speed of the wheels. (0 - 255 = 0% - 100%)
  */
@@ -156,6 +186,7 @@ void motor_set_duty(uint8_t pin, speed_value value);
  *
  * @param dir Direction of the motor motion
  * @param speed_state Speed of the motor.
+ * @sa motor_set_duty
  *
  */
 void motor_set_left(orientation dir, speed_value speed_state);
@@ -165,7 +196,7 @@ void motor_set_left(orientation dir, speed_value speed_state);
  *
  * @param dir Direction of the motor motion
  * @param speed_state Speed of the motor.
- *
+ * @sa motor_set_duty
  */
 void motor_set_right(orientation dir, speed_value speed_state);
 
