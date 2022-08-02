@@ -14,6 +14,12 @@
 /**
  * @page drive Driving module
  * @tableofcontents
+ *
+ * This module contains functions to control the speed of the motors and the direction of these.
+ * It also contains enums that define @ref orientation "moving orientations" or pre defined possible
+ * @ref speed_value "speed values" for the motors. @n The @ref direction "driving directions" itself
+ * are defined in the utility module.
+ *
  * @section secDriTask Module Tasks
  * The main task of this module is to drive the robot in relation to the data that the @ref sensor
  * "sensor module" retrieves so that the robot will follow the line on the ground as long as has not
@@ -22,6 +28,10 @@
  * In the main operation mode the robot should start on the @ref startingField starting field and
  * then drive 3 rounds around the @ref track. @n At the end it should stop on the starting field and
  * reset itself after 5 seconds. For this see: @ref secReset
+ *
+ * @section track Track
+ *
+ * @subsection startingField Starting Field (Home)
  *
  * @section secDriDuty The Duty cycle
  * The duty cycle of our motors is used to control the received voltage and therefore the speed

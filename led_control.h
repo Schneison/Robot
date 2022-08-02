@@ -11,6 +11,29 @@
  * convert these to an led state. @n
  * For reference see @ref led_chase, @ref led_blink, @ref led_sensor
  */
+
+/**
+ * @page led LED module
+ * This module is mainly used to control the leds.
+ * Most importantly are the functions that are called to handle states from other modules and
+ * convert these to an led state.
+ *
+ * Currently there are three main operation modes of the leds: @ref secLEDSensor
+ * "Reflecting the sensors", @ref secLEDChase "a chase" or @ref secLEDBlink "blinking".
+ * @section secLEDHar Hardware
+ * The robot is equipped with three leds that are connected to an shift registry. Every time we want
+ * to change the state of the leds we have to shift a new state into the registry. This is done with
+ * the help of the clock method @ref led_clock.
+ * @section secLEDSensor Reflect Sensors
+ * The most important operation mode for the leds is the reflection mode. It reflects and shows the
+ * state of the optical sensors belonging to the robot. The left led shows the state of the left
+ * sensor and so on.
+ * @section secLEDChase The Chase
+ * Lets the leds show an chase on the leds. Stating from left going two the right, back and
+ * repeating itself.
+ * @section secLEDBlink The Blink
+ * Lets the led blink on and off repeatedly.
+ */
 #ifndef LED_CONTROL_H
 #define LED_CONTROL_H
 

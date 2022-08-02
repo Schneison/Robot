@@ -21,7 +21,6 @@
  * and contains all kind of variables that are used by the @ref modules to do various things and
  * keep track of old states to evaluate or over function boarders.
  * @section secCycle Working Cycle
- * @section secInput Read Input
  */
 
 /**

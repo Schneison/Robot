@@ -4,6 +4,41 @@
  * @date 06.07.2022
  * @brief Reads the sensors of the roboter
  * @version 0.1
+ *
+ * This module provides functions to read the state of the adc converters with are connected to the
+ * reflective optical sensors on the robot and to the battery.
+ */
+/**
+ * @page sensor Sensor module
+ * @tableofcontents
+ * This module provides functions to read the state of the adc converters with are connected to the
+ * reflective optical sensors on the robot and to the battery.
+ *
+ * @section secADC Analog Digital Converter
+ * The adc converts an analog input stream to a digital output stream. For this is needs a
+ * reference Voltage which is provided by the battery. The adc has many channels which can be used
+ * to connect and read different devices. We use the channels 0 to 2 for the optical sensors and
+ * channel 3 is connected to an voltage divider which is connected to the battery.
+ * @sa ADMUX_CHN_ADC0
+ * @sa #ADMUX_CHN_ADC1
+ * @sa #ADMUX_CHN_ADC2
+ * @sa #ADMUX_CHN_ADC3
+ * @sa #ADMUX_CHN_ALL
+ *
+ * @section Reflective Optical Sensors
+ * We use three reflective optical sensors for detection of the @ref track "track". Every sensor
+ * has its own threshold when the program will accept a line to be found this is needed because
+ * every sensor has a different calibration. Every measurement is done multiple times to reduce the
+ * possibility that indirect noise can distort the result. (The amount is defined in
+ * @ref ADC_AVG_AMOUNT)
+ * @sa #ADC_AVG_AMOUNT
+ * @sa #SIGNAL_RIGHT_UPPER
+ * @sa #SIGNAL_CENTER_UPPER
+ * @sa #SIGNAL_LEFT_UPPER
+ *
+ * @section secBat Battery Voltage
+ * The last channel we use is for the battery voltage. The battery is connected to the pin adc 3 via
+ * a voltage divider.
  */
 #ifndef RO_SIGNALS
 #define RO_SIGNALS
@@ -11,6 +46,18 @@
 #include <avr/io.h>
 #include "utility.h"
 
+/** @brief Data direction registry of the right sensor */
+#define DR_ADC_0 DDRC
+/** @brief Data direction registry pint of the right sensor */
+#define DP_ADC_0 DDC0
+/** @brief Data direction registry of the center sensor */
+#define DR_ADC_1 DDRC
+/** @brief Data direction registry pin of the center sensor */
+#define DP_ADC_1 DDC1
+/** @brief Data direction registry of the left sensor */
+#define DR_ADC_2 DDRC
+/** @brief Data direction registry pin of the left sensor */
+#define DP_ADC_2 DDC2
 /** @brief Active channels and reference of the admux */
 #define A_MUX_SELECTION ADMUX
 /** @brief Admux voltage reference */
@@ -69,7 +116,7 @@
  * @sa #ADMUX_CHN_ADC1
  * @sa #ADMUX_CHN_ADC2
  */
-#define ADMUX_CHN_ALL 7  // 0000 0111
+#define ADMUX_CHN_ALL 3  // 0000 0011
 
 /**
  * @brief Amount of measurements made by the analog-digital-converter
@@ -93,15 +140,11 @@
  */
 #define SIGNAL_LEFT_UPPER 250
 
-/**
- * @brief Min Operating Voltage of the board
- */
+/** @brief Min Operating Voltage of the board */
 #define BATTERY_MIN 20
-/**
- * @brief Max Operating Voltage of the board
- */
+/** @brief Max Operating Voltage of the board */
 #define BATTERY_MAX 220
-
+/** @brief Range in that the battery voltage can fluctuate */
 #define BATTERY_RANGE 10
 
 /**

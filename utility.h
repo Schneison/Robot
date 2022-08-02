@@ -14,7 +14,7 @@
  * @section secReset Reset
  * We reset the board with the help of the watchdog timer with a 5 second delay until reset. Once
  * we start the reset process the function will never left.
- * \paragraph paWatchdog Watchdog Timer
+ * \subsection subWatchdog Watchdog Timer
  * The watchdog timer is a software timer that is used to detect of the board malfunctions or is
  * stuck in an endless loop. If so the timer resets the board so it is no longer stuck nad instead
  * works as intended. This behaviour can be used by us to reset the board manually if we want so,

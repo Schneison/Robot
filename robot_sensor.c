@@ -14,6 +14,10 @@ void sensor_clear(void) {
 }
 
 void sensor_init(void) {
+    DR_ADC_0 &= ~(1 << DP_ADC_0);
+    DR_ADC_1 &= ~(1 << DP_ADC_1);
+    DR_ADC_2 &= ~(1 << DP_ADC_2);
+    DR_ADC_3 &= ~(1 << DP_ADC_3);
 
     // Sets AVcc as the ADC's voltage source and as the reference,
     // while that voltage stems from the AREF-pin (5V when the robots is

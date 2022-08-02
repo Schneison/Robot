@@ -3,8 +3,33 @@
  * @brief Basic serial communication via USART for ATMEGA328
  * @version 0.1
  * @date 2021-06-08
+ *
+ * This module provides functions for serial communication via USART
+ * (Universal Synchronous and Asynchronous Serial Receiver and Transmitter). We are mainly connected
+ * to a PC with the serial port "/dev/ttyACM0" or bluetooth with the port "rfcomm0".
  */
-
+/**
+ * @page usart USART module
+ * @tableofcontents
+ * USART short for "Universal Synchronous and Asynchronous Serial Receiver and Transmitter" is a
+ * serial communication device which we use to communicate with the computer with the port
+ * "/dev/ttyACM0" or via bluetooth with the port "rfcomm0".
+ * @section secUInput Input
+ * In our case we use the usart receiver to receive mainly single uppercase letters for the
+ * action modes. If a letter is received with corresponds to the actions defined at: @ref actions,
+ * the given action will be applied if possible, i.e. if we are not currently in an action that does
+ * not allow to switch like the "freeze / save state" action.@n
+ * For a complete call history see @ref usart_receive_byte
+ * @sa usart_receive_byte
+ * @sa state_read_input
+ * @section secUOutput Output
+ * Many messages are send via the usart transmitter in all kind of scenarios for example if a round
+ * on the @ref track is completed.@n
+ * For a complete call history see @ref usart_transmit_byte
+ * @sa usart_transmit_byte
+ * @sa state_read_input
+ * @sa state_show
+ */
 #ifndef IESUSART_h
 #define IESUSART_h
 

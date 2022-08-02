@@ -1,10 +1,3 @@
-/**
- * @file usart.c
- * @brief Basic serial communication via USART for ATMEGA328
- * @version 0.1
- * @date 26.06.2022
- */
-
 #include "usart.h"
 
 unsigned char usart_receive_byte(void) {
