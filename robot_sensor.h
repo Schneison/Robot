@@ -4,6 +4,7 @@
  * @date 06.07.2022
  * @brief Reads the sensors of the roboter
  * @version 0.1
+ * @copyright MIT License.
  *
  * This module provides functions to read the state of the adc converters with are connected to the
  * reflective optical sensors on the robot and to the battery.

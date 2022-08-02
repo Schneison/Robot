@@ -4,6 +4,7 @@
  * @date 06.07.2022
  * @brief Utility module common structures
  * @version 0.1
+ * @copyright MIT License.
  *
  * This module contains structs and functions that are used in a wide range of other modules and
  * serves as a key module.
@@ -11,9 +12,11 @@
 /**
  * @page utility Utility module
  * @tableofcontents
+ *
  * @section secReset Reset
  * We reset the board with the help of the watchdog timer with a 5 second delay until reset. Once
  * we start the reset process the function will never left.
+ *
  * \subsection subWatchdog Watchdog Timer
  * The watchdog timer is a software timer that is used to detect of the board malfunctions or is
  * stuck in an endless loop. If so the timer resets the board so it is no longer stuck nad instead

@@ -4,6 +4,7 @@
  * @date 06.07.2022
  * @brief Utility class
  * @version 0.1
+ * @copyright MIT License.
  */
 /**
  * @page timers Timer module

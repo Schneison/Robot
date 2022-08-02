@@ -4,6 +4,7 @@
  * @date 26.07.2022
  * @brief Main module and try point of the robot system
  * @version 0.1
+ * @copyright MIT License.
  *
  * Used to setup the registers and then pass the work on to the state control to do the main work
  * and cycles.

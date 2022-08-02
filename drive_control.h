@@ -3,6 +3,7 @@
  * @author Larson Schneider
  * @date 06.07.2022
  * @brief Controls movement speed and direction of the robot
+ * @copyright MIT License.
  * @version 0.1
  *
  * This module contains functions to control the speed of the motors and the direction of these. @n

@@ -4,6 +4,7 @@
  * @date 09.07.2022
  * @brief Contains functions and structs for handling the leds (light-emitting diodes) of the robot
  * @version 0.1
+ * @copyright MIT License.
  *
  * This module is mainly used to control the leds.
  *
@@ -20,17 +21,21 @@
  *
  * Currently there are three main operation modes of the leds: @ref secLEDSensor
  * "Reflecting the sensors", @ref secLEDChase "a chase" or @ref secLEDBlink "blinking".
+ *
  * @section secLEDHar Hardware
  * The robot is equipped with three leds that are connected to an shift registry. Every time we want
  * to change the state of the leds we have to shift a new state into the registry. This is done with
  * the help of the clock method @ref led_clock.
+ *
  * @section secLEDSensor Reflect Sensors
  * The most important operation mode for the leds is the reflection mode. It reflects and shows the
  * state of the optical sensors belonging to the robot. The left led shows the state of the left
  * sensor and so on.
+ *
  * @section secLEDChase The Chase
  * Lets the leds show an chase on the leds. Stating from left going two the right, back and
  * repeating itself.
+ *
  * @section secLEDBlink The Blink
  * Lets the led blink on and off repeatedly.
  */

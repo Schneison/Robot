@@ -39,7 +39,7 @@ any text to the robot via a serial connection. Some "shortcut" buttons are also 
 Furthermore the current state of the field sensors can be seen and the direction that the robot is currently driving.
 This is possible thanks to an ongoing message exchange between the robot and the user interface.
 
-<h1>
+<h1 align="center">
 <img src="images/user_interface.png" alt=" " width="666" height="356">
 </h1>
 
