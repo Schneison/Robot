@@ -28,6 +28,7 @@ int main(void) {
     trackState->ui_connection = UI_DISCONNECTED;
     trackState->sensor_brick = 0;
     trackState->dir_last_valid = 0;
+    trackState->has_driven_once = 0;
     // Create counters, has to be done before first use
     timers_create(trackState->counters);
     state_run_loop(trackState);

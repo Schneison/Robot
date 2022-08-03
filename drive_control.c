@@ -222,9 +222,9 @@ void drive_apply(track_state *state, sensor_state current, sensor_state last) {
         last_valid = brick_current;
     }
     if(last_ != current) {
-        char s[sizeof("00\n")];
-        sprintf(s, "%d\n", current);
-        usart_print(s);
+        char s[sizeof("00")];
+        sprintf(s, "%d", current);
+        usart_println(s);
         last_ = current;
     }
     direction dir = motor_evaluate_sensors(current, last);
@@ -263,12 +263,12 @@ void drive_manual(track_state *state) {
         if(state->manual_dir_last){
             motor_drive_stop();
             state->manual_dir_last = 0;
-            usart_print("drive stop\n");
+            usart_println("drive stop");
         }else {
             drive_move_direction(state, state->manual_dir);
             state->manual_dir = DIR_NONE;
             state->manual_dir_last = 1;
-            usart_print("drive\n");
+            usart_println("drive");
         }
     }
 }
@@ -296,18 +296,18 @@ void drive_run(track_state *state) {
                         state->drive = DS_FIRST_ROUND;
                         break;
                     case DS_FIRST_ROUND:
-                        usart_print("YEAH, done round 1, going for round 2/3\n");
+                        usart_println("YEAH, done round 1, going for round 2/3");
                         state->drive = DS_SECOND_ROUND;
                         break;
                     case DS_SECOND_ROUND:
-                        usart_print("YEAH YEAH, done round 2, going for round 3/3\n");
+                        usart_println("YEAH YEAH, done round 2, going for round 3/3");
                         state->drive = DS_THIRD_ROUND;
                         break;
                     case DS_THIRD_ROUND:
-                        usart_print(
+                        usart_println(
                                 "YEAH YEAH YEAH , I really did it my way. ... And what's my "
                                 "purpose\n and the general sense of my further life now?"
-                                " Type ? for help\n");
+                                " Type ? for help");
                         state->drive = DS_BACKWARDS;
                         break;
                     default:

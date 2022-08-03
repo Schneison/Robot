@@ -17,9 +17,9 @@ void state_show(track_state *state) {
             }
             // Manual check, so we don't have to create a pointer every tick
             if (timers_check_state(state, COUNTER_1_HZ)) {
-                char s[sizeof("Round and round I go, currently round #1\n")];
-                sprintf(s, "Round and round I go, currently round #%d\n", round);
-                usart_print(s);
+                char s[sizeof("Round and round I go, currently round #1")];
+                sprintf(s, "Round and round I go, currently round #%d", round);
+                usart_println(s);
             }
             //TODO: Remove before deployment
             led_sensor(state->sensor_last);
@@ -69,13 +69,25 @@ void state_show(track_state *state) {
 void state_print_help(const track_state *state) {
     //Only print help text if S was not received once
     if (state->has_driven_once) {
+        usart_println("Currently on track, no help is given if the roboter already started driving!");
         return;
     }
     if (state->pos == POS_START_FIELD) {
-        usart_print("-X Safe action_state\n-S 3 Rounds\n-P Pause\n-R Reset\n-C Home\n-? Help\n");
+        usart_println("On the starting field the following actions are valid:");
+        usart_println(" -S: 3 Rounds");
+        usart_println(" -P: Pause");
+        usart_println(" -C: Home");
     } else {
-        usart_print("Not on start field, please position on start field!\n");
+        usart_println("Not on the starting field the following actions are valid:");
     }
+    usart_println(" -X: Safe State / Freeze");
+    usart_println(" -R: Reset");
+    usart_println(" -?: Help");
+    usart_println(" -M: Manual drive");
+    usart_println("  -W: Drive forward");
+    usart_println("  -B: Drive backwards");
+    usart_println("  -A: Drive left");
+    usart_println("  -D: Drive right");
 }
 
 void state_on_action_change(track_state *state, action_type oldAction) {
@@ -84,7 +96,7 @@ void state_on_action_change(track_state *state, action_type oldAction) {
     }
     switch (state->action) {
         case AC_RESET:
-            usart_print("Will util_reset in 5 seconds...\n");
+            usart_println("Will util_reset in 5 seconds...");
             break;
         case AC_WAIT: //Fallthrough
         case AC_FROZEN: //Fallthrough
@@ -99,7 +111,7 @@ void state_on_action_change(track_state *state, action_type oldAction) {
             break;
     }
     //TODO: remove
-    usart_print("State change....\n");
+    usart_println("State change....");
 }
 
 void state_read_input(track_state *state) {
@@ -124,11 +136,16 @@ void state_read_input(track_state *state) {
                 break;
             }
             if ((state->action) != AC_ROUNDS) {
+                usart_println("Not driving on track, can't be paused!");
                 return;
             }
             state->action = AC_PAUSE;
             break;
         case 'C':
+            if(state->action != AC_ROUNDS){
+                usart_println("Not driving on track, can't be called home!");
+                return;
+            }
             state->action = AC_RETURN_HOME;
             break;
         case 'M':
@@ -181,21 +198,21 @@ void state_update_position(track_state *trackState) {
         trackState->homeCache++;
         if (trackState->homeCache > 2) {
             if (trackState->pos != POS_START_FIELD) {
-                usart_print("Start field found \n");
+                usart_println("Start field found");
             }
             trackState->pos = POS_START_FIELD;
             trackState->homeCache = 3;
         } else {
-            char s[sizeof("Start field tick 1\n")];
-            sprintf(s, "Start field tick %d\n", trackState->homeCache);
-            usart_print(s);
+            char s[sizeof("Start field tick 1")];
+            sprintf(s, "Start field tick %d", trackState->homeCache);
+            usart_println(s);
         }
         return;
     }
     trackState->homeCache = 0;
     if (trackState->action == AC_ROUNDS) {
         if ((trackState->pos) != POS_TRACK) {
-            usart_print("Start field lost \n");
+            usart_println("Start field lost");
         }
         trackState->pos = POS_TRACK;
     } else {
@@ -206,8 +223,8 @@ void state_update_position(track_state *trackState) {
 void state_send_update(track_state *trackState) {
     if (trackState->ui_connection == UI_CONNECTED && timers_check_state(trackState,
                                                                         COUNTER_3_HZ)) {
-        char* s = "[(7,7,7,7,100,7)]\n";
-        sprintf(s, "[(%d,%d,%d,%d,%d,%d)]\n",
+        char* s = "[(7,7,7,7,100,7)]";
+        sprintf(s, "[(%d,%d,%d,%d,%d,%d)]",
                 // Last sensor state
                 trackState->sensor_last,
                 // Direction of driving
@@ -220,14 +237,14 @@ void state_send_update(track_state *trackState) {
                 trackState->action == AC_MANUAL,
                 // Battery voltage in percent times 100
                 sensor_get_battery());
-        usart_print(s);
+        usart_println(s);
     }
-    if(timers_check_state(trackState, COUNTER_1_HZ)){
+    /*if(timers_check_state(trackState, COUNTER_1_HZ)){
         char s[sizeof("100\n")];
         sprintf(s, "%d\n",
                 sensor_get_battery());
         usart_print(s);
-    }
+    }*/
 }
 
 _Noreturn void state_run_loop(track_state *trackState) {
@@ -238,8 +255,8 @@ _Noreturn void state_run_loop(track_state *trackState) {
         timers_update(trackState->counters);
         state_show(trackState);
         state_send_update(trackState);
-        action_type oldAction = trackState->action;
-        switch (oldAction) {
+        action_type action = trackState->action;
+        switch (action) {
             case AC_MANUAL: {
                 drive_manual(trackState);
                 break;
@@ -264,8 +281,8 @@ _Noreturn void state_run_loop(track_state *trackState) {
          * If the state changes an action was applied, usually when the 3 rounds were driven and the
          * robot is switched to util_reset
          */
-        if (oldAction != trackState->action) {
-            state_on_action_change(trackState, oldAction);
+        if (action != trackState->action) {
+            state_on_action_change(trackState, action);
         }
     }
 }

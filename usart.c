@@ -28,6 +28,11 @@ void usart_print(const char *c) {
     }
 }
 
+void usart_println(const char *c) {
+    usart_print(c);
+    usart_print("\n");
+}
+
 void usart_init(unsigned long ubrr) {
     // Set baud rate, high byte first
     UB_BAUD_RATE_HIGH = (unsigned char) (ubrr >> 8);

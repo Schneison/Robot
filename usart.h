@@ -120,6 +120,11 @@ void usart_transmit_byte(unsigned char data);
 void usart_print(const char *c);
 
 /**
+ * @brief Transmitters a string (char by char) until '\0’ is reached and adds a new line
+ */
+void usart_println(const char *c);
+
+/**
  * @brief Sets up the USART port (The USART baudrate register)
  * @param ubrr Content to write into the UBRR register
  */

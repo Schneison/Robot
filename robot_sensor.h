@@ -59,6 +59,10 @@
 #define DR_ADC_2 DDRC
 /** @brief Data direction registry pin of the left sensor */
 #define DP_ADC_2 DDC2
+/** @brief Data direction registry of the battery sensor */
+#define DR_ADC_3 DDRC
+/** @brief Data direction registry pin of the battery sensor */
+#define DP_ADC_3 DDC3
 /** @brief Active channels and reference of the admux */
 #define A_MUX_SELECTION ADMUX
 /** @brief Admux voltage reference */
@@ -144,7 +148,7 @@
 /** @brief Min Operating Voltage of the board */
 #define BATTERY_MIN 20
 /** @brief Max Operating Voltage of the board */
-#define BATTERY_MAX 220
+#define BATTERY_MAX 225
 /** @brief Range in that the battery voltage can fluctuate */
 #define BATTERY_RANGE 10
 

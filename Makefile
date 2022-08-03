@@ -35,6 +35,7 @@ compile: $(C_SRC) $(H_SRC)
 link: $(TARGET_FILE)
 
 flash: $(TARGET_FILE).hex
+	avrdude $(DUDE_FLAGS) -U flash:w:$(TARGET_FILE).hex:i
 
 indent: $(C_SRC) $(H_SRC)
 	@mkdir -p indent
@@ -60,7 +61,6 @@ $(TARGET_FILE): $(O_SRC)
 
 $(TARGET_FILE).hex: $(TARGET_FILE)
 	avr-objcopy -O ihex $(TARGET_FILE) $(TARGET_FILE).hex
-	avrdude $(DUDE_FLAGS) -U flash:w:$(TARGET_FILE).hex:i
 
 $(OUT_O_DIR)/%.o: %.c %.h
 	@mkdir -p $(@D)
