@@ -1,7 +1,12 @@
 #include "timers.h"
 
-uint16_t millis = 0;
-
+uint32_t millis = 0;
+/**
+ * @brief Contains the frequencies for the corresponding counters in #counter_def
+ */
+const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 2,
+                                                       1000 / 5,1000 / 12,
+                                                       1000 / 32 };
 /**
  * @brief Updates counter variables
  *
@@ -24,7 +29,7 @@ void timers_update(counter *counters) {
     for (int i = 0; i < COUNTER_AMOUNT; i++) {
         counter *counter = &counters[i];
         // Diff since last true cycle
-        uint16_t delta = millis - counter->last_millis;
+        uint32_t delta = millis - counter->last_millis;
         if (delta > counter->threshold) {
             counter->last_millis = millis;
             counter->value = 1;

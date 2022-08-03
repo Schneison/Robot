@@ -124,15 +124,12 @@
  * @brief Counter variable, which contains a value from 0 to 255. This value represents the
  * milliseconds since the last second. One unit is (1000/255) ms.
  */
-extern uint16_t millis;
+extern uint32_t millis;
 
 /**
  * @brief Contains the frequencies for the corresponding counters in #counter_def
  */
-static const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 5,
-                                                             1000 / 6, 1000 / 8,
-                                                             1000 / 3, 1000 / 12,
-                                                             1000 / 24, 1000 / 4};
+extern const uint16_t counter_frequencies[COUNTER_AMOUNT];
 
 /**
  * @brief Defines counters with different frequencies to allow output in the given frequencies.
@@ -142,19 +139,16 @@ typedef enum {
      * @brief 1 HZ Counter
      */
     COUNTER_1_HZ,
+    COUNTER_2_HZ,
     /**
  * @brief 5 HZ Counter
  */
     COUNTER_5_HZ,
-    COUNTER_6_HZ,
     /**
  * @brief 8 HZ Counter
  */
-    COUNTER_8_HZ,
-    COUNTER_3_HZ,
     COUNTER_12_HZ,
-    COUNTER_24_HZ,
-    COUNTER_4_HZ,
+    COUNTER_32_HZ,
 } counter_def;
 
 /**

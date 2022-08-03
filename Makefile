@@ -59,12 +59,16 @@ clean:
 try_connect:
 	BotBtSerial connect
 
+try_disconnect:
+	BotBtSerial disconnect
+
 $(TARGET_FILE): $(O_SRC)
 	$(CC) $(O_SRC) -o $(TARGET_FILE) $(CFLAGS)
 
 $(TARGET_FILE).hex: $(TARGET_FILE)
 	avr-objcopy -O ihex $(TARGET_FILE) $(TARGET_FILE).hex
 
+-include $(D_SRC)
 $(OUT_O_DIR)/%.o: %.c %.h
 	@mkdir -p $(@D)
 

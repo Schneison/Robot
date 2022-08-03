@@ -37,7 +37,7 @@
 /**
  * @brief Amount of counters that are defined in #counter_def
  */
-#define COUNTER_AMOUNT 8
+#define COUNTER_AMOUNT 6
 
 /** @brief Contains parameters for a 5 second timer */
 #define WATCH_DOG_TIME (WDTO_1S | WDTO_4S)
@@ -53,7 +53,7 @@ typedef struct counter {
     /**
      * @brief Milliseconds since last true cycle.
      */
-    uint16_t last_millis;
+    uint32_t last_millis;
     /**
      * @brief If the frequency applies this cycle. Possible values are 0 and 1.
      */

@@ -158,7 +158,7 @@ typedef enum {
 /**
 * @brief Speed of the inner wheel
 */
-    SPEED_INNER = 180,
+    SPEED_INNER = 190,
 /**
 * @brief Speed on a strait line
 */
@@ -166,7 +166,7 @@ typedef enum {
 /**
 * @brief Speed of the outer wheel
 */
-    SPEED_OUTER = 230
+    SPEED_OUTER = 220
 } speed_value;
 
 /**

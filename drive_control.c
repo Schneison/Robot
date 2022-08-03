@@ -139,6 +139,10 @@ direction motor_calc_direction(
        ) {
     if(current == SENSOR_NONE) {
         if(last_state == SENSOR_ALL){
+            usart_print_pretty("Used last simple state");
+            char s[sizeof("%d")];
+            sprintf(s, "%d", *last_simple);
+            usart_println(s);
             return *last_simple;
         }
         return *last_dir;

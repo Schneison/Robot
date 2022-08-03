@@ -28,7 +28,7 @@ void state_show(track_state *state) {
         case AC_FROZEN:
             timers_print(state->counters, COUNTER_1_HZ,
                          "In safe state! Won't react to any instructions! Rescue me!\n");
-            if (timers_check_state(state, COUNTER_24_HZ)) {
+            if (timers_check_state(state, COUNTER_32_HZ)) {
                 led_chase(&(state->last_led));
             }
             break;
@@ -42,7 +42,7 @@ void state_show(track_state *state) {
         case AC_PAUSE:
             timers_print(state->counters, COUNTER_1_HZ,
                          "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again\n");
-            if (timers_check_state(state, COUNTER_3_HZ)) {
+            if (timers_check_state(state, COUNTER_2_HZ)) {
                 led_chase(&(state->last_led));
             }
             break;
@@ -233,7 +233,7 @@ void state_update_position(track_state *trackState) {
 void state_send_update(const track_state *trackState) {
     if (trackState->ui_connection == UI_CONNECTED && timers_check_state(trackState,
                                                                         COUNTER_12_HZ)) {
-        char* s = "[(7,7,7,7,100,7)]\n";
+        char* s = "[(7,7,7,7,1000,7)]\n";
         sprintf(s, "[(%d,%d,%d,%d,%d,%d)]\n",
                 // Last sensor state
                 trackState->sensor_last,
