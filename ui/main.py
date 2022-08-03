@@ -29,9 +29,9 @@ SENSOR_RIGHT = 4
 SENSOR_ALL = 7
 
 DRIVE_NONE = 0
-DRIVE_LEFT = 1
-DRIVE_STRAIGHT = 2
-DRIVE_RIGHT = 4
+DRIVE_LEFT = 3
+DRIVE_STRAIGHT = 1
+DRIVE_RIGHT = 2
 
 
 @dataclass
@@ -270,15 +270,15 @@ class StateDisplay(tk.Frame):
         "#f2e7bf")
         # Drive Left
         self.canvas.itemconfig(self.drive_left,
-                               image=self.arrow_left if state.drive_state & DRIVE_LEFT else
+                               image=self.arrow_left if state.drive_state == DRIVE_LEFT else
                                self.arrow_left_light)
         # Drive Straight
         self.canvas.itemconfig(self.drive_straight,
-                               image=self.arrow_straight if state.drive_state & DRIVE_STRAIGHT else
+                               image=self.arrow_straight if state.drive_state == DRIVE_STRAIGHT else
                                self.arrow_straight_light)
         # Drive Right
         self.canvas.itemconfig(self.drive_right,
-                               image=self.arrow_right if state.drive_state & DRIVE_RIGHT else
+                               image=self.arrow_right if state.drive_state == DRIVE_RIGHT else
                                self.arrow_right_light)
 
     def init_ui(self):

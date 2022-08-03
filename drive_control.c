@@ -171,11 +171,26 @@ void drive_move_direction(track_state *state, direction dir) {
     state->dir_last = dir;
 }
 
+sensor_state last_s;
+direction last_;
+
 void drive_apply(track_state *state) {
     direction dir = motor_calc_direction(state->sensor_current,
                                          SENSOR_RIGHT,
                                          &(state->dir_last_valid),
                                          &(state->dir_last_simple));
+    if(last_s != state->sensor_current) {
+        char s[sizeof("S: %d")];
+        sprintf(s, "S: %d", state->sensor_current);
+        usart_println(s);
+        last_s = state->sensor_current;
+    }
+    if(last_ != dir) {
+        char s[sizeof("D: %d")];
+        sprintf(s, "D: %d", dir);
+        usart_println(s);
+        last_ = dir;
+    }
     drive_move_direction(state, dir);
 }
 
