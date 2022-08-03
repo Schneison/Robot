@@ -198,12 +198,10 @@ void drive_manual(track_state *state) {
         if(state->manual_dir_last){
             motor_drive_stop();
             state->manual_dir_last = 0;
-            usart_println("drive stop");
         }else {
             drive_move_direction(state, state->manual_dir);
             state->manual_dir = DIR_NONE;
             state->manual_dir_last = 1;
-            usart_println("drive");
         }
     }
 }
@@ -230,15 +228,15 @@ void drive_run(track_state *state) {
                         state->drive = DS_FIRST_ROUND;
                         break;
                     case DS_FIRST_ROUND:
-                        usart_println("YEAH, done round 1, going for round 2/3");
+                        usart_print_pretty("YEAH, done round 1, going for round 2/3");
                         state->drive = DS_SECOND_ROUND;
                         break;
                     case DS_SECOND_ROUND:
-                        usart_println("YEAH YEAH, done round 2, going for round 3/3");
+                        usart_print_pretty("YEAH YEAH, done round 2, going for round 3/3");
                         state->drive = DS_THIRD_ROUND;
                         break;
                     case DS_THIRD_ROUND:
-                        usart_println(
+                        usart_print_pretty(
                                 "YEAH YEAH YEAH , I really did it my way. ... And what's my "
                                 "purpose\n and the general sense of my further life now?"
                                 " Type ? for help");

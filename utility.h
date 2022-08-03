@@ -32,6 +32,8 @@
 #include <avr/wdt.h>
 #include "led_control.h"
 
+#define DEBUG 1
+
 /**
  * @brief Amount of counters that are defined in #counter_def
  */
@@ -51,7 +53,7 @@ typedef struct counter {
     /**
      * @brief Milliseconds since last true cycle.
      */
-    uint16_t lastMillis;
+    uint16_t last_millis;
     /**
      * @brief If the frequency applies this cycle. Possible values are 0 and 1.
      */

@@ -47,7 +47,6 @@
 #ifndef MOTOR_DRIVE
 #define MOTOR_DRIVE
 
-#include <util/delay.h>
 #include <avr/io.h>
 #include "timers.h"
 #include "robot_sensor.h"

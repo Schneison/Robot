@@ -94,5 +94,5 @@ sensor_state sensor_get_state() {
 }
 
 uint8_t sensor_get_battery(void) {
-    return (uint8_t)(sensor_adc_read_avg(ADMUX_CHN_ADC3, 20));
+    return (uint8_t)(sensor_adc_read_avg(ADMUX_CHN_ADC3, 100));
 }

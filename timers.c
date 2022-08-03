@@ -16,7 +16,7 @@ void timers_create(counter *counters) {
         counter *counter = &counters[i];
         counter->value = 0;
         counter->threshold = counter_frequencies[i];
-        counter->lastMillis = millis;
+        counter->last_millis = millis;
     }
 }
 
@@ -24,9 +24,9 @@ void timers_update(counter *counters) {
     for (int i = 0; i < COUNTER_AMOUNT; i++) {
         counter *counter = &counters[i];
         // Diff since last true cycle
-        uint16_t delta = millis - counter->lastMillis;
+        uint16_t delta = millis - counter->last_millis;
         if (delta > counter->threshold) {
-            counter->lastMillis = millis;
+            counter->last_millis = millis;
             counter->value = 1;
         } else {
             counter->value = 0;

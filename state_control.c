@@ -19,7 +19,7 @@ void state_show(track_state *state) {
             if (timers_check_state(state, COUNTER_1_HZ)) {
                 char s[sizeof("Round and round I go, currently round #1")];
                 sprintf(s, "Round and round I go, currently round #%d", round);
-                usart_println(s);
+                usart_print_pretty(s);
             }
             //TODO: Remove before deployment
             led_sensor(state->sensor_last);
@@ -69,7 +69,8 @@ void state_show(track_state *state) {
 void state_print_help(const track_state *state) {
     //Only print help text if S was not received once
     if (state->has_driven_once) {
-        usart_println("Currently on track, no help is given if the roboter already started driving!");
+        usart_println("Currently on track, no help is given if the roboter already "
+                      "started driving!");
         return;
     }
     if (state->pos == POS_START_FIELD) {
@@ -87,7 +88,7 @@ void state_print_help(const track_state *state) {
     usart_println(" -- W: Drive forward");
     usart_println(" -- B: Drive backwards");
     usart_println(" -- A: Drive left");
-    usart_println(" -- D: Drive right");
+    usart_print_pretty(" -- D: Drive right");
 }
 
 void state_on_action_change(track_state *state, action_type oldAction) {
@@ -96,7 +97,7 @@ void state_on_action_change(track_state *state, action_type oldAction) {
     }
     switch (state->action) {
         case AC_RESET:
-            usart_println("Will reset in 5 seconds...");
+            usart_print_pretty("Will reset in 5 seconds...");
             break;
         case AC_WAIT: //Fallthrough
         case AC_FROZEN: //Fallthrough
@@ -110,8 +111,6 @@ void state_on_action_change(track_state *state, action_type oldAction) {
         default:
             break;
     }
-    //TODO: remove
-    usart_println("State change....");
 }
 
 void state_read_input(track_state *state) {
@@ -126,7 +125,7 @@ void state_read_input(track_state *state) {
     switch (byte) {
         case 'S':
             if((state->pos) != POS_START_FIELD){
-                usart_println("Can't start when not on the starting field!");
+                usart_print_pretty("Can't start when not on the starting field!");
                 return;
             }
             state->action = AC_ROUNDS;
@@ -140,14 +139,14 @@ void state_read_input(track_state *state) {
                 break;
             }
             if ((state->action) != AC_ROUNDS) {
-                usart_println("Not driving on track, can't be paused!");
+                usart_print_pretty("Not driving on track, can't be paused!");
                 return;
             }
             state->action = AC_PAUSE;
             break;
         case 'C':
             if(state->action != AC_ROUNDS){
-                usart_println("Not driving on track, can't be called home!");
+                usart_print_pretty("Not driving on track, can't be called home!");
                 return;
             }
             state->action = AC_RETURN_HOME;
@@ -193,6 +192,9 @@ void state_read_input(track_state *state) {
             }
             return;
     }
+    if(oldAction == state->action){
+        return;
+    }
     state_on_action_change(state, oldAction);
 }
 
@@ -205,12 +207,12 @@ void state_update_position(track_state *trackState) {
     if (trackState->sensor_last == SENSOR_ALL) {
         trackState->homeCache++;
         if (trackState->homeCache > 2) {
-            if (trackState->pos != POS_START_FIELD) {
+            if (trackState->pos != POS_START_FIELD && DEBUG) {
                 usart_println("Start field found");
             }
             trackState->pos = POS_START_FIELD;
             trackState->homeCache = 3;
-        } else {
+        } else if(DEBUG) {
             char s[sizeof("Start field tick 1")];
             sprintf(s, "Start field tick %d", trackState->homeCache);
             usart_println(s);
@@ -219,7 +221,7 @@ void state_update_position(track_state *trackState) {
     }
     trackState->homeCache = 0;
     if (trackState->action == AC_ROUNDS) {
-        if ((trackState->pos) != POS_TRACK) {
+        if ((trackState->pos) != POS_TRACK && DEBUG) {
             usart_println("Start field lost");
         }
         trackState->pos = POS_TRACK;
@@ -228,7 +230,7 @@ void state_update_position(track_state *trackState) {
     }
 }
 
-void state_send_update(track_state *trackState) {
+void state_send_update(const track_state *trackState) {
     if (trackState->ui_connection == UI_CONNECTED && timers_check_state(trackState,
                                                                         COUNTER_12_HZ)) {
         char* s = "[(7,7,7,7,100,7)]\n";
