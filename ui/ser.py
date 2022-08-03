@@ -57,7 +57,7 @@ class SerialHandler:
             time.sleep(0.01)
 
     def receive_data(self):
-        """Run on the receive thread to read data from the port"""
+        """Run on the receiving thread to read data from the port"""
         while not self.stop:
             # noinspection PyBroadException
             try:
@@ -116,7 +116,7 @@ ser_handler: Union[SerialHandler, None] = None
 
 
 def is_connected() -> bool:
-    """Checks if we have a open connection to a port"""
+    """Checks if we have an open connection to a port"""
     return ser_handler and ser_handler.ser.is_open
 
 
@@ -146,12 +146,12 @@ def open_port(port: str, logger: Logger, update_state: UpdateFunction) -> bool:
         close_port(True)
         ser_handler = None
         return False
-    connect = False
+    connected = False
     try:
         logger.log(INFO, "Connected to " + port)
-        connect = True
         ser_handler = SerialHandler(port, logger, update_state)
         ser_handler.start_threads()
+        connected = True
     except PortNotOpenError:
         logger.log(ERROR, "Connection failed, port not open")
     except SerialTimeoutException:
@@ -159,4 +159,4 @@ def open_port(port: str, logger: Logger, update_state: UpdateFunction) -> bool:
     except SerialException as msg:
         logger.log(ERROR, "Connection failed")
         logger.log(ERROR, msg)
-    return connect
+    return connected

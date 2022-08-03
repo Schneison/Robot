@@ -238,7 +238,7 @@ void state_send_update(const track_state *trackState) {
                 // Last sensor state
                 trackState->sensor_last,
                 // Direction of driving
-                trackState->last_dir,
+                trackState->dir_last,
                 // Current action
                 trackState->action,
                 // On start field

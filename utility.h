@@ -208,12 +208,6 @@ typedef struct track_state {
      */
     sensor_state sensor_current;
     /**
-     * @brief Caches the last three sensor states in pakages, the first three bits are the last
-     * state, the next three bits the one before and so on
-     * @brief States older than 3 cycles will simply be shifted out of the valid area
-     */
-    uint16_t sensor_brick;
-    /**
      * @brief Position of the robot on the track
      */
     track_pos pos;
@@ -251,11 +245,15 @@ typedef struct track_state {
     /**
      * @brief Last driven direction, used by ui state
      */
-    direction last_dir;
+    direction dir_last;
     /**
      * @brief Last valid driven direction that was not #DIR_NONE
      */
     direction dir_last_valid;
+    /**
+     * @brief Last valid driven direction that was #DIR_LEFT or #DIR_RIGHT
+     */
+    direction dir_last_simple;
 
     /**
      * @brief Connection state to the ui

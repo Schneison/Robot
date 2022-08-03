@@ -118,7 +118,8 @@ void motor_drive_stop(void) {
 
 direction motor_evaluate_sensors(sensor_state current) {
     if ((current & SENSOR_CENTER)
-        && ((current & SENSOR_LEFT) == (current & SENSOR_RIGHT)) || !(current & SENSOR_LEFT) == !(current & SENSOR_RIGHT)) {
+        && ((current & SENSOR_LEFT) == (current & SENSOR_RIGHT))
+        || !(current & SENSOR_LEFT) == !(current & SENSOR_RIGHT)) {
         return DIR_FORWARD;
     }
     if (current & SENSOR_RIGHT) {
@@ -130,11 +131,22 @@ direction motor_evaluate_sensors(sensor_state current) {
     return DIR_NONE;
 }
 
-direction motor_calc_direction(sensor_state current, direction* last_dir) {
+direction motor_calc_direction(
+        sensor_state current,
+        sensor_state last_state,
+        direction *last_dir,
+        direction *last_simple
+       ) {
     if(current == SENSOR_NONE) {
+        if(last_state == SENSOR_ALL){
+            return *last_simple;
+        }
         return *last_dir;
     }else{
         *last_dir = motor_evaluate_sensors(current);
+        if(*last_dir == SENSOR_RIGHT || *last_dir == SENSOR_LEFT){
+            *last_simple = *last_dir;
+        }
         return *last_dir;
     }
 }
@@ -156,11 +168,14 @@ void drive_move_direction(track_state *state, direction dir) {
         default:
             break;
     }
-    state->last_dir = dir;
+    state->dir_last = dir;
 }
 
 void drive_apply(track_state *state) {
-    direction dir = motor_calc_direction(state->sensor_current, &(state->dir_last_valid));
+    direction dir = motor_calc_direction(state->sensor_current,
+                                         SENSOR_RIGHT,
+                                         &(state->dir_last_valid),
+                                         &(state->dir_last_simple));
     drive_move_direction(state, dir);
 }
 
@@ -194,11 +209,12 @@ void drive_home(track_state *state) {
 }
 
 void drive_manual(track_state *state) {
-    if(timers_check_state(state, COUNTER_1_HZ) &&( state->manual_dir || state->manual_dir_last)) {
+    if(timers_check_state(state, COUNTER_1_HZ)
+        && ( state->manual_dir || state->manual_dir_last)) {
         if(state->manual_dir_last){
             motor_drive_stop();
             state->manual_dir_last = 0;
-        }else {
+        } else {
             drive_move_direction(state, state->manual_dir);
             state->manual_dir = DIR_NONE;
             state->manual_dir_last = 1;

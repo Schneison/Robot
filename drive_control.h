@@ -162,7 +162,7 @@ typedef enum {
 /**
 * @brief Speed on a strait line
 */
-    SPEED_STRAIT = 140,
+    SPEED_STRAIT = 120,
 /**
 * @brief Speed of the outer wheel
 */
@@ -259,7 +259,8 @@ direction motor_evaluate_sensors(sensor_state current);
  * @param current Current sensor state
  * @param last_dir Last direction driven, that was not #DIR_NONE
  */
-direction motor_calc_direction(sensor_state current, direction* last_dir);
+direction motor_calc_direction(sensor_state current, sensor_state last_state, direction *last_dir,
+                               direction *last_simple);
 
 /**
  * @brief Perform driving of the robot
