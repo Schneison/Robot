@@ -211,15 +211,6 @@ void motor_set_left(orientation dir, speed_value speed_state);
 void motor_set_right(orientation dir, speed_value speed_state);
 
 /**
- * @brief Sets the speed of the two motors.
- *
- * @param left_speed Speed state of the left motor.
- * @param right_speed Speed state of the righht motor.
- *
- */
-void motor_set_speed(speed_value left_speed, speed_value right_speed);
-
-/**
  * @brief Sets the values to drive the robot to the left
  */
 void motor_drive_left(void);

@@ -54,11 +54,6 @@ void motor_set_duty(uint8_t pin, speed_value value) {
     }
 }
 
-void motor_set_speed(speed_value left_speed, speed_value right_speed) {
-    motor_set_duty(DP_M_LE, left_speed); // left
-    motor_set_duty(DP_M_RE, right_speed); // right
-}
-
 void motor_set_right(orientation dir, speed_value speed_state) {
     if (dir == OR_FORWARDS) {
         OR_M_RF |= (1 << OP_M_RF); // Forward ON
@@ -138,11 +133,7 @@ direction motor_calc_direction(
         direction *last_simple
        ) {
     if(current == SENSOR_NONE) {
-        if(last_state == SENSOR_ALL){
-            usart_print_pretty("Used last simple state");
-            char s[sizeof("%d")];
-            sprintf(s, "%d", *last_simple);
-            usart_println(s);
+        if(last_state == SENSOR_ALL || (last_state & SENSOR_LEFT) == (last_state & SENSOR_RIGHT)){
             return *last_simple;
         }
         return *last_dir;
@@ -175,26 +166,11 @@ void drive_move_direction(track_state *state, direction dir) {
     state->dir_last = dir;
 }
 
-sensor_state last_s;
-direction last_;
-
 void drive_apply(track_state *state) {
     direction dir = motor_calc_direction(state->sensor_current,
                                          SENSOR_RIGHT,
                                          &(state->dir_last_valid),
                                          &(state->dir_last_simple));
-    if(last_s != state->sensor_current) {
-        char s[sizeof("S: %d")];
-        sprintf(s, "S: %d", state->sensor_current);
-        usart_println(s);
-        last_s = state->sensor_current;
-    }
-    if(last_ != dir) {
-        char s[sizeof("D: %d")];
-        sprintf(s, "D: %d", dir);
-        usart_println(s);
-        last_ = dir;
-    }
     drive_move_direction(state, dir);
 }
 

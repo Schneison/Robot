@@ -138,7 +138,7 @@
  * @brief Threshold of the center sensor
  * @details This will determine if the signal of the sensor is read as positive.
  */
-#define SIGNAL_CENTER_UPPER 120
+#define SIGNAL_CENTER_UPPER 160
 /**
  * @brief Threshold of the left sensor
  * @details This will determine if the signal of the sensor is read as positive.

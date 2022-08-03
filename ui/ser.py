@@ -49,7 +49,7 @@ class SerialHandler:
         """Run on the update thread to update the current ui state"""
         # Wait for connection to be established before requiring stat updates
         time.sleep(2)
-        # Activate request for tat updates
+        # Activate request for ui updates
         self.send_byte("Y")
         while not self.stop:
             if not self.data.empty():  # if data has been added
@@ -66,6 +66,8 @@ class SerialHandler:
                     # State info
                     if txt.startswith('[') and txt.endswith(']'):
                         self.read_state(txt)
+                    elif txt.startswith('<') and txt.endswith('>'):
+                        self.send_byte("Y")
                     else:
                         self.logger.log(INFO, txt)
                 time.sleep(0.01)
