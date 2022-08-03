@@ -31,6 +31,7 @@ void usart_print(const char *c) {
 void usart_println(const char *c) {
     usart_print(c);
     usart_print("\n");
+    usart_print("\n");
 }
 
 void usart_init(unsigned long ubrr) {

@@ -46,7 +46,8 @@ class RobotState:
     connected: bool
 
     def with_connection(self, connected) -> RobotState:
-        return RobotState(self.led, self.drive_state, self.action, self.home, self.manuel, self.battery, connected)
+        return RobotState(self.led, self.drive_state, self.action, self.home, self.manuel,
+                          self.battery, connected)
 
 
 STATE_EMPTY = RobotState(SENSOR_NONE, DRIVE_NONE, 0, False, False, 0, False)
@@ -110,7 +111,8 @@ class ConsoleDisplay:
 class ConnectionControl:
     """Controls which can be used to open ports and send data via serial"""
 
-    def __init__(self, frm: ttk.Frame, update_state: UpdateFunction, con_call: Callable[[bool], NoReturn]):
+    def __init__(self, frm: ttk.Frame, update_state: UpdateFunction, con_call: Callable[[bool],
+                                                                                        NoReturn]):
         self.port_var = StringVar()
         self.connect_var = StringVar()
         self.frm = frm
@@ -128,20 +130,26 @@ class ConnectionControl:
     def init_ui(self):
         """Creates the ui elements of this control"""
         frm = self.frm
-        ttk.Label(frm, text="COM Port", relief=FLAT, justify=LEFT).grid(column=0, row=0, sticky=tk.W)
+        ttk.Label(frm, text="COM Port", relief=FLAT, justify=LEFT) \
+            .grid(column=0, row=0, sticky=tk.W)
         ttk.Entry(frm, textvariable=self.port_var).grid(column=0, row=1, columnspan=3, sticky=tk.EW)
-        ttk.Button(frm, textvariable=self.connect_var, command=lambda: self.open_or_close_serial()).grid(column=3,
-                                                                                                         row=1)
-        ttk.Button(frm, text="COM1", command=lambda: self.port_var.set("COM1")).grid(column=0, row=2)
-        ttk.Button(frm, text="/dev/ttyACM0", command=lambda: self.port_var.set("/dev/ttyACM0")).grid(column=1, row=2)
-        ttk.Button(frm, text="rfcomm0", command=lambda: self.port_var.set("rfcomm0")).grid(column=2, row=2)
+        ttk.Button(frm, textvariable=self.connect_var, command=lambda: self.open_or_close_serial()) \
+            .grid(column=3, row=1)
+        ttk.Button(frm, text="COM1", command=lambda: self.port_var.set("COM1")) \
+            .grid(column=0, row=2)
+        ttk.Button(frm, text="/dev/ttyACM0", command=lambda: self.port_var.set("/dev/ttyACM0")) \
+            .grid(column=1, row=2)
+        ttk.Button(frm, text="/dev/rfcomm0", command=lambda: self.port_var.set("/dev/rfcomm0")) \
+            .grid(column=2, row=2)
         ttk.Label(frm, text="Data", relief=FLAT, justify=LEFT).grid(column=0, row=3, sticky=tk.W)
         data_e = ttk.Entry(frm)
         data_e.grid(column=0, row=4, columnspan=3, sticky=tk.EW)
-        ttk.Button(frm, text="Send", command=lambda: try_send(data_e.get(), logger)).grid(column=3, row=4)
+        ttk.Button(frm, text="Send", command=lambda: try_send(data_e.get(), logger)) \
+            .grid(column=3, row=4)
 
     def open_or_close_serial(self) -> None:
-        """Action for the open/close button, tries to open/closes the port contained in the port entry."""
+        """Action for the open/close button, tries to open/closes the port contained
+        in the port entry."""
         port = self.port_var.get()
         connected = open_port(port, logger, self.update_state)
         self.con_call(connected)
@@ -182,21 +190,31 @@ class DriveControl:
         # -S-
         # FPR
         # -H-
-        add_connection(ttk.Button(self.frm, text="Start", command=lambda: try_send('S', logger))).grid(column=1, row=0)
-        add_connection(ttk.Button(self.frm, text="Pause", command=lambda: try_send('P', logger))).grid(column=1, row=1)
-        add_connection(ttk.Button(self.frm, text="Rest", command=lambda: try_send('R', logger))).grid(column=2, row=1)
-        add_connection(ttk.Button(self.frm, text="Home", command=lambda: try_send('C', logger))).grid(column=1, row=2)
-        add_connection(ttk.Button(self.frm, text="Freeze", command=lambda: try_send('X', logger))).grid(column=0, row=1)
+        add_connection(ttk.Button(self.frm, text="Start", command=lambda: try_send('S', logger))) \
+            .grid(column=1, row=0)
+        add_connection(ttk.Button(self.frm, text="Pause", command=lambda: try_send('P', logger))) \
+            .grid(column=1, row=1)
+        add_connection(ttk.Button(self.frm, text="Rest", command=lambda: try_send('R', logger))) \
+            .grid(column=2, row=1)
+        add_connection(ttk.Button(self.frm, text="Home", command=lambda: try_send('C', logger))) \
+            .grid(column=1, row=2)
+        add_connection(ttk.Button(self.frm, text="Freeze", command=lambda: try_send('X', logger))) \
+            .grid(column=0, row=1)
         # Needed for space between the buttons
         ttk.Label(self.frm, text="").grid(column=1, row=3)
         # -W-
         # AMD
         # -B-
-        add_manuel(ttk.Button(self.frm, text="Forward", command=lambda: try_send('W', logger))).grid(column=1, row=4)
-        add_manuel(ttk.Button(self.frm, text="Right", command=lambda: try_send('D', logger))).grid(column=2, row=5)
-        add_connection(ttk.Button(self.frm, text="Manuel", command=lambda: try_send('M', logger))).grid(column=1, row=5)
-        add_manuel(ttk.Button(self.frm, text="Backward", command=lambda: try_send('B', logger))).grid(column=1, row=6)
-        add_manuel(ttk.Button(self.frm, text="Left", command=lambda: try_send('A', logger))).grid(column=0, row=5)
+        add_manuel(ttk.Button(self.frm, text="Forward", command=lambda: try_send('W', logger))) \
+            .grid(column=1, row=4)
+        add_manuel(ttk.Button(self.frm, text="Right", command=lambda: try_send('D', logger))) \
+            .grid(column=2, row=5)
+        add_connection(ttk.Button(self.frm, text="Manuel", command=lambda: try_send('M', logger))) \
+            .grid(column=1, row=5)
+        add_manuel(ttk.Button(self.frm, text="Backward", command=lambda: try_send('B', logger))) \
+            .grid(column=1, row=6)
+        add_manuel(ttk.Button(self.frm, text="Left", command=lambda: try_send('A', logger))) \
+            .grid(column=0, row=5)
 
 
 def create_image(path: str, flip=False) -> PhotoImage:
@@ -209,8 +227,8 @@ def create_image(path: str, flip=False) -> PhotoImage:
 
 def convert_tuple_state(state_tuple: StateTuple) -> RobotState:
     """Converts the tuple state to a state object"""
-    return RobotState(state_tuple[0], state_tuple[1], state_tuple[2], state_tuple[3] > 0, state_tuple[4] > 0,
-                      state_tuple[5], is_connected())
+    return RobotState(state_tuple[0], state_tuple[1], state_tuple[2], state_tuple[3] > 0,
+                      state_tuple[4] > 0, state_tuple[5], is_connected())
 
 
 class StateDisplay(tk.Frame):
@@ -245,18 +263,23 @@ class StateDisplay(tk.Frame):
         # Blue LED
         self.canvas.itemconfig(self.led_left, fill="#05f" if state.led & SENSOR_LEFT else "#667e92")
         # Green LED
-        self.canvas.itemconfig(self.led_center, fill="#3d7d30" if state.led & SENSOR_CENTER else "#89ac76")
+        self.canvas.itemconfig(self.led_center, fill="#3d7d30" if state.led & SENSOR_CENTER else
+        "#89ac76")
         # Yellow LED
-        self.canvas.itemconfig(self.led_right, fill="#fb0" if state.led & SENSOR_RIGHT else "#f2e7bf")
+        self.canvas.itemconfig(self.led_right, fill="#fb0" if state.led & SENSOR_RIGHT else
+        "#f2e7bf")
         # Drive Left
         self.canvas.itemconfig(self.drive_left,
-                               image=self.arrow_left if state.drive_state & DRIVE_LEFT else self.arrow_left_light)
+                               image=self.arrow_left if state.drive_state & DRIVE_LEFT else
+                               self.arrow_left_light)
         # Drive Straight
         self.canvas.itemconfig(self.drive_straight,
-                               image=self.arrow_straight if state.drive_state & DRIVE_STRAIGHT else self.arrow_straight_light)
+                               image=self.arrow_straight if state.drive_state & DRIVE_STRAIGHT else
+                               self.arrow_straight_light)
         # Drive Right
         self.canvas.itemconfig(self.drive_right,
-                               image=self.arrow_right if state.drive_state & DRIVE_RIGHT else self.arrow_right_light)
+                               image=self.arrow_right if state.drive_state & DRIVE_RIGHT else
+                               self.arrow_right_light)
 
     def init_ui(self):
         frm = ttk.Labelframe(self, text="Battery")

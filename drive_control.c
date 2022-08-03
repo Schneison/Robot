@@ -116,77 +116,27 @@ void motor_drive_stop(void) {
     motor_set_right(OR_STOP, SPEED_ZERO);
 }
 
-void motor_update_brick(track_state *state, sensor_state current){
-    state->sensor_brick <<= 3;
-    state->sensor_brick |= current;
-    state->sensor_brick &= BRICK_ALL;
-}
-
-void print_bits(uint16_t brick){
-    int i = 0;
-    char s[2];
-    for(;i<BRICK_CACHED_AMOUNT * 3;++i){
-        sprintf(s, "%d", (brick & BRICK_ALL) ? 1 : 0);
-        // print last bit and shift left.
-        usart_print(s);
-        brick <<=1;
-    }
-    usart_print("\n");
-}
-
-sensor_state motor_brick_sensor(uint16_t brick, sensor_state state, uint8_t threshold){
-    int v = 0;
-    for(int i = 0;i < BRICK_CACHED_AMOUNT;i++){
-        if(brick & (state << i)){
-            v++;
-        }
-    }
-    return v >= threshold ? state : SENSOR_NONE;
-}
-
-sensor_state motor_evaluate_brick(uint16_t brick){
-    sensor_state brick_state = SENSOR_NONE;
-    brick_state |= motor_brick_sensor(brick, SENSOR_LEFT, BRICK_THRESHOLD);
-    brick_state |= motor_brick_sensor(brick, SENSOR_RIGHT, BRICK_THRESHOLD);
-    brick_state |= motor_brick_sensor(brick, SENSOR_CENTER, BRICK_THRESHOLD);
-    return brick_state;
-}
-
-//direction motor_evaluate_sensors(sensor_state current, sensor_state last) {
-//    // None
-//    /*if(!current){
-//        if(last & SENSOR_LEFT) {
-//            return DIR_LEFT;
-//        }else if (last & SENSOR_RIGHT) {
-//            return DIR_RIGHT;
-//        }
-//    }*/
-//    if(current & SENSOR_LEFT && !(current & SENSOR_RIGHT)) {
-//        return DIR_LEFT;
-//    }else if (current & SENSOR_RIGHT && !(current & SENSOR_LEFT)) {
-//        return DIR_RIGHT;
-//    }else if ((current & SENSOR_CENTER)) {
-//        return DIR_FORWARD;
-//    }
-//    return DIR_NONE;
-//}
-
-direction motor_evaluate_sensors(sensor_state current, sensor_state last) {
-    if (current == SENSOR_NONE) {
-        // Right Sensor
-        if (last & SENSOR_RIGHT) {
-            return DIR_RIGHT;
-        }
-        // Left Sensor
-        else if (last & SENSOR_LEFT) {
-            return DIR_LEFT;
-        }
-    }
-    if ((current & SENSOR_CENTER) && ((current & SENSOR_LEFT) && (current & SENSOR_RIGHT) ||
-                                      !(current & SENSOR_LEFT) && !(current & SENSOR_RIGHT))) {
+direction motor_evaluate_sensors(sensor_state current) {
+    if ((current & SENSOR_CENTER)
+        && ((current & SENSOR_LEFT) == (current & SENSOR_RIGHT)) || !(current & SENSOR_LEFT) == !(current & SENSOR_RIGHT)) {
         return DIR_FORWARD;
     }
+    if (current & SENSOR_RIGHT) {
+        return DIR_RIGHT;
+    }
+    if (current & SENSOR_LEFT) {
+        return DIR_LEFT;
+    }
     return DIR_NONE;
+}
+
+direction motor_calc_direction(sensor_state current, direction* last_dir) {
+    if(current == SENSOR_NONE) {
+        return *last_dir;
+    }else{
+        *last_dir = motor_evaluate_sensors(current);
+        return *last_dir;
+    }
 }
 
 void drive_move_direction(track_state *state, direction dir) {
@@ -209,25 +159,8 @@ void drive_move_direction(track_state *state, direction dir) {
     state->last_dir = dir;
 }
 
-sensor_state last_valid;
-sensor_state last_;
-
-void drive_apply(track_state *state, sensor_state current, sensor_state last) {
-    sensor_state brick_last = motor_evaluate_brick(state->sensor_brick);
-    motor_update_brick(state, current);
-    sensor_state brick_current = motor_evaluate_brick(state->sensor_brick);
-//    print_bits(0b000011001111);
-//    direction dir = motor_evaluate_sensors(current, last);
-    if(current && current != last_valid){
-        last_valid = brick_current;
-    }
-    if(last_ != current) {
-        char s[sizeof("00")];
-        sprintf(s, "%d", current);
-        usart_println(s);
-        last_ = current;
-    }
-    direction dir = motor_evaluate_sensors(current, last);
+void drive_apply(track_state *state) {
+    direction dir = motor_calc_direction(state->sensor_current, &(state->dir_last_valid));
     drive_move_direction(state, dir);
 }
 
@@ -237,13 +170,15 @@ void drive_home(track_state *state) {
         case DS_FIRST_ROUND: //Fallthrough
         case DS_SECOND_ROUND: //Fallthrough
         case DS_THIRD_ROUND: //Fallthrough
-            //When on start field begin first round
-            if (state->pos == POS_START_FIELD) {
+            //When on start field stop
+            if (state->last_pos == POS_START_FIELD) {
                 state->drive = DS_BACKWARDS;
             }
+            drive_apply(state);
             break;
         case DS_BACKWARDS:
             drive_move_direction(state, DIR_BACK);
+            // Stop if on starting field
             if (state->sensor_current == SENSOR_ALL) {
                 state->drive = DS_POST_DRIVE;
             }
@@ -279,9 +214,8 @@ void drive_run(track_state *state) {
             //When on start field begin first round
             if (state->pos == POS_START_FIELD) {
                 state->drive = DS_ZERO_ROUND;
-                usart_print(
+                usart_println(
                         "Here I go again on my own, going down the only round I’ve ever known…"
-                        "\n"
                 );
             }
             break;
@@ -315,7 +249,7 @@ void drive_run(track_state *state) {
                         break;
                 }
             }
-            drive_apply(state, state->sensor_current, state->sensor_last);
+            drive_apply(state);
             break;
         case DS_BACKWARDS:
             motor_drive_backward();

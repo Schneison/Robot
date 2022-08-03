@@ -96,6 +96,8 @@
  * @brief Control Register A and B of timer1
  */
 #define TIMER_1_CONTROL TCCR1B
+/** @brief Register for interrupt mask */
+#define TIMER_1_INTERRUPT TIMSK1
 /**
  * @brief Sets the prescale value of timer1 to 64. For more info see datasheet p.173
  */
@@ -180,7 +182,7 @@ void timers_update(counter *counters);
  * @retval 1 if the frequency is meet this cycle.
  * @retval 0 if the frequency is not meet this cycle.
  */
-uint8_t timers_check_state(track_state *state, counter_def counterDef);
+uint8_t timers_check_state(const track_state *state, counter_def counterDef);
 
 /**
  * @brief Checks if the counter that is defined with the given definition has a true value this
@@ -202,7 +204,7 @@ uint8_t timers_check(const counter *counters, counter_def counterDef);
  * @param counters Array of counters, has to be the size of #COUNTER_AMOUNT, and is typically
  * located on the global state
  */
-void timers_print(counter *counters, counter_def frequency, const char *text);
+void timers_print(const counter *counters, counter_def frequency, const char *text);
 
 /**
  * @brief Setup method for timers module, setups all timers

@@ -37,7 +37,7 @@ void state_show(track_state *state) {
             break;
         case AC_RETURN_HOME:
             timers_print(state->counters, COUNTER_1_HZ,
-                         "Returning home, will util_reset me there\n");
+                         "Returning home, will reset me there\n");
             break;
         case AC_PAUSE:
             timers_print(state->counters, COUNTER_1_HZ,
@@ -74,20 +74,20 @@ void state_print_help(const track_state *state) {
     }
     if (state->pos == POS_START_FIELD) {
         usart_println("On the starting field the following actions are valid:");
-        usart_println(" -S: 3 Rounds");
-        usart_println(" -P: Pause");
-        usart_println(" -C: Home");
+        usart_println(" - S: 3 Rounds");
+        usart_println(" - P: Pause");
+        usart_println(" - C: Home");
     } else {
         usart_println("Not on the starting field the following actions are valid:");
     }
-    usart_println(" -X: Safe State / Freeze");
-    usart_println(" -R: Reset");
-    usart_println(" -?: Help");
-    usart_println(" -M: Manual drive");
-    usart_println("  -W: Drive forward");
-    usart_println("  -B: Drive backwards");
-    usart_println("  -A: Drive left");
-    usart_println("  -D: Drive right");
+    usart_println(" - X: Safe State / Freeze");
+    usart_println(" - R: Reset");
+    usart_println(" - ?: Help");
+    usart_println(" - M: Manual drive");
+    usart_println(" -- W: Drive forward");
+    usart_println(" -- B: Drive backwards");
+    usart_println(" -- A: Drive left");
+    usart_println(" -- D: Drive right");
 }
 
 void state_on_action_change(track_state *state, action_type oldAction) {
@@ -96,7 +96,7 @@ void state_on_action_change(track_state *state, action_type oldAction) {
     }
     switch (state->action) {
         case AC_RESET:
-            usart_println("Will util_reset in 5 seconds...");
+            usart_println("Will reset in 5 seconds...");
             break;
         case AC_WAIT: //Fallthrough
         case AC_FROZEN: //Fallthrough
@@ -118,13 +118,17 @@ void state_read_input(track_state *state) {
     if (!usart_can_receive()) {
         return;
     }
-    if (state->action == AC_FROZEN) {
+    if (state->action == AC_FROZEN || state->action == AC_RESET) {
         return;
     }
     action_type oldAction = state->action;
     unsigned char byte = usart_receive_byte();
     switch (byte) {
         case 'S':
+            if((state->pos) != POS_START_FIELD){
+                usart_println("Can't start when not on the starting field!");
+                return;
+            }
             state->action = AC_ROUNDS;
             break;
         case 'X':
@@ -149,6 +153,10 @@ void state_read_input(track_state *state) {
             state->action = AC_RETURN_HOME;
             break;
         case 'M':
+            if(state->action){
+                state->action = AC_WAIT;
+                break;
+            }
             state->action = AC_MANUAL;
             break;
         case 'Y':
@@ -222,9 +230,9 @@ void state_update_position(track_state *trackState) {
 
 void state_send_update(track_state *trackState) {
     if (trackState->ui_connection == UI_CONNECTED && timers_check_state(trackState,
-                                                                        COUNTER_3_HZ)) {
-        char* s = "[(7,7,7,7,100,7)]";
-        sprintf(s, "[(%d,%d,%d,%d,%d,%d)]",
+                                                                        COUNTER_12_HZ)) {
+        char* s = "[(7,7,7,7,100,7)]\n";
+        sprintf(s, "[(%d,%d,%d,%d,%d,%d)]\n",
                 // Last sensor state
                 trackState->sensor_last,
                 // Direction of driving
@@ -237,14 +245,8 @@ void state_send_update(track_state *trackState) {
                 trackState->action == AC_MANUAL,
                 // Battery voltage in percent times 100
                 sensor_get_battery());
-        usart_println(s);
-    }
-    /*if(timers_check_state(trackState, COUNTER_1_HZ)){
-        char s[sizeof("100\n")];
-        sprintf(s, "%d\n",
-                sensor_get_battery());
         usart_print(s);
-    }*/
+    }
 }
 
 _Noreturn void state_run_loop(track_state *trackState) {

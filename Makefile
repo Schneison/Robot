@@ -56,6 +56,9 @@ documentation: $(C_SRC) $(H_SRC)
 clean:
 	-rm -f $(TARGET_FILE) *.hex $(OUT_O_DIR)/*.o
 
+try_connect:
+	BotBtSerial connect
+
 $(TARGET_FILE): $(O_SRC)
 	$(CC) $(O_SRC) -o $(TARGET_FILE) $(CFLAGS)
 

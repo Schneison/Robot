@@ -59,18 +59,18 @@ class SerialHandler:
     def receive_data(self):
         """Run on the receive thread to read data from the port"""
         while not self.stop:
-            if self.ser is not None and self.ser.is_open and self.ser.inWaiting() > 0:
-                # noinspection PyBroadException
-                try:
+            # noinspection PyBroadException
+            try:
+                if self.ser is not None and self.ser.is_open and self.ser.inWaiting() > 0:
                     txt = self.ser.readline().decode().replace('\n', '')
                     # State info
                     if txt.startswith('[') and txt.endswith(']'):
                         self.read_state(txt)
                     else:
                         self.logger.log(INFO, txt)
-                except:
-                    pass
-            time.sleep(0.01)
+                time.sleep(0.01)
+            except:
+                pass
 
     def read_state(self, txt: str):
         """Serialises the given text and add it to the state queue"""
@@ -96,12 +96,16 @@ class SerialHandler:
         self.ser.write(bytes(data, 'ascii', 'ignore'))
         self.ser.write(bytes('\r\n', 'ascii', 'ignore'))
 
-    def close(self, manual=False):
+    def close(self, manual_open=False):
         """Close the port and stop all threads"""
         self.stop_threads()
-        if manual:
-            # Stop state requests
-            self.send_byte("Q")
+        try:
+            if manual_open:
+                # Stop state requests
+                self.send_byte("Q")
+        except OSError:
+            # Already closed
+            pass
         time.sleep(0.5)
         if self.ser and self.ser.is_open:
             self.ser.close()

@@ -159,11 +159,11 @@ typedef enum {
 /**
 * @brief Speed of the inner wheel
 */
-    SPEED_INNER = 150,
+    SPEED_INNER = 180,
 /**
 * @brief Speed on a strait line
 */
-    SPEED_STRAIT = 120,
+    SPEED_STRAIT = 140,
 /**
 * @brief Speed of the outer wheel
 */
@@ -248,29 +248,26 @@ void motor_drive_backward(void);
 void motor_drive_stop(void);
 
 /**
- * @brief Updates the brick sate of the sensors.
- *
- * @param state Current sensor state
- * @param current  Current sensor state
- * @sa #track_state.sensor_brick
- */
-void motor_update_brick(track_state *state, sensor_state current);
-
-/**
  * @brief Reads sensor input and evaluates the direction that the robot has to drive.
  * @param current Current sensor state
  * @param last Sensor state in the last cycle
  */
-direction motor_evaluate_sensors(sensor_state current, sensor_state last);
+direction motor_evaluate_sensors(sensor_state current);
+
+/**
+ * @brief Selects the direction to drive based on the current sensor state and the last driven
+ * direction.
+ * @param current Current sensor state
+ * @param last_dir Last direction driven, that was not #DIR_NONE
+ */
+direction motor_calc_direction(sensor_state current, direction* last_dir);
 
 /**
  * @brief Perform driving of the robot
  *
  * @param state Current global state
- * @param current Current sensor state
- * @param last State of the sensors in the last cycle.
  */
-void drive_apply(track_state *state, sensor_state current, sensor_state last);
+void drive_apply(track_state *state);
 
 /**
  * @brief Drive the robot into the given direction

@@ -251,7 +251,7 @@ typedef struct track_state {
      */
     direction last_dir;
     /**
-     * @brief Last valid driven direction that was not none
+     * @brief Last valid driven direction that was not #DIR_NONE
      */
     direction dir_last_valid;
 
