@@ -24,12 +24,7 @@
  * @section secDriTask Module Tasks
  * The main task of this module is to drive the robot in relation to the data that the @ref sensor
  * "sensor module" retrieves so that the robot will follow the line on the ground as long as has not
- * finished 3 rounds or was called home. @n
- *
- * @subsection subDriTaskMain Main (S)
- * In the main operation mode the robot should start on the @ref startingField "starting field" and
- * then drive 3 rounds around the @ref track. @n At the end it should stop on the starting field and
- * reset itself after 5 seconds. For this see: @ref secReset
+ * finished 3 rounds or was called home.
  *
  * @section track Track
  * The track is a white background containing with black lines in the foreground. In the driving

@@ -54,6 +54,7 @@ activated.
 ### Manual Control
 If a `M` is entered the roboter enters the manual driving mode and can be controlled by entering `W, A, B, D` how
 explained above. If the key is entered again the previous mode will be activated again.
+
 ---
 ## User Interface
 

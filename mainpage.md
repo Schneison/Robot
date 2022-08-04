@@ -1,8 +1,14 @@
 ## Project Robot        
 
 <blockquote>
-    <p>Small program for a line following robot which can accept a variety of instructions via a bluetooth connection.</p>
+    <p>Small program for a line following robot which can accept a variety of instructions via a bluetooth connection.
+</p>
 </blockquote>
+<blockquote style="color:orange">
+    <p>All additional features, i.e. these that were not required by the original task,
+are marked with orange font color on the main page.</p>
+</blockquote>
+
 @tableofcontents
 
 @section about About
@@ -34,9 +40,11 @@ The current mode is selected by sending the related key via a serial connection 
 | UI Disconnect  |     Q      | Disconnects the ui (internally used)                                                     |
 
 @subsection actDrive Drive
-If the robot is placed on the stating field, it should start to blink in a frequency of 5 HZ. If an `S` is entered, the
-robot should start to drive 3 rounds around the track stop on the starting field again and reset itself in the end after
-5 seconds.
+In the main operation mode the robot should start on the @ref startingField "starting field" and
+then drive 3 rounds around the @ref track "track". @n At the end it should stop on the starting field and
+reset itself after 5 seconds. @n
+For more information about the driving see the @ref drive "driving module".
+For more information about the reset see: @ref secReset
 
 @subsection actPause Pause
 In any position in the driving action if a `P` is entered the robot should stop driving and wait for key to be entered 
@@ -50,16 +58,18 @@ nearly instant.
 If a `X` is entered the robot should stop what ever he is doing, don't react to any input and wait for external reset.
 
 @subsection actRest Rest
-If a `P` is entered the robot should reset itself after 5 seconds and  don't react to any input after this mode was
-activated.
-
+If a `R` is entered the robot should reset itself after 5 seconds and  don't react to any input after this mode was
+activated. If it was currently driving it should instantly stop.@n
+For more information about the reset see the @ref utility "utility module".
+<span style="color:orange">
 @subsection actManual Manual Control
 If a `M` is entered the roboter enters the manual driving mode and can be controlled by entering `W, A, B, D` how 
 explained above. If the key is entered again the previous mode will be activated again.
+</span>
 
 ---
 @section ui User Interface
-
+<span style="color:orange">
 Implemented via python with the help of [tkinter](https://docs.python.org/3/library/tkinter.html). Can be used to send 
 any text to the robot via a serial connection. Some "shortcut" buttons are also provided for all existing modes.<br>
 Furthermore the current state of the field sensors can be seen and the direction that the robot is currently driving.
@@ -78,6 +88,7 @@ At the start of the connection the user interface send a `Y` message to the robo
 state update messages. A state update message contains information of the current state of the robot (Field sensors,
 driving direction, etc. ...). After the user interface is closed an `Q` will be sent to the robot, which indicates that
 no more ui updates are needed.
+</span>
 
 ---
 @section modules Modules
@@ -124,7 +135,7 @@ The following targets are defined in the makefile:
 
 - `clean`
   - Clears `./out/ ` directory, removes ".o", ".d" and ".hex" files
-
+<span style="color:orange">
 - `help`
   - Displays all possible actions with explanations
 
@@ -142,6 +153,8 @@ The following targets are defined in the makefile:
 
 - `try_disconnect`
   - Tries to disconnect the connection to the robot if any is existent
+
+</span>
 
 ---
 ## License
