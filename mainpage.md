@@ -114,8 +114,11 @@ The method @ref setup call all these before the main programm relly starts with 
 
 ---
 ## Program Execution
-This project makes heavy use of the "Makefile" shame for compilation, link and flashing to the board. 
+This project makes heavy use of the "Makefile" scheme for compilation, link and flashing to the board. 
 Additionally, we use [Doxygen](https://doxygen.nl/) to generate the corresponding documentation for the **C** files.
+
+To execute one of the following targets cust call 'make ***target name***'. If you call just 'make'
+if will automatically performe the 'all' target.
 
 The following targets are defined in the makefile:
 - `all`
