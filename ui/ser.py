@@ -1,11 +1,12 @@
 import queue
-import serial as serial
 import threading
 import time
 from ast import literal_eval as make_tuple
 from logging import Logger, INFO, ERROR
-from serial import Serial, SerialException, PortNotOpenError, SerialTimeoutException
 from typing import Final, Union, Callable, Tuple, NoReturn
+
+import serial as serial
+from serial import Serial, SerialException, PortNotOpenError, SerialTimeoutException
 
 baud_rate: Final[int] = 9600
 """baudrate of the usert serial connection of the board"""
@@ -59,7 +60,6 @@ class SerialHandler:
     def receive_data(self):
         """Run on the receiving thread to read data from the port"""
         while not self.stop:
-            # noinspection PyBroadException
             try:
                 if self.ser is not None and self.ser.is_open and self.ser.inWaiting() > 0:
                     txt = self.ser.readline().decode().replace('\n', '')
@@ -71,7 +71,7 @@ class SerialHandler:
                     else:
                         self.logger.log(INFO, txt)
                 time.sleep(0.01)
-            except:
+            except IOError:
                 pass
 
     def read_state(self, txt: str):

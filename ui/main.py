@@ -1,21 +1,21 @@
 from __future__ import annotations
 
-import logging
-import tkinter as tk
-from tkinter import ttk, StringVar, FLAT, LEFT
-from tkinter.scrolledtext import ScrolledText
-import queue
 import atexit
+import logging
+import queue
 import signal
 import sys
+import tkinter as tk
+import warnings
 from dataclasses import dataclass
+from tkinter import ttk, StringVar, FLAT, LEFT
+from tkinter.scrolledtext import ScrolledText
 from typing import List, Callable, NoReturn, Union
 
-import ser
-from ser import UpdateFunction, try_send, open_port, close_port, StateTuple, is_connected
 from PIL import Image
 from PIL.ImageTk import PhotoImage
-import warnings
+
+from ser import UpdateFunction, try_send, open_port, close_port, StateTuple, is_connected
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 # Pillow 10
@@ -133,7 +133,7 @@ class ConnectionControl:
         ttk.Label(frm, text="COM Port", relief=FLAT, justify=LEFT) \
             .grid(column=0, row=0, sticky=tk.W)
         ttk.Entry(frm, textvariable=self.port_var).grid(column=0, row=1, columnspan=3, sticky=tk.EW)
-        ttk.Button(frm, textvariable=self.connect_var, command=lambda: self.open_or_close_serial()) \
+        ttk.Button(frm, textvariable=self.connect_var, command=self.open_or_close_serial) \
             .grid(column=3, row=1)
         ttk.Button(frm, text="COM1", command=lambda: self.port_var.set("COM1")) \
             .grid(column=0, row=2)
@@ -282,12 +282,12 @@ class StateDisplay(tk.Frame):
                                self.arrow_right_light)
 
     def init_ui(self):
+        """Creates the ui elements of this control"""
         frm = ttk.Labelframe(self, text="Battery")
         self.battery = ttk.Progressbar(frm, maximum=100)
         self.battery.pack()
         frm.pack(pady=4, fill=tk.X, expand=1)
         self.battery.pack(pady=4, fill=tk.X, expand=1)
-        """Creates the ui elements of this control"""
         self.canvas = tk.Canvas(self)
         self.led_left = self.canvas.create_rectangle(30, 10, 120, 80)
         self.led_center = self.canvas.create_rectangle(150, 10, 240, 80)
