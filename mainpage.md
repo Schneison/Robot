@@ -131,6 +131,9 @@ The following targets are defined in the makefile:
 - `flash`
   - Flashes the program on to the roboter
 
+- `force`
+  - Same as `all` target but calls `clean` target beforehand
+
 - `documentation`
   - Creates doxygen docs at `./doc/`
 
