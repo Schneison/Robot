@@ -52,7 +52,7 @@ If a `P` is entered the robot should reset itself after 5 seconds and  don't rea
 activated.
 
 ### Manual Control
-If a `M` is entered the roboter enters the manual driving mode and can be controlled by entering `W, A, B, D` how
+If a `M` is entered the robot enters the manual driving mode and can be controlled by entering `W, A, B, D` how
 explained above. If the key is entered again the previous mode will be activated again.
 
 ---
@@ -94,7 +94,7 @@ The following targets are defined in the makefile:
   - Creates ".o" files for every C file in `./out/` and creates ".hex" file also in `./out/`
 
 - `flash`
-  - Flashes the program on to the roboter
+  - Flashes the program on to the robot
 
 - `documentation`
   - Creates doxygen docs at `./doc/`

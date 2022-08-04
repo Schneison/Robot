@@ -65,7 +65,7 @@
 /** @brief LED shift register clock port */
 #define LED_CLOCK_PORT PORTD
 /**
- * @brief Amount of led on this roboter
+ * @brief Amount of led on this robot
  * @details Defines how many shifts have to be done to update all led values
  */
 #define LED_AMOUNT 3

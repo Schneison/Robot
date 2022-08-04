@@ -64,7 +64,7 @@ activated. If it was currently driving it should instantly stop.@n
 For more information about the reset see the @ref utility "utility module".
 <span style="color:orange">
 @subsection actManual Manual Control
-If a `M` is entered the roboter enters the manual driving mode and can be controlled by entering `W, A, B, D` how 
+If a `M` is entered the robot enters the manual driving mode and can be controlled by entering `W, A, B, D` how 
 explained above. If the key is entered again the previous mode will be activated again.
 </span>
 
@@ -129,7 +129,7 @@ The following targets are defined in the makefile:
   - Creates ".o" files for every C file in `./out/` and creates ".hex" file also in `./out/`
 
 - `flash`
-  - Flashes the program on to the roboter
+  - Flashes the program on to the robot
 
 - `force`
   - Same as `all` target but calls `clean` target beforehand

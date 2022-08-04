@@ -2,7 +2,7 @@
  * @file
  * @author Larson Schneider
  * @date 06.07.2022
- * @brief Reads the sensors of the roboter
+ * @brief Reads the sensors of the robot
  * @version 0.1
  * @copyright MIT License.
  *

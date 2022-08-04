@@ -69,7 +69,7 @@ void state_show(track_state *state) {
 void state_print_help(const track_state *state) {
     //Only print help text if S was not received once
     if (state->has_driven_once) {
-        usart_println("Currently on track, no help is given if the roboter already "
+        usart_println("Currently on track, no help is given if the robot already "
                       "started driving!");
         return;
     }

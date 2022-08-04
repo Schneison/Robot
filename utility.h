@@ -65,7 +65,7 @@ typedef struct counter {
 } counter;
 
 /**
- * @brief Defines the action state of the roboter
+ * @brief Defines the action state of the robot
  */
 typedef enum {
     /**
@@ -73,19 +73,19 @@ typedef enum {
      */
     AC_WAIT,
     /**
-     * @brief The roboter drives 3 rounds from the start point and resets after this.
+     * @brief The robot drives 3 rounds from the start point and resets after this.
      */
     AC_ROUNDS,
     /**
-     * @brief The roboter waits 5 seconds and resets to default state
+     * @brief The robot waits 5 seconds and resets to default state
      */
     AC_RESET,
     /**
-     * @brief The roboter makes a pause
+     * @brief The robot makes a pause
      */
     AC_PAUSE,
     /**
-     * @brief The roboter reacts to nothing until a hard util_reset is done
+     * @brief The robot reacts to nothing until a hard util_reset is done
      */
     AC_FROZEN,
     /**
