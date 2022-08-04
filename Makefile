@@ -3,7 +3,7 @@ include Makeconfig.mk
 # all targets that don't correspond to files
 .PHONY: info force list-headers help cppcheck compile flash documentation link clean
 
-all: compile link flash documentation
+all: compile link documentation flash
 	@echo Done.
 
 force: clean all
