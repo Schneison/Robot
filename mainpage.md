@@ -4,10 +4,6 @@
     <p>Small program for a line following robot which can accept a variety of instructions via a bluetooth connection.
 </p>
 </blockquote>
-<blockquote style="color:orange">
-    <p>All additional features, i.e. these that were not required by the original task,
-are marked with orange font color on the main page.</p>
-</blockquote>
 
 @tableofcontents
 
@@ -20,6 +16,11 @@ three LEDs.
 <h1 align="center">
 <img src="robot.png" alt=" " width="250" height="200">
 </h1>
+
+<blockquote style="color:orange">
+    <p>All additional features, i.e. these that were not required by the original task,
+are marked with orange font color on the main page.</p>
+</blockquote>
 
 ---
 @section actions Action Modes
