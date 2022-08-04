@@ -56,7 +56,7 @@ documentation: $(C_SRC) $(H_SRC)
 	doxygen $(DOX)
 
 clean:
-	-rm -f $(TARGET_FILE) *.hex $(OUT_O_DIR)/*.o $(OUT_O_DIR)/*.d
+	-rm -f $(TARGET_FILE) $(OUT_O_DIR)/*.hex $(OUT_O_DIR)/*.o $(OUT_O_DIR)/*.d
 
 try_connect:
 	BotBtSerial connect
