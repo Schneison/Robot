@@ -209,7 +209,7 @@ class DriveControl:
             .grid(column=1, row=4)
         add_manuel(ttk.Button(self.frm, text="Right", command=lambda: try_send('D', logger))) \
             .grid(column=2, row=5)
-        add_connection(ttk.Button(self.frm, text="Manuel", command=lambda: try_send('M', logger))) \
+        add_connection(ttk.Button(self.frm, text="Manual", command=lambda: try_send('M', logger))) \
             .grid(column=1, row=5)
         add_manuel(ttk.Button(self.frm, text="Backward", command=lambda: try_send('B', logger))) \
             .grid(column=1, row=6)

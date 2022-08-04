@@ -25,14 +25,20 @@
  * The main task of this module is to drive the robot in relation to the data that the @ref sensor
  * "sensor module" retrieves so that the robot will follow the line on the ground as long as has not
  * finished 3 rounds or was called home. @n
+ *
  * @subsection subDriTaskMain Main (S)
- * In the main operation mode the robot should start on the @ref startingField starting field and
+ * In the main operation mode the robot should start on the @ref startingField "starting field" and
  * then drive 3 rounds around the @ref track. @n At the end it should stop on the starting field and
  * reset itself after 5 seconds. For this see: @ref secReset
  *
  * @section track Track
+ * The track is a white background containing with black lines in the foreground. In the driving
+ * mode the robot should stay on this line. Somewhere on the track there is also one single black
+ * starting field.
  *
  * @subsection startingField Starting Field (Home)
+ * Home point of the robot. If the robot should drive, it is only allowed from this position. It is
+ * unique on the track.
  *
  * @section secDriDuty The Duty cycle
  * The duty cycle of our motors is used to control the received voltage and therefore the speed
@@ -40,9 +46,6 @@
  * receives voltage. We realize this through enable and disable the pin if the compare value of the
  * timer exceeds or is equal to the defined compare value of one of the motors. We so the pin will
  * change from 1 to 0. In the default position the pin is set to 1, i.e enabled.
- *
- * @section secDriDir Driving direction evaluation
- * The direction the robot will drive
  */
 #ifndef MOTOR_DRIVE
 #define MOTOR_DRIVE

@@ -23,13 +23,10 @@
  * and contains all kind of variables that are used by the @ref modules to do various things and
  * keep track of old states to evaluate or over function boarders.
  * @section secCycle Working Cycle
- *
+ * The work cycle is the run loop of this program. It does actions like reading the input, update
+ * the leds, send messages via serial and do the actions that are relative to the entered keys.
  */
 
-/**
- * @page ui User Interface
- * @section secUIUpdate State Updates
- */
 #ifndef STATE_CONTROL_H
 #define STATE_CONTROL_H
 

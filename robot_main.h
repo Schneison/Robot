@@ -10,29 +10,6 @@
  * and cycles.
  */
 
-/**
- * @page modules Modules
- * @tableofcontents
- * The structure of this project is divided into multiple modules each of which takes on different
- * tasks like driving, state control or reading from the sensors.
- * @section secModAll All Modules
- * - @subpage states
- * - @subpage drive
- * - @subpage sensor
- * - @subpage timers
- * - @subpage utility
- * - @subpage usart
- * - @subpage led
- *
- * @section secModSet Setup
- * A module contains functions, macro defs, structs and enums. All methods are prefixed with the
- * name of respective module.@n
- * Some but not all modules contain "clean" and "init" (setup) functions, former sets some used registers
- * to there default values, latter sets these registers to the value needed for the robot to
- * function correctly. @n
- * The method @ref setup call all these before the main programm relly starts with the work.
- */
-
 #ifndef ROBOT_MAIN_H
 #define ROBOT_MAIN_H
 
