@@ -5,15 +5,15 @@ uint32_t millis = 0;
  * @brief Contains the frequencies for the corresponding counters in #counter_def
  */
 const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 2,
-                                                       1000 / 10,1000 / 12,
-                                                       1000 / 32 };
+                                                      1000 / 10, 1000 / 12,
+                                                      1000 / 32};
 /**
  * @brief Updates counter variables
  *
  * Called after the millis timer reaches the compare value
  */
 ISR (TIMER1_COMPA_vect) {
-    millis++;
+        millis++;
 }
 
 void timers_create(counter *counters) {

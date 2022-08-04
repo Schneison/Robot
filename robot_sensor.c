@@ -76,7 +76,7 @@ uint16_t sensor_adc_read_avg(uint8_t channel, uint8_t amount_samples) {
         sum += sensor_adc_read(channel);
     }
 
-    return (uint16_t) (sum / (float) amount_samples);
+    return (uint16_t)(sum / (float) amount_samples);
 }
 
 sensor_state sensor_get_state() {

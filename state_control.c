@@ -148,7 +148,7 @@ void state_read_input(track_state *state) {
     unsigned char byte = usart_receive_byte();
     switch (byte) {
         case 'S':
-            if((state->pos) != POS_START_FIELD){
+            if ((state->pos) != POS_START_FIELD) {
                 usart_print_pretty("Can't start when not on the starting field!");
                 return;
             }
@@ -169,19 +169,19 @@ void state_read_input(track_state *state) {
             state->action = AC_PAUSE;
             break;
         case 'C':
-            if(state->action != AC_ROUNDS){
+            if (state->action != AC_ROUNDS) {
                 usart_print_pretty("Not driving on track, can't be called home!");
                 return;
             }
             state->action = AC_RETURN_HOME;
             break;
         case 'M':
-            if(state->action){
-                state->action = state-> manual_driven_before ? AC_ROUNDS : AC_WAIT;
+            if (state->action) {
+                state->action = state->manual_driven_before ? AC_ROUNDS : AC_WAIT;
                 state->manual_driven_before = 0;
                 break;
             }
-            if(state->action == AC_ROUNDS){
+            if (state->action == AC_ROUNDS) {
                 state->manual_driven_before = 1;
                 //Reset drive state
                 state->dir_last = DIR_NONE;
@@ -206,7 +206,7 @@ void state_read_input(track_state *state) {
             state_read_manual_input(state, byte);
             return;
     }
-    if(oldAction == state->action){
+    if (oldAction == state->action) {
         return;
     }
     state_on_action_change(state, oldAction);
@@ -237,7 +237,7 @@ void state_update_position(track_state *trackState) {
 void state_send_update(const track_state *trackState) {
     if (trackState->ui_connection == UI_CONNECTED && timers_check_state(trackState,
                                                                         COUNTER_12_HZ)) {
-        char* s = "[(7,7,7,7,1000,7)]\n";
+        char *s = "[(7,7,7,7,1000,7)]\n";
         sprintf(s, "[(%d,%d,%d,%d,%d,%d)]\n",
                 // Last sensor state
                 trackState->sensor_last,

@@ -136,15 +136,15 @@ direction motor_calc_direction(
         sensor_state last_state,
         direction *last_dir,
         direction *last_simple
-       ) {
-    if(current == SENSOR_NONE) {
-        if(last_state == SENSOR_ALL || (last_state & SENSOR_LEFT) == (last_state & SENSOR_RIGHT)){
+) {
+    if (current == SENSOR_NONE) {
+        if (last_state == SENSOR_ALL || (last_state & SENSOR_LEFT) == (last_state & SENSOR_RIGHT)) {
             return *last_simple;
         }
         return *last_dir;
-    }else{
+    } else {
         *last_dir = motor_evaluate_sensors(current);
-        if(*last_dir == SENSOR_RIGHT || *last_dir == SENSOR_LEFT){
+        if (*last_dir == SENSOR_RIGHT || *last_dir == SENSOR_LEFT) {
             *last_simple = *last_dir;
         }
         return *last_dir;
@@ -213,9 +213,9 @@ void drive_home(track_state *state) {
 }
 
 void drive_manual(track_state *state) {
-    if(timers_check_state(state, COUNTER_1_HZ)
-        && ( state->manual_dir || state->manual_dir_last)) {
-        if(state->manual_dir_last){
+    if (timers_check_state(state, COUNTER_1_HZ)
+        && (state->manual_dir || state->manual_dir_last)) {
+        if (state->manual_dir_last) {
             motor_drive_stop();
             state->manual_dir_last = 0;
         } else {

@@ -26,12 +26,13 @@ void led_set(led_state state) {
 
 void led_chase(led_state *lastState) {
     int state = *lastState;
-    if(!state){
+    if (!state) {
         state = LED_LEFT;
     }
     // From right to left
     if (state & CHASE_FLAG) {
-        *lastState = ((state & LED_ALL) << 1) & LED_ALL | ((!(state & LED_CENTER)) ? CHASE_FLAG : 0);
+        *lastState =
+                ((state & LED_ALL) << 1) & LED_ALL | ((!(state & LED_CENTER)) ? CHASE_FLAG : 0);
     } else {
         *lastState = ((state & LED_ALL) >> 1) & LED_ALL | ((state & LED_CENTER) ? CHASE_FLAG : 0);
     }
