@@ -17,9 +17,9 @@ help:
 	@echo " make force        	- Force rebuild of entire project and documentation (clean first)"
 	@echo " make clean        	- Remove all build output"
 	@echo " make cppcheck     	- Static code analysis tool for the C"
-	@echo " make indent       	- Applies style conventions to current .c and .h files"
+	@echo " make indent			- Applies style conventions to current .c and .h files"
 	@echo " make documentation	- Create doxygen documentation for this project"
-	@echo " make try_connect    - Tries to establish a connection with a robot via bluetooth"
+	@echo " make try_connect	- Tries to establish a connection with a robot via bluetooth"
 	@echo " make try_disconnect	- Tries to disconnect the connection to the robot if any is existent"
 	@echo ""
 
