@@ -143,7 +143,7 @@ typedef enum {
     /**
  * @brief 5 HZ Counter
  */
-    COUNTER_5_HZ,
+    COUNTER_10_HZ,
     /**
  * @brief 8 HZ Counter
  */

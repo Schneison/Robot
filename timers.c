@@ -5,7 +5,7 @@ uint32_t millis = 0;
  * @brief Contains the frequencies for the corresponding counters in #counter_def
  */
 const uint16_t counter_frequencies[COUNTER_AMOUNT] = {1000 / 1, 1000 / 2,
-                                                       1000 / 5,1000 / 12,
+                                                       1000 / 10,1000 / 12,
                                                        1000 / 32 };
 /**
  * @brief Updates counter variables
@@ -49,7 +49,7 @@ uint8_t timers_check(const counter *counters, counter_def counterDef) {
 
 void timers_print(const counter *counters, counter_def frequency, const char *text) {
     if (timers_check(counters, frequency)) {
-        usart_print(text);
+        usart_print_pretty(text);
     }
 }
 

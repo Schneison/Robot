@@ -45,7 +45,7 @@
 /// Desired baudrate
 #define BAUD 9600
 /// What to write into the UBRR register
-#define UBRR_SETTING F_CPU/16.0/BAUD-1
+#define UBRR_SETTING F_CPU/16/BAUD-1
 
 /**
  * @brief Usart Status Registry

@@ -65,6 +65,16 @@ void state_print_help(const track_state *state);
 void state_on_action_change(track_state *state, action_type oldAction);
 
 /**
+ * @brief Checks if the given character is a valid manual driving action key and if so initialises
+ * the needed actions to drive in this direction if the manual mode is selected. If not ignore the
+ * character completely.
+ *
+ * @param state Internal state
+ * @param byte Read character
+ */
+void state_read_manual_input(track_state *state, unsigned char byte);
+
+/**
  * @brief Tries to read an input from the USART, apply the action behind the character if any is
  * defined, send an error message for undefined characters.
  * @details Defined characters are: S, X; P, C, R, ?

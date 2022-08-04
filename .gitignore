@@ -1,6 +1,7 @@
 tmpfile
 tmpfile.hex
 .o
+doc/
 dox/
 /out/
 /indent/

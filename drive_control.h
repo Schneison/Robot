@@ -158,11 +158,12 @@ typedef enum {
 /**
 * @brief Speed of the inner wheel
 */
-    SPEED_INNER = 190,
+    SPEED_INNER = 200,
 /**
 * @brief Speed on a strait line
 */
-    SPEED_STRAIT = 120,
+    SPEED_STRAIT = 125,
+    SPEED_BACK_SMOOTH = 90,
 /**
 * @brief Speed of the outer wheel
 */
@@ -221,14 +222,19 @@ void motor_drive_left(void);
 void motor_drive_right(void);
 
 /**
- * @brief Sets the values to drive the robot to the forward
+ * @brief Sets the values to drive the robot to forward
  */
 void motor_drive_forward(void);
 
 /**
- * @brief Sets the values to drive the robot to the backward
+ * @brief Sets the values to drive the robot to backward
  */
 void motor_drive_backward(void);
+
+/**
+ * @brief Sets the values to drive the robot smooth backwards
+ */
+void motor_drive_backward_smooth(void);
 
 /**
  * @brief Stops all motors and disables the duty cycle of the robot
@@ -240,7 +246,6 @@ void motor_drive_stop(void);
 /**
  * @brief Reads sensor input and evaluates the direction that the robot has to drive.
  * @param current Current sensor state
- * @param last Sensor state in the last cycle
  */
 direction motor_evaluate_sensors(sensor_state current);
 
@@ -248,10 +253,12 @@ direction motor_evaluate_sensors(sensor_state current);
  * @brief Selects the direction to drive based on the current sensor state and the last driven
  * direction.
  * @param current Current sensor state
+ * @param last_state Sensor state in last cycle
  * @param last_dir Last direction driven, that was not #DIR_NONE
+ * @param last_simple Last direction driven, that was #DIR_LEFT or #DIR_RIGHT
  */
-direction motor_calc_direction(sensor_state current, sensor_state last_state, direction *last_dir,
-                               direction *last_simple);
+direction motor_calc_direction(sensor_state current, sensor_state last_state,
+                               direction *last_dir, direction *last_simple);
 
 /**
  * @brief Perform driving of the robot

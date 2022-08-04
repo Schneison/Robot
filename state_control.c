@@ -21,13 +21,12 @@ void state_show(track_state *state) {
                 sprintf(s, "Round and round I go, currently round #%d", round);
                 usart_print_pretty(s);
             }
-            //TODO: Remove before deployment
             led_sensor(state->sensor_last);
             break;
         }
         case AC_FROZEN:
             timers_print(state->counters, COUNTER_1_HZ,
-                         "In safe state! Won't react to any instructions! Rescue me!\n");
+                         "In safe state! Won't react to any instructions! Rescue me!");
             if (timers_check_state(state, COUNTER_32_HZ)) {
                 led_chase(&(state->last_led));
             }
@@ -37,11 +36,12 @@ void state_show(track_state *state) {
             break;
         case AC_RETURN_HOME:
             timers_print(state->counters, COUNTER_1_HZ,
-                         "Returning home, will reset me there\n");
+                         "Returning home, will reset me there");
+            led_sensor(state->sensor_last);
             break;
         case AC_PAUSE:
             timers_print(state->counters, COUNTER_1_HZ,
-                         "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again\n");
+                         "Pause .... zzzZZZzzzZZZzzz .... wake me up with P again");
             if (timers_check_state(state, COUNTER_2_HZ)) {
                 led_chase(&(state->last_led));
             }
@@ -50,14 +50,14 @@ void state_show(track_state *state) {
             if ((state->pos) == POS_START_FIELD) {
                 timers_print(state->counters, COUNTER_1_HZ,
                              "On the starting field. Waiting for your instructions..."
-                             " Send ? for help.\n");
-                if (timers_check_state(state, COUNTER_5_HZ)) {
+                             " Send ? for help.");
+                if (timers_check_state(state, COUNTER_10_HZ)) {
                     led_blink(&(state->last_led));
                 }
             } else {
                 timers_print(state->counters, COUNTER_1_HZ,
                              "Not on the starting field. Place me there please... "
-                             "Send ? for help.\n");
+                             "Send ? for help.");
                 led_sensor(state->sensor_last);
             }
             break;
@@ -97,7 +97,9 @@ void state_on_action_change(track_state *state, action_type oldAction) {
     }
     switch (state->action) {
         case AC_RESET:
-            usart_print_pretty("Will reset in 5 seconds...");
+            usart_print_pretty("Will reset myself in 5 seconds. I will forget everything. "
+                               "Make sure to handle me well and take care of my messages when"
+                               " I am back functioning. Thanks!");
             break;
         case AC_WAIT: //Fallthrough
         case AC_FROZEN: //Fallthrough
@@ -107,6 +109,28 @@ void state_on_action_change(track_state *state, action_type oldAction) {
             break;
         case AC_ROUNDS:
             state->has_driven_once = 1;
+            break;
+        default:
+            break;
+    }
+}
+
+void state_read_manual_input(track_state *state, unsigned char byte) {
+    if (state->action != AC_MANUAL) {
+        return;
+    }
+    switch (byte) {
+        case 'W':
+            state->manual_dir = DIR_FORWARD;
+            break;
+        case 'A':
+            state->manual_dir = DIR_LEFT;
+            break;
+        case 'D':
+            state->manual_dir = DIR_RIGHT;
+            break;
+        case 'B':
+            state->manual_dir = DIR_BACK;
             break;
         default:
             break;
@@ -153,8 +177,16 @@ void state_read_input(track_state *state) {
             break;
         case 'M':
             if(state->action){
-                state->action = AC_WAIT;
+                state->action = state-> manual_driven_before ? AC_ROUNDS : AC_WAIT;
+                state->manual_driven_before = 0;
                 break;
+            }
+            if(state->action == AC_ROUNDS){
+                state->manual_driven_before = 1;
+                //Reset drive state
+                state->dir_last = DIR_NONE;
+                state->dir_last_valid = DIR_NONE;
+                state->dir_last_simple = DIR_LEFT;
             }
             state->action = AC_MANUAL;
             break;
@@ -171,25 +203,7 @@ void state_read_input(track_state *state) {
             state_print_help(state);
             return;
         default:
-            if (state->action != AC_MANUAL) {
-                return;
-            }
-            switch (byte) {
-                case 'W':
-                    state->manual_dir = DIR_FORWARD;
-                    break;
-                case 'A':
-                    state->manual_dir = DIR_LEFT;
-                    break;
-                case 'D':
-                    state->manual_dir = DIR_RIGHT;
-                    break;
-                case 'B':
-                    state->manual_dir = DIR_BACK;
-                    break;
-                default:
-                    break;
-            }
+            state_read_manual_input(state, byte);
             return;
     }
     if(oldAction == state->action){
@@ -207,23 +221,13 @@ void state_update_position(track_state *trackState) {
     if (trackState->sensor_last == SENSOR_ALL) {
         trackState->homeCache++;
         if (trackState->homeCache > 2) {
-            if (trackState->pos != POS_START_FIELD && DEBUG) {
-                usart_println("Start field found");
-            }
             trackState->pos = POS_START_FIELD;
             trackState->homeCache = 3;
-        } else if(DEBUG) {
-            char s[sizeof("Start field tick 1")];
-            sprintf(s, "Start field tick %d", trackState->homeCache);
-            usart_println(s);
         }
         return;
     }
     trackState->homeCache = 0;
     if (trackState->action == AC_ROUNDS) {
-        if ((trackState->pos) != POS_TRACK && DEBUG) {
-            usart_println("Start field lost");
-        }
         trackState->pos = POS_TRACK;
     } else {
         trackState->pos = POS_UNKNOWN;

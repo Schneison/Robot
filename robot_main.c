@@ -4,7 +4,7 @@ void setup(void) {
     motor_clear();
     sensor_clear();
 
-    usart_init(UBRR_SETTING);
+    usart_init((unsigned long) UBRR_SETTING);
     sensor_init();
     motor_init();
     led_init();
@@ -24,6 +24,7 @@ int main(void) {
     trackState.homeCache = 0;
     trackState.manual_dir = DIR_NONE;
     trackState.manual_dir_last = 0;
+    trackState.manual_driven_before = 0;
     trackState.ui_connection = UI_DISCONNECTED;
     trackState.has_driven_once = 0;
     trackState.dir_last = DIR_NONE;

@@ -32,15 +32,15 @@
 #include <avr/wdt.h>
 #include "led_control.h"
 
-#define DEBUG 1
-
 /**
  * @brief Amount of counters that are defined in #counter_def
  */
 #define COUNTER_AMOUNT 6
 
 /** @brief Contains parameters for a 5 second timer */
-#define WATCH_DOG_TIME (WDTO_1S | WDTO_4S)
+#define WATCH_DOG_TIME_5S (WDTO_1S | WDTO_4S)
+/** @brief Contains parameters for a 15 millisecond timer */
+#define WATCH_DOG_TIME_1MS (WDTO_15MS)
 
 /**
  * @brief Helper struct that is used to check frequency requirements every cycle. For example this
@@ -243,18 +243,21 @@ typedef struct track_state {
      */
     uint8_t manual_dir_last;
     /**
+     * @brief If the robot was driving before manual was called.
+     */
+    uint8_t manual_driven_before;
+    /**
      * @brief Last driven direction, used by ui state
      */
     direction dir_last;
     /**
-     * @brief Last valid driven direction that was not #DIR_NONE
+     * @brief Last valid driven direction that was not #DIR_NONE, used by driving logic
      */
     direction dir_last_valid;
     /**
-     * @brief Last valid driven direction that was #DIR_LEFT or #DIR_RIGHT
+     * @brief Last valid driven direction that was #DIR_LEFT or #DIR_RIGHT, used by driving logic
      */
     direction dir_last_simple;
-
     /**
      * @brief Connection state to the ui
      */
@@ -266,5 +269,11 @@ typedef struct track_state {
  * @details For more information on the wdt look at p.76 of the datasheet
  */
 _Noreturn void util_reset(void);
+
+/**
+ * @brief Resets the board after nearly instant (15 ms) by using the watch dog timer.
+ * @details For more information on the wdt look at p.76 of the datasheet
+ */
+_Noreturn void util_reset_instant(void);
 
 #endif //UTILITY

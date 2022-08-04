@@ -101,6 +101,11 @@ void motor_drive_backward(void) {
     motor_set_right(OR_BACKWARDS, SPEED_STRAIT);
 }
 
+void motor_drive_backward_smooth(void) {
+    motor_set_left(OR_BACKWARDS, SPEED_BACK_SMOOTH);
+    motor_set_right(OR_BACKWARDS, SPEED_BACK_SMOOTH);
+}
+
 void motor_drive_left(void) {
     motor_set_right(OR_FORWARDS, SPEED_OUTER);
     motor_set_left(OR_BACKWARDS, SPEED_INNER);
@@ -196,7 +201,11 @@ void drive_home(track_state *state) {
         case DS_CHECK_START:
         case DS_POST_DRIVE:
             motor_drive_stop();
-            state->action = AC_RESET;
+            usart_print_pretty(
+                    "I just arrived at home. Resetting NOW! Take care of my messages when I'm"
+                    "back...");
+            util_reset_instant();
+            //Never reached
             break;
         case DS_PRE_DRIVE:
             break;
@@ -223,8 +232,8 @@ void drive_run(track_state *state) {
             //When on start field begin first round
             if (state->pos == POS_START_FIELD) {
                 state->drive = DS_ZERO_ROUND;
-                usart_println(
-                        "Here I go again on my own, going down the only round I’ve ever known…"
+                usart_print_pretty(
+                        "Here I go again on my own, going down the only round I've ever known..."
                 );
             }
             break;
@@ -261,7 +270,7 @@ void drive_run(track_state *state) {
             drive_apply(state);
             break;
         case DS_BACKWARDS:
-            motor_drive_backward();
+            motor_drive_backward_smooth();
             if (state->sensor_current == SENSOR_ALL) {
                 state->drive = DS_POST_DRIVE;
             }
